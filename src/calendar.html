@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Calendar</title>
+    <style>
+      /* Tailwind-inspired custom styles */
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7fafc;
+        margin: 0;
+      }
+
+      /* Flex container for page layout */
+      .page-wrapper {
+        display: flex;
+        height: 100vh;
+      }
+
+      /* Sidebar styles */
+      .sidebar {
+        width: 250px;
+        background-color: #2d3748;
+        color: white;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Sidebar Links */
+      .sidebar a {
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .sidebar a:hover {
+        background-color: #00b7ff;
+      }
+
+      /* Content Area */
+      .content-area {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 2rem;
+      }
+
+      .calendar-container {
+  width: 100%;
+  max-width: 900px;
+  height: calc(100vh - 4rem); /* Full viewport height minus the 2rem top and bottom margins */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 2rem auto; /* Centers the calendar horizontally and gives 2rem space at top and bottom */
+  display: flex;
+  flex-direction: column;
+}
+
+
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .calendar-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a202c;
+      }
+
+      .calendar-header button {
+        background-color: #7AD9FF;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+      }
+
+      .calendar-header button:hover {
+        background-color: #7AD9FF;
+      }
+
+      table {
+  width: 100%;
+  height: 100%; /* Make sure the table takes up the remaining space */
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensures cells fill available space */
+}
+
+td, th {
+  height: calc(100% / 6); /* Equal height for each row */
+  vertical-align: middle;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #4a5568;
+}
+
+      th {
+        background-color: #edf2f7;
+        font-weight: 600;
+      }
+
+      td {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      td:hover {
+        background-color: #f7fafc;
+      }
+
+      td.today {
+        background-color: #7AD9FF;
+        color: white;
+        font-weight: 600;
+      }
+
+      .event {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        background-color: #FF7A81;
+        color: white;
+        font-size: 0.75rem;
+        padding: 4px;
+        border-radius: 4px;
+        max-width: 80%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 768px) {
+        .calendar-container {
+          padding: 1rem;
+        }
+
+        .calendar-header h2 {
+          font-size: 1.25rem;
+        }
+
+        th,
+        td {
+          font-size: 0.9rem;
+        }
+      }
+      
+      #prev-month, #next-month {
+  background-color: #7AD9FF;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+#prev-month:hover, #next-month:hover {
+  background-color: #7AD9FF;
+}
+
+#prev-month i, #next-month i {
+  margin-left: 0.5rem; /* Space between the icon and text */
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 250px; /* Offset for sidebar */
+  width: calc(100% - 250px); /* Remaining content area */
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px; /* Max width for readability */
+  text-align: center;
+  position: relative;
+}
+
+/* Adjust positioning when sidebar is hidden on smaller screens */
+@media (max-width: 1024px) {
+  .popup-overlay {
+    left: 0;
+    width: 100%; /* Take full width when sidebar is hidden */
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+    </style>
+  </head>
+
+  <body
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html"></include>
+        <!-- ===== Header End ===== -->
+        <div id="event-popup" class="popup-overlay hidden">
+          <div class="popup-content">
+            <span class="close-btn" onclick="closePopup()">&times;</span>
+            <h3 id="popup-date"></h3>
+            <ul id="popup-events"></ul>
+            <!-- Add your button here -->
+            <!-- <button
+              id="block-dates-btn"
+              class="mt-4 w-full bg-secondary text-white font-medium py-2 px-4 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+            >
+              Block Date for All Listings
+            </button> -->
+          </div>
+        </div>
+        
+        
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button id="prev-month">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 18l-6-6 6-6"></path>
+                </svg>
+              </button>
+              
+                            <h2 id="calendar-title">Loading...</h2>
+              <button id="next-month">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6l6 6-6 6"></path>
+                </svg>
+              </button>
+                        </div>
+            <table id="calendar-table">
+              <thead>
+                <tr>
+                  <th>Sun</th>
+                  <th>Mon</th>
+                  <th>Tue</th>
+                  <th>Wed</th>
+                  <th>Thu</th>
+                  <th>Fri</th>
+                  <th>Sat</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getFirestore, collection, addDoc, doc, setDoc, Timestamp, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+  
+      // Your Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+        authDomain: "ryntit-b503c.firebaseapp.com",
+        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+        projectId: "ryntit-b503c",
+        storageBucket: "ryntit-b503c.appspot.com",
+        messagingSenderId: "908115066071",
+        appId: "1:908115066071:web:1de252c17cce4346be0492",
+        measurementId: "G-PDBZNLKYKC"
+      };
+  
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app); // Firebase Auth instance
+  
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const calendarRef = collection(db, `vendors/${user.uid}/calendar`);
+      const snapshot = await getDocs(calendarRef);
+
+      events = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          date: data.date,
+          event: data.event?.replace(/^"|"$/g, '') || "Untitled Event"
+        };
+      });
+
+      generateCalendar(); // Call calendar rendering after data is loaded
+    } else {
+      console.log("User not logged in");
+    }
+  });
+      });
+        </script>
+    <script>
+      let events = []
+
+      let currentMonth = new Date().getMonth();
+      let currentYear = new Date().getFullYear();
+      // Get the current month and year
+      function getCurrentMonthAndYear() {
+        return { month: currentMonth, year: currentYear };
+      }
+
+      // Update the calendar title
+      function updateCalendarTitle() {
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+        document.getElementById("calendar-title").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      }
+
+      function generateCalendar() {
+  const { month, year } = getCurrentMonthAndYear();
+
+  // Get first day of the month and the number of days in the month
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const totalDays = lastDay.getDate();
+  const startDay = firstDay.getDay(); // 0-Sun, 1-Mon, ..., 6-Sat
+
+  // Get today's date
+  const today = new Date();
+  const todayDate = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+
+  let calendarHTML = "";
+  let day = 1;
+
+  for (let row = 0; row < 6; row++) {
+    calendarHTML += "<tr>";
+    for (let col = 0; col < 7; col++) {
+      if (row === 0 && col < startDay) {
+        calendarHTML += "<td class='empty'></td>"; // Empty cells before the first day
+      } else if (day <= totalDays) {
+        const isToday = (day === todayDate && month === todayMonth && year === todayYear) ? "today" : "";
+        
+        // Format the current day as YYYY-MM-DD for comparison
+        const currentDayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        calendarHTML += `<td class="${isToday}" data-day="${day}">${day}`;
+
+        // Add events for the day
+        events.forEach(event => {
+          if (event.date === currentDayString) {
+            calendarHTML += `<div class="event">${event.event}</div>`;
+          }
+        });
+
+        calendarHTML += "</td>";
+        day++;
+      } else {
+        calendarHTML += "<td class='empty'></td>"; // Empty cells after the last day
+      }
+    }
+    calendarHTML += "</tr>";
+    if (day > totalDays) break; // Stop if we filled all days
+  }
+
+  document.getElementById("calendar-table").getElementsByTagName("tbody")[0].innerHTML = calendarHTML;
+
+  // Reattach event listeners after re-rendering
+  attachEventListeners();
+}
+
+// Function to attach event listeners to date cells
+function attachEventListeners() {
+  document.querySelectorAll('#calendar-table td').forEach(td => {
+    td.addEventListener('click', function () {
+      const day = this.getAttribute('data-day');
+      if (day) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        const eventDetails = events
+          .filter(event => event.date === dateStr)
+          .map(event => event.event);
+
+        openPopup(dateStr, eventDetails);
+      }
+    });
+  });
+}
+
+// Modify month navigation event listeners
+document.getElementById("prev-month").addEventListener("click", function () {
+  if (currentMonth === 0) {
+    currentMonth = 11;
+    currentYear--;
+  } else {
+    currentMonth--;
+  }
+  updateCalendarTitle();
+  generateCalendar();
+});
+
+document.getElementById("next-month").addEventListener("click", function () {
+  if (currentMonth === 11) {
+    currentMonth = 0;
+    currentYear++;
+  } else {
+    currentMonth++;
+  }
+  updateCalendarTitle();
+  generateCalendar();
+});
+
+// Initialize the calendar
+updateCalendarTitle();
+generateCalendar();
+
+    </script>
+    <script>
+function openPopup(date, events) {
+  document.getElementById('popup-date').textContent = `${date}`;
+
+  const eventList = document.getElementById('popup-events');
+  eventList.innerHTML = '';
+
+  if (events.length > 0) {
+    events.forEach(event => {
+      const li = document.createElement('li');
+
+      if (event.startsWith("Order #")) {
+        const match = event.match(/Order\s+#(\d+)/);
+        if (match && match[1]) {
+          const orderId = match[1];
+          li.innerHTML = `<a href="/order.html?id=${orderId}" style="color: black; text-decoration: underline;">${event}</a>`;
+        } else {
+          li.textContent = event;
+        }
+      } else {
+        li.textContent = event;
+      }
+
+      eventList.appendChild(li);
+    });
+  } else {
+    eventList.innerHTML = '<li>No events</li>';
+  }
+
+  document.getElementById('event-popup').classList.remove('hidden');
+}
+
+    
+      function closePopup() {
+        document.getElementById('event-popup').classList.add('hidden');
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('#calendar-table td').forEach(td => {
+          td.addEventListener('click', function () {
+            const day = this.getAttribute('data-day');
+            if (day) {
+              const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              
+              const eventDetails = events
+                .filter(event => event.date === dateStr)
+                .map(event => event.event);
+    
+              openPopup(dateStr, eventDetails);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

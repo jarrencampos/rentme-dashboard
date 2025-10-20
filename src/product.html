@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    Edit Listing
+  </title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<body
+  x-data="{ page: 'formElements', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+  x-init="
+          darkMode = JSON.parse(localStorage.getItem('darkMode'));
+          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+  :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}">
+  <!-- ===== Preloader Start ===== -->
+  <include src="./partials/preloader.html"></include>
+  <!-- ===== Preloader End ===== -->
+
+  <!-- ===== Page Wrapper Start ===== -->
+  <div class="flex h-screen overflow-hidden">
+    <!-- ===== Sidebar Start ===== -->
+    <include src="./partials/sidebar.html"></include>
+    <!-- ===== Sidebar End ===== -->
+
+    <!-- ===== Content Area Start ===== -->
+    <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+      <!-- ===== Header Start ===== -->
+      <include src="./partials/header.html" />
+      <!-- ===== Header End ===== -->
+
+      <!-- ===== Main Content Start ===== -->
+      <main>
+        <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+          <!-- Breadcrumb Start -->
+          <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-title-md2 font-bold text-black dark:text-white">
+              Edit Listing
+            </h2>
+          </div>
+          <!-- Breadcrumb End -->
+
+          <!-- ====== Form Elements Section Start -->
+          <div class="grid grid-cols-1 gap-9 sm:grid-cols-1">
+            <form id="listingForm">
+              <div class="flex flex-col gap-9">
+                <!-- Input Fields -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+                    <h3 class="font-medium text-black dark:text-white">
+                      Main Info
+                    </h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Title
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter a descriptive title for your rental item. This should be a short catchy title that quickly describes your item.
+                          </span>
+                        </span>
+                      </label>
+                      <input type="text" id="title" maxlength="30" placeholder="White Jump Castle"
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
+                    </div>
+                    
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Subtitle
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter a descriptive subtitle for your rental item. This will be under the main title and more descriptive than the main title.
+                          </span>
+                        </span>
+                      </label>
+                      <input type="text" id="subtitle" maxlength="55"
+                        placeholder="Multiple color options available for the ball pit!"
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
+                    </div>
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Location
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter the actual location of this item. This will not be seen by the users and only used to determine the distance to the renters venue.
+                          </span>
+                        </span>
+                      </label>
+                      <input type="text" id="location" maxlength="75"
+                        placeholder="1600 Pennsylvania Avenue NW, Washington, DC 20500"
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
+                    </div>
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Service radius from location
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter your service radius from your location that you are willing to deliver.
+                          </span>
+                        </span>
+                      </label>
+                      <div
+                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg">
+                        <!-- Input with rounded corners -->
+                        <input type="number" id="serviceMiles" placeholder="50" step="1" min="1"
+                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary rounded-l-lg" />
+                        <span class="price-per-day text-black dark:text-white text-lg rounded-r-lg">miles</span>
+                        <!-- added rounded-r-lg -->
+                      </div>
+                    </div>
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Quantity
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter your quantity of your inventory of this item.
+                          </span>
+                        </span>
+                      </label>
+                      <div
+                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg">
+                        <!-- Input with rounded corners -->
+                        <input type="number" id="quantity" placeholder="1" step="1" min="1"
+                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary rounded-l-lg" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Description
+                        <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter a detailed description for your rental item.
+                          </span>
+                      </label>
+                      <textarea type="text" rows="6" id="description" maxlength="1500"
+                        placeholder="Bring the enchantment of a castle to your backyard with our Inflatable White Castle featuring a delightful ball pit – the ultimate playtime paradise for kids aged 0-5! This inflatable castle combines the thrill of bouncing with the joy of splashing around in a sea of colorful balls. PLEASE NOTE: No facepainting allowed with this rental."
+                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+                    <h3 class="font-medium text-black dark:text-white">
+                      Pricing
+                    </h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
+                        Rental Cost
+                                                <span class="relative group ml-1 flex items-center">
+                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
+                            Enter your cost per unit please include your cost including delivery and set up.
+                          </span>
+                      </label>
+                      <!-- Price input field with static $ and per day text -->
+                      <div
+                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg price-container">
+                        <span class="px-5 text-black dark:text-white">$</span>
+                        <input type="number" id="pricing" placeholder="100.00" step="0.01" min="0.01"
+                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary" />
+                        <span class="price-per-day text-black dark:text-white text-lg">/ per day</span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+                <!-- File upload -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
+                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+                    <h3 class="font-medium text-black dark:text-white">
+                      Images
+                    </h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                    <!-- Main Image -->
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Main Image
+                      </label>
+                      <input type="file" id="imageInput"
+                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
+                      <!-- Image Preview Box -->
+                      <div id="imagePreview1"
+                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
+                        <span class="text-gray-500">No image selected</span>
+                      </div>
+                    </div>
+
+                    <!-- Image 2 -->
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Image 2
+                      </label>
+                      <input type="file" id="imageInput2"
+                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
+                      <!-- Image Preview Box -->
+                      <div id="imagePreview2"
+                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
+                        <span class="text-gray-500">No image selected</span>
+                      </div>
+                    </div>
+
+                    <!-- Image 3 -->
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Image 3
+                      </label>
+                      <input type="file" id="imageInput3"
+                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
+                      <!-- Image Preview Box -->
+                      <div id="imagePreview3"
+                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
+                        <span class="text-gray-500">No image selected</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-9">
+                  <!-- Select input -->
+                  <div
+                    class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+                      <h3 class="font-medium text-black dark:text-white">
+                        Category selection
+                      </h3>
+                    </div>
+                    <div class="flex flex-col gap-5.5 p-6.5">
+                      <!-- Main Category Dropdown -->
+                      <div>
+                        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                          Main Categories
+                        </label>
+                        <div class="relative z-20 bg-white dark:bg-form-input">
+                          <select
+                            class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                            id="mainCategory">
+                            <option value="" class="text-body">Select a Category</option>
+                            <option value="inflatable" class="text-body">Inflatable</option>
+                            <option value="furniture" class="text-body">Furniture</option>
+                            <option value="games" class="text-body">Games</option>
+                            <option value="food-service" class="text-body">Food Service</option>
+                            <option value="audiovisual" class="text-body">Audiovisual</option>
+                            <option value="flooring" class="text-body">Flooring</option>
+                          </select>
+                          <span class="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                              xmlns="http://www.w3.org/2000/svg">
+                              <g opacity="0.8">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                  fill="#637381"></path>
+                              </g>
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Subcategory Dropdown -->
+                      <div>
+                        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                          Sub-Categories
+                        </label>
+                        <div class="relative z-20 bg-white dark:bg-form-input">
+                          <select
+                            class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                            id="subCategory">
+                            <option value="" class="text-body">Select a Sub-Category</option>
+                          </select>
+                          <span class="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                              xmlns="http://www.w3.org/2000/svg">
+                              <g opacity="0.8">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                                  fill="#637381"></path>
+                              </g>
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+
+
+                    </div>
+
+                  </div>
+                </div>
+                <!-- Time and date -->
+                <div
+                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
+                    <h3 class="font-medium text-black dark:text-white">Available Dates</h3>
+                  </div>
+                  <div class="flex flex-col gap-5.5 p-6.5">
+                    <div>
+                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">Block Dates</label>
+                      <div class="relative flex justify-center"> <!-- Added flex and justify-center -->
+                        <!-- Hidden Input for Flatpickr initialization -->
+                        <input type="text" id="datepicker" style="display: none;" />
+                      </div>
+                    </div>
+                  </div>
+                  <div id="blockedDates" class="mt-4 text-center text-sm text-black dark:text-white">
+                    <!-- Dates will appear here -->
+                  </div>
+                  <div id="selected-dates" class="mt-4 text-center text-sm text-black dark:text-white">
+                    <!-- Dates will appear here -->
+                  </div>
+                </div>
+
+
+                <!-- Disclaimer Section -->
+                <div class="flex justify-center mt-4">
+                  <p class="text-sm text-gray-600 dark:text-gray-300 text-center">
+                    By clicking update, you are agreeing to our
+                    <a href="/terms.html" target="_blank" class="text-blue-500 hover:text-blue-700">Terms and
+                      Conditions</a>
+                    and
+                    <a href="/privacy.html" target="_blank" class="text-blue-500 hover:text-blue-700">Privacy
+                      Policy</a>.
+                  </p>
+                </div>
+                <!-- Update/Delete Buttons -->
+                <div class="flex justify-center gap-4 mt-8">
+                  <button id="uploadButton" type="submit"
+                    class="px-5 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                    Update
+                  </button>
+                  <button type="submit" id="deleteButton"
+                  class="px-5 py-3 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                  Delete
+                </button>
+                
+                  <!-- Spinner -->
+                  <div id="loading-spinner" class="hidden mt-1">
+                    <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
+                      viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </form>
+
+          </div>
+          </form>
+        </div>
+        <!-- ====== Form Elements Section End -->
+    </div>
+    </main>
+    <!-- ===== Main Content End ===== -->
+  </div>
+  <!-- ===== Content Area End ===== -->
+  </div>
+  <!-- ===== Page Wrapper End ===== -->
+  <script>
+    // Function to handle image file input and preview
+    function handleFileSelect(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const previewBox = document.getElementById(previewId);
+
+      input.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+          // Create an object URL for the image and set it as the background image
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewBox.innerHTML = `<img src="${e.target.result}" alt="Image Preview" />`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewBox.innerHTML = `<span class="text-gray-500">No image selected</span>`;
+        }
+      });
+
+      // Click event to trigger the file input on image click
+      previewBox.addEventListener('click', function () {
+        input.click();  // Simulate a click on the file input
+      });
+    }
+
+    // Initialize the file input listeners
+    document.addEventListener('DOMContentLoaded', function () {
+      handleFileSelect('imageInput', 'imagePreview1');
+      handleFileSelect('imageInput2', 'imagePreview2');
+      handleFileSelect('imageInput3', 'imagePreview3');
+    });
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, Timestamp, getDoc, getDocs, updateDoc} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+      authDomain: "ryntit-b503c.firebaseapp.com",
+      databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+      projectId: "ryntit-b503c",
+      storageBucket: "ryntit-b503c.appspot.com",
+      messagingSenderId: "908115066071",
+      appId: "1:908115066071:web:1de252c17cce4346be0492",
+      measurementId: "G-PDBZNLKYKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app); // Firebase Auth instance
+    const storage = getStorage(app); // Firebase Storage instance
+
+    document.addEventListener("DOMContentLoaded", () => {
+      let currentUserId = null;
+
+      // Check if the user is logged in
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUserId = user.uid; // Get the current user's UID
+        } else {
+          console.log("No user logged in");
+        }
+      });
+
+
+      // Extract the id parameter from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      let initialValues = {}; // Store initial values globally
+      let productData;  // Declare this variable at a higher scope
+      let selectedBlockDates = [];
+
+
+      if (productId) {
+        const productRef = doc(db, "products", productId);  // Get a reference to the product document
+
+        getDoc(productRef).then((docSnap) => {
+          if (docSnap.exists()) {
+            productData = docSnap.data();
+
+            // Populate the form with the data from Firebase
+            const detailsId = productData.details_id;  // Assuming `detailsId` is stored in the product document
+
+            if (detailsId) {
+              // Fetch the 'details' document using the details_id field from the 'details' collection
+              const detailsRef = doc(db, "details", detailsId);
+              getDoc(detailsRef).then((detailsSnap) => {
+                if (detailsSnap.exists()) {
+                  const detailsData = detailsSnap.data();  // Get the data from the 'details' document
+
+                  document.getElementById('title').value = productData.title;
+                  document.getElementById('subtitle').value = detailsData.subtitle || '';
+                  document.getElementById('description').value = detailsData.description || '';
+                  document.getElementById('location').value = productData.location || '';
+                  document.getElementById('serviceMiles').value = detailsData.serviceMiles || 0;
+                  document.getElementById('quantity').value = detailsData.num_items || 0;
+                  document.getElementById('pricing').value = productData.price || 0;
+
+                  document.getElementById('mainCategory').value = detailsData.mainCategory || '';
+
+                  const event = new Event('change');
+                  document.getElementById('mainCategory').dispatchEvent(event);
+
+                  document.getElementById('subCategory').value = detailsData.subCategory || '';
+
+                  updateImagePreview('imageInput', 'imagePreview1', productData.image_url); // Main Image
+
+              initialValues = {                
+                title: productData.title || '',
+                subtitle: detailsData.subtitle || '',
+                description: detailsData.description || '',
+                location: productData.location || '',
+                serviceMiles: String(detailsData.serviceMiles) || '',
+                quantity: String(detailsData.num_items) || '',
+                pricing: String(productData.price) || '',
+                mainCategory: detailsData.mainCategory || '',
+                subCategory: detailsData.subCategory || '',
+                mainImageFile: productData.image_url || '',
+                block_dates: detailsData.block_dates || []
+            };
+                  // Get today's date
+                  const today = new Date();
+
+                  // Calculate the date one year from today
+                  const oneYearFromToday = new Date();
+                  oneYearFromToday.setFullYear(today.getFullYear() + 1); // Set it to one year ahead
+
+                  flatpickr("#datepicker", {
+                    mode: "multiple",
+                    dateFormat: "m/d/y",
+                    clickOpens: false,
+                    allowInput: false,
+                    closeOnSelect: false,
+                    minDate: "today",
+                    maxDate: oneYearFromToday,
+                    inline: true,
+                    onChange: function (selectedDatesArr) {
+                      selectedBlockDates = selectedDatesArr.map(date => {
+                        return date.toISOString().split('T')[0]; // Format to 'YYYY-MM-DD'
+                      });
+                      const selectedDatesDiv = document.getElementById("selected-dates");
+                      selectedDatesDiv.textContent = selectedBlockDates.length > 0
+                        ? `Blocked Dates: ${selectedBlockDates.join(', ')}`
+                        : '';
+                    },
+                    onReady: function (selectedDates, dateStr, instance) {
+                      if (Array.isArray(detailsData.block_dates) && detailsData.block_dates.length > 0) {
+                        const formattedDates = detailsData.block_dates.map(dateStr => {
+                          return instance.parseDate(dateStr, "Y-m-d"); // Correctly parses dates
+                        });
+                        instance.setDate(formattedDates, true);
+                        selectedBlockDates = detailsData.block_dates
+                      }
+                    }
+                  });
+
+                  // Fetch the image URLs from the 'image' subcollection under the details document
+                  const secondaryRef = doc(db, "details", detailsId, "photos", "secondary");
+                  const thirdRef = doc(db, "details", detailsId, "photos", "third");
+
+// Fetch secondary image
+getDoc(secondaryRef).then((docSnap) => {
+  if (docSnap.exists()) {
+    const url = docSnap.data().image_url;
+    if (url) {
+      updateImagePreview('imageInput2', 'imagePreview2', url); // Image 2
+    }
+  }
+}).catch((error) => {
+  console.log("Error getting secondary image:", error);
+});
+
+// Fetch third image
+getDoc(thirdRef).then((docSnap) => {
+  if (docSnap.exists()) {
+    const url = docSnap.data().image_url;
+    if (url) {
+      updateImagePreview('imageInput3', 'imagePreview3', url); // Image 3
+    }
+  }
+}).catch((error) => {
+  console.log("Error getting third image:", error);
+});
+
+                } else {
+                  console.log("No such details document!");
+                }
+              }).catch((error) => {
+                console.log("Error getting details document:", error);
+              });
+            } else {
+              console.log("No details_id found in product document!");
+            }
+          } else {
+            console.log("No such product document!");
+          }
+        }).catch((error) => {
+          console.log("Error getting product document:", error);
+        });
+      }
+
+      // Function to handle image preview for input fields
+      function updateImagePreview(inputId, previewId, imageUrl) {
+        const previewBox = document.getElementById(previewId);
+        const input = document.getElementById(inputId);
+
+        if (imageUrl) {
+          // If an image URL exists, set it as the preview image
+          previewBox.innerHTML = `<img src="${imageUrl}" alt="Image Preview" />`;
+        } else {
+          // Fallback text if no image URL
+          previewBox.innerHTML = `<span class="text-gray-500">No image selected</span>`;
+        }
+
+        // Click event to trigger the file input on image click
+        previewBox.addEventListener('click', function () {
+          input.click();  // Simulate a click on the file input
+        });
+      }
+
+      const submitBtn = document.getElementById('uploadButton');
+      const deleteBtn = document.getElementById('deleteButton');
+      const spinner = document.getElementById('loading-spinner');
+
+      function haveDatesChanged(initialDates, newDates) {
+    if (initialDates.length !== newDates.length) return true;
+
+    // Sort and stringify for easy comparison
+    const sortedInitial = [...initialDates].sort().map(d => new Date(d).toISOString());
+    const sortedNew = [...newDates].sort().map(d => new Date(d).toISOString());
+
+    for (let i = 0; i < sortedInitial.length; i++) {
+        if (sortedInitial[i] !== sortedNew[i]) return true;
+    }
+
+    return false;
+}
+
+      // Handle form submission
+      document.getElementById('listingForm').addEventListener('submit', async function (event) {
+        event.preventDefault();  // Prevents the form from submitting the traditional way
+        submitBtn.disabled = true;
+        deleteBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        deleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        spinner.classList.remove('hidden');
+
+        const submitter = event.submitter;
+
+        // Check which button was clicked
+        if (submitter.id === 'deleteButton') {
+          // Handle delete logic
+          Swal.fire({
+            title: 'Delete Listing',
+            text: 'Are you sure you want to delete your listing? This action cannot be undone.',
+            icon: 'warning',
+            confirmButtonText: 'Delete',
+            customClass: {
+              confirmButton: 'custom-delete-button'  // Apply custom class to the "OK" button
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // The user confirmed the delete action
+              console.log('Deleting the listing...');
+              // Add your delete functionality here (e.g., delete from Firestore or database)
+
+              Swal.fire({
+                title: 'Deleted!',
+                text: 'Your listing has been deleted.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'custom-ok-button' // Apply custom class to the "OK" button
+                }
+              }).then(() => {
+                submitBtn.disabled = false;
+                deleteBtn.disabled = false;
+                deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+                window.location.href = '/listings.html'; // Redirect after success
+              });
+            }
+          });
+          // Add your delete functionality here
+        } else if (submitter.id === 'uploadButton') {
+          // Handle upload logic
+
+          // Make sure the user is logged in
+          if (!currentUserId) {
+            Swal.fire({
+              title: 'Not Logged In',
+              text: 'You must be logged in to submit the listing.',
+              icon: 'warning',
+              confirmButtonText: 'Login',
+              customClass: {
+                confirmButton: 'bg-primary text-white',
+              },
+            });
+            submitBtn.disabled = false;
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+            return;
+          }
+          const pricingNumber = parseFloat(initialValues.pricing); // Use parseInt(pricing) if you need an integer
+
+          if (isNaN(pricingNumber)) {
+            Swal.fire({
+              title: 'Invalid Price',
+              text: 'Please enter a valid price.',
+              icon: 'error',
+              confirmButtonText: 'Ok',
+              customClass: {
+                confirmButton: 'bg-primary text-white',
+              },
+            });
+            submitBtn.disabled = false;
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+            return;
+          }
+
+          try {
+            // Step 1: Check if any field has changed
+            const hasChanges = (
+              initialValues.title !== document.getElementById('title').value ||
+              initialValues.subtitle !== document.getElementById('subtitle').value ||
+              initialValues.description !== document.getElementById('description').value ||
+              initialValues.location !== document.getElementById('location').value ||
+              initialValues.serviceMiles !== document.getElementById('serviceMiles').value ||
+              initialValues.pricing !== document.getElementById('pricing').value ||
+              initialValues.mainCategory !== document.getElementById('mainCategory').value ||
+              initialValues.subCategory !== document.getElementById('subCategory').value ||
+              initialValues.quantity !== document.getElementById('quantity').value ||
+              haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
+              // Check if any image files have been updated
+              document.getElementById('imageInput').files.length > 0 ||
+              document.getElementById('imageInput2').files.length > 0 ||
+              document.getElementById('imageInput3').files.length > 0
+            );
+
+            if (!hasChanges) {
+              Swal.fire({
+                title: 'No Changes',
+                text: 'No changes were made to the listing.',
+                icon: 'info',
+                confirmButtonText: 'Ok',
+                customClass: {
+                  confirmButton: 'bg-primary text-white',
+                },
+              });
+              submitBtn.disabled = false;
+              deleteBtn.disabled = false;
+              deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+              return; // Do not proceed with the upload if no changes were made
+            }
+           // Upload to product page first.
+           const fieldMappings = {
+            //product 
+  title:        { inputId: 'title', target: 'products' },
+  location:     { inputId: 'location', target: 'products' },
+  price:      { inputId: 'pricing', target: 'products'},
+//details
+num_items: { inputId: 'quantity', target: 'details'},
+mainCategory: { inputId: 'mainCategory', target: 'details'},
+subCategory:  { inputId: 'subCategory',  target: 'details'},
+  subtitle:     { inputId: 'subtitle', target: 'details' },
+  description:  { inputId: 'description', target: 'details' },
+  serviceMiles: { inputId: 'serviceMiles', target: 'details' },
+};
+
+const numericFields = ['price', 'serviceMiles', 'num_items'];
+const productUpdates = {};
+const detailUpdates = {};
+
+for (const [initialKey, config] of Object.entries(fieldMappings)) {
+  const { inputId, target } = config;
+  let newValue = document.getElementById(inputId).value;
+  let originalValue = initialValues[initialKey];
+
+  if (numericFields.includes(initialKey)) {
+    newValue = newValue.trim() === '' ? 0 : parseFloat(newValue); // Use parseFloat for numeric conversion
+
+    // Ensure the original value is also treated as a number
+    originalValue = parseFloat(originalValue);
+    console.log(`New Value: ${newValue}, Original Value: ${originalValue}`);
+  }
+
+  if (newValue !== originalValue) {
+    if (target === 'products') {
+      productUpdates[initialKey] = newValue;
+    } else if (target === 'details') {
+      detailUpdates[initialKey] = newValue;
+    }
+  }
+}
+
+// Always add a timestamp to both if anything changes
+const timestamp = Timestamp.now();
+if (Object.keys(productUpdates).length > 0) productUpdates.timestamp = timestamp;
+if (Object.keys(detailUpdates).length > 0) detailUpdates.timestamp = timestamp;
+
+// Firestore updates
+const productRef = doc(db, "products", productId);
+const detailsRef = doc(db, "details", productData.details_id);
+
+if (selectedBlockDates && selectedBlockDates.length > 0) {
+  detailUpdates.block_dates = selectedBlockDates;
+}
+
+if (Object.keys(productUpdates).length > 0) {
+  await updateDoc(productRef, productUpdates);
+  console.log("Updated product fields:", productUpdates);
+}
+if (Object.keys(detailUpdates).length > 0) {
+  await updateDoc(detailsRef, detailUpdates);
+  console.log("Updated detail fields:", detailUpdates);
+}
+
+const imageUploadPromises = [];
+
+const mainImageFile = document.getElementById('imageInput').files[0];
+const image2File = document.getElementById('imageInput2').files[0];
+const image3File = document.getElementById('imageInput3').files[0];
+
+const getFileExtension = (file) => file.name.split('.').pop();
+
+const uniqueFileName = (label, file) => {
+  const ext = getFileExtension(file);
+  const timestamp = Date.now();
+  return `${label}_${timestamp}.${ext}`;
+};
+
+const uploadImage = async (imageFile, storagePath, fileName, index) => {
+  const fullPath = `${storagePath}/${fileName}`;
+  const storageRef = ref(storage, fullPath);
+  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`Upload ${index} is ${progress.toFixed(2)}% done`);
+      },
+      (error) => {
+        console.error(`Error uploading image ${index}:`, error);
+        reject(error);
+      },
+      async () => {
+        const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        console.log(`Image ${index} uploaded successfully:`, imageUrl);
+        resolve(imageUrl);
+      }
+    );
+  });
+};
+
+if (mainImageFile) {
+  const fileName = uniqueFileName('main', mainImageFile);
+  const mainImageUpload = uploadImage(mainImageFile, `vendors/${currentUserId}/products/${productId}`, fileName, 1)
+    .then(url => updateDoc(doc(db, "products", productId), { image_id: url }));
+  imageUploadPromises.push(mainImageUpload);
+}
+
+if (image2File) {
+  const fileName = uniqueFileName('second', image2File);
+  const image2Upload = uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName, 2)
+    .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
+      image_url: url,
+      timestamp: Timestamp.now()
+    }));
+  imageUploadPromises.push(image2Upload);
+}
+
+if (image3File) {
+  const fileName = uniqueFileName('third', image3File);
+  const image3Upload = uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName, 3)
+    .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
+      image_url: url,
+      timestamp: Timestamp.now()
+    }));
+  imageUploadPromises.push(image3Upload);
+}
+
+            // Wait for all image uploads to complete
+            await Promise.all(imageUploadPromises);
+
+            Swal.fire({
+              title: 'Success!',
+              text: 'Your listing was uploaded successfully.',
+              icon: 'success',
+              confirmButtonText: 'OK',
+              iconColor: '#3085d6',
+              customClass: {
+                confirmButton: 'custom-ok-button'  // Apply custom class to the "OK" button
+              }
+            }).then(() => {
+              submitBtn.disabled = false;
+              deleteBtn.disabled = false;
+              deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+              window.location.href = '/listings.html'; // Redirect after success
+            });
+
+            // Reset the form fields
+            document.getElementById('listingForm').reset();
+          } catch (error) {
+            console.error("Error writing document: ", error);
+            Swal.fire({
+              title: 'Error',
+              text: 'There was an issue uploading your listing. Please reach out to us support@ryntit.com',
+              icon: 'error',
+              confirmButtonText: 'OK',
+              customClass: {
+                confirmButton: 'custom-ok-button'  // Apply custom class to the "OK" button
+              }
+            });
+            submitBtn.disabled = false;
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    spinner.classList.add('hidden');
+          }
+        }
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const subCategories = {
+        inflatable: ['Extreme', 'Water Slides', 'Games', 'Course', 'Bounce'],
+        furniture: ['Chairs', 'Tables', 'Tent', 'Heating'],
+        games: ['Arcade', 'Climbing Walls', 'Inflatable'],
+        'food-service': ['Freezers', 'Refrigeration', 'Coolers'],
+        audiovisual: ['Speakers', 'Projectors', 'Microphones'],
+        flooring: ['Carpet', 'Dance Floor', 'Platform', 'Staging']
+      };
+
+      const mainCategorySelect = document.getElementById('mainCategory');
+      const subCategorySelect = document.getElementById('subCategory');
+
+      // Listen for changes in the main category dropdown
+      mainCategorySelect.addEventListener('change', function () {
+        const selectedMainCategory = mainCategorySelect.value;
+
+        // Clear current subcategory options
+        subCategorySelect.innerHTML = '<option value="" class="text-body">Select a Sub-Category</option>';
+
+        // If a valid category is selected, populate the subcategories
+        if (subCategories[selectedMainCategory]) {
+          subCategories[selectedMainCategory].forEach(function (subCategory) {
+            const option = document.createElement('option');
+            option.value = subCategory.toLowerCase();  // Store lowercase value for consistency
+            option.textContent = subCategory;
+            subCategorySelect.appendChild(option);
+          });
+
+          // Enable the subcategory dropdown
+          subCategorySelect.disabled = false;
+        } else {
+          // If no valid category is selected, disable the subcategory dropdown
+          subCategorySelect.disabled = true;
+        }
+      });
+
+      // Define your custom function that gets called when the main category changes
+      function yourFunction(mainCategory) {
+        console.log("Main category changed to: " + mainCategory);
+        // Add any custom logic you want to run based on the main category
+      }
+    });
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Define the custom button style */
+    .custom-ok-button {
+      background-color: #292929;
+      /* Green background */
+      color: white;
+      /* Text color */
+      border: none;
+      /* Remove border */
+      padding: 10px 20px;
+      /* Add padding */
+      font-size: 16px;
+      /* Adjust font size */
+      border-radius: 5px;
+      /* Round the corners */
+    }
+
+    /* Hover effect for the button */
+    .custom-ok-button:hover {
+      background-color: #000000;
+      /* Darker green on hover */
+    }
+
+    .custom-delete-button {
+      background-color: #ff0000;
+      /* Green background */
+      color: white;
+      /* Text color */
+      border: none;
+      /* Remove border */
+      padding: 10px 20px;
+      /* Add padding */
+      font-size: 16px;
+      /* Adjust font size */
+      border-radius: 5px;
+      /* Round the corners */
+    }
+
+    /* Hover effect for the button */
+    .custom-delete-button:hover {
+      background-color: #a40000;
+      /* Darker green on hover */
+    }
+    .image-preview-box {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .image-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Ensures image maintains aspect ratio and covers the box */
+    }
+
+    /* Make sure the image preview box is square */
+    .image-preview-box span {
+      display: block;
+      text-align: center;
+      line-height: 2.5rem;
+      color: #aaa;
+      font-size: 1rem;
+    }
+  </style>
+</body>
+</html>

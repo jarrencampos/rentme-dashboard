@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order</title>
+  </head>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+      authDomain: "ryntit-b503c.firebaseapp.com",
+      databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+      projectId: "ryntit-b503c",
+      storageBucket: "ryntit-b503c.appspot.com",
+      messagingSenderId: "908115066071",
+      appId: "1:908115066071:web:1de252c17cce4346be0492",
+      measurementId: "G-PDBZNLKYKC"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Function to get URL parameter
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Function to fetch the order details by order ID
+    async function getOrderDetails(orderId) {
+      const orderDocRef = doc(db, "orders", orderId);
+      const orderDocSnapshot = await getDoc(orderDocRef);
+      return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
+    }
+
+    async function fetchOrderDetails(orderId) {
+    if (!orderId) {
+        console.error("Order ID is missing.");
+        return null;
+    }
+
+    try {
+        const orderDocRef = doc(db, "orders", orderId);
+        const orderSnapshot = await getDoc(orderDocRef);
+
+        if (orderSnapshot.exists()) {
+            return orderSnapshot.data(); // Return order details
+        } else {
+            console.warn("Order not found:", orderId);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching order details:", error);
+        return null;
+    }
+}
+
+    onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        console.log("No user is signed in.");
+        window.location.href = 'signin.html'; // Redirect to login
+        return;
+    }
+
+    console.log("User is signed in:", user.uid);
+
+    const orderId = getUrlParameter('id'); // Get the order ID from URL
+    if (!orderId) {
+        console.log("No order ID in URL.");
+        return;
+    }
+
+    const order = await fetchOrderDetails(orderId); // Fetch order details
+
+    if (order && order.vendorId === user.uid) {
+        console.log("User is authorized to view this order.");
+
+        // Update the Order # header
+        const orderHeader = document.querySelector("h1");
+        if (orderHeader) {
+            orderHeader.textContent = `Order #${orderId}`;
+        }
+
+        // Update the Rental Address
+        const rentalAddressElement = document.querySelector("#rental-address");
+        if (rentalAddressElement && order.rentalAddress) {
+            rentalAddressElement.textContent = order.rentalAddress;
+        }
+
+        const rentalStartDateElement = document.querySelector("#start-date");
+        if (rentalStartDateElement && order.rentalDateStart) {
+          rentalStartDateElement.textContent = `Start: ${order.rentalDateStart}`;
+        }
+
+        const rentalEndDateElement = document.querySelector("#end-date");
+        if (rentalEndDateElement && order.rentalDateEnd) {
+          rentalEndDateElement.textContent = `End: ${order.rentalDateEnd}`;
+        }
+
+        const customerNameElement = document.querySelector("#renter-name");
+        if (customerNameElement && order.customerInfoName) {
+          customerNameElement.textContent = `Name: ${order.customerInfoName}`;
+        }
+
+        const customerEmailElement = document.querySelector("#renter-email");
+        if (customerEmailElement && order.customerInfoEmail) {
+          customerEmailElement.textContent = `Email: ${order.customerInfoEmail}`;
+        }
+
+        const customerPhoneElement = document.querySelector("#renter-number");
+        if (customerPhoneElement && order.customerInfoNumber) {
+          customerPhoneElement.textContent = `Phone: ${order.customerInfoNumber}`;
+        }
+
+        const rentalProduct = document.querySelector("#rental-product");
+        if (rentalProduct && order.rentalProduct) {
+          rentalProduct.textContent = `${order.rentalProduct} x ${order.days}`;
+        }
+
+        const rentalPrice = document.querySelector("#rental-price");
+        if (rentalPrice && order.rentalPrice) {
+          rentalPrice.textContent = `$${order.rentalPrice}/day`;
+        }
+
+        // Totals
+
+        const priceClient = document.querySelector("#price-client");
+if (priceClient && order.totalPrice) {
+    priceClient.textContent = `$${order.totalPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+}
+
+        
+        const totalFee = order.totalPrice - order.rentalPrice
+
+        const priceFee = document.querySelector("#price-fee");
+        if (priceFee) {
+          priceFee.textContent = `- $${totalFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        }
+
+        const pricePayout = document.querySelector("#price-payout");
+        if (pricePayout && order.rentalPrice) {
+          pricePayout.textContent = `$${(order.totalPrice - totalFee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        }
+
+const rentalAddressLink = document.querySelector("#rental-address-link");
+
+if (rentalAddressElement && rentalAddressLink && order.rentalAddress) {
+    rentalAddressElement.textContent = order.rentalAddress;
+    
+    // Encode address for Google Maps search
+    const encodedAddress = encodeURIComponent(order.rentalAddress);
+    rentalAddressLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+}
+
+
+        // You can also update other elements like rental dates, customer info, etc.
+    } else {
+        console.log("User is not authorized to view this order.");
+        window.location.href = 'unauthorized.html'; // Redirect unauthorized users
+    }
+});
+
+  </script>
+
+  <body
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Pa ge Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div id="order-details-container">
+            <!-- Order details will be inserted here -->
+            <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg space-y-6">
+
+                <!-- Order Overview Header -->
+                <div class="text-center space-y-2">
+                  <h1 class="text-3xl font-semibold text-gray-800">...</h1>
+                </div>
+          
+                <!-- Rental Details Section -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <!-- Rental Address -->
+                  <a id="rental-address-link" href="#" target="_blank" class="block">
+                  <div class="bg-gray-100 p-4 rounded-lg">
+                      <div class="bg-gray-100 p-4 rounded-lg hover:bg-gray-200 transition cursor-pointer">
+                        <h3 class="font-semibold text-lg text-gray-700">Rental Address</h3>
+                        <p id="rental-address" class="text-gray-600">...</p>
+                      </div>                    
+                  </div>
+                </a>
+
+          
+                  <!-- Dates -->
+                  <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg text-gray-700">Rental Dates</h3>
+                    <p id="start-date" class="text-gray-600">Start: ...</p>
+                    <p id="end-date" class="text-gray-600">End: ...</p>
+                  </div>
+                </div>
+
+                                <!-- Customer Info Section -->
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <h3 class="font-semibold text-lg text-gray-700">Customer Information</h3>
+                                    <p id="renter-name" class="text-gray-600">Name: ...</p>
+                                    <p id="renter-email" class="text-gray-600">Email: ...</p>
+                                    <p id="renter-number" class="text-gray-600">Phone: ...</p>
+                                  </div>
+          
+                <!-- Products Section -->
+                <div class="bg-gray-100 p-4 rounded-lg">
+                  <h3 class="font-semibold text-lg text-gray-700">Rental Products</h3>
+                  <ul class="space-y-2">
+                    <li class="flex justify-between">
+                      <span id="rental-product" class="text-gray-600">...</span>
+                      <span id="rental-price" class="text-gray-800 font-semibold">$.../day</span>
+                    </li>
+                  </ul>
+                </div>
+          
+                <!-- Cost Breakdown -->
+                <div class="bg-gray-100 p-4 rounded-lg">
+                  <h3 class="font-semibold text-lg text-gray-700">Cost Breakdown</h3>
+                  <div class="flex justify-between text-gray-600">
+                    <span>Client Paid</span>
+                    <span id="price-client" class="text-gray-800 font-semibold">$...</span>
+                  </div>
+                  <div class="flex justify-between text-gray-600">
+                    <span>Transaction Fee</span>
+                    <span id="price-fee" class="text-gray-800 font-semibold">$...</span>
+                  </div>
+                  <hr class="border-t border-gray-400 my-2">
+                  <div class="flex justify-between text-gray-600">
+                    <span>Total Payout</span>
+                    <span id="price-payout" class="text-gray-800 font-semibold">$...</span>
+                  </div>
+                </div>
+          
+              </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

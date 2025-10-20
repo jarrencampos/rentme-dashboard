@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Vendor Dashboard
+    </title>
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    
+      document.addEventListener("DOMContentLoaded", () => {
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+          authDomain: "ryntit-b503c.firebaseapp.com",
+          databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+          projectId: "ryntit-b503c",
+          storageBucket: "ryntit-b503c.appspot.com",
+          messagingSenderId: "908115066071",
+          appId: "1:908115066071:web:1de252c17cce4346be0492",
+          measurementId: "G-PDBZNLKYKC"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+    
+        // Check authentication state
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            console.log("User is signed in:", user.uid);
+    
+            // Fetch data from Firestore
+            const userCollection = collection(db, "vendors");
+            const userQuery = query(userCollection, where("uid", "==", user.uid));
+            const querySnapshot = await getDocs(userQuery);
+    
+            getUserInfo(user.uid);
+    
+            querySnapshot.forEach((doc) => {
+              console.log(`${doc.id} =>`, doc.data());
+            });
+          } else {
+            console.log("No user is signed in.");
+            window.location.href = 'signin.html'; // Redirect to your login page
+          }
+        });
+    
+        // Function to fetch user data
+        async function getUserInfo(userId) {
+          try {
+            const userDoc = doc(db, 'vendors', userId);
+            const docSnap = await getDoc(userDoc);
+    
+            if (docSnap.exists()) {
+              const userInfo = docSnap.data();
+              displayUserInfo(userInfo);
+            } else {
+              console.log('No such document!');
+            }
+          } catch (error) {
+            console.error('Error getting document:', error);
+          }
+        }
+    
+        // Function to display user info
+        async function displayUserInfo(userInfo) {
+          const userTotalSales = document.getElementById('userTotalSales');
+          const userTotalProducts = document.getElementById('userTotalProducts');
+          const userTotalBookings = document.getElementById('userTotalBookings');
+
+          const formattedSales = userInfo.total_sales
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+          const totalSales = parseFloat(userInfo.total_sales);
+const totalBookings = parseFloat(userInfo.total_bookings);
+
+const avgSales = (!totalSales || !totalBookings) ? 0 : totalSales / totalBookings;
+
+// Update elements if they exist
+if (avgSales !== undefined && document.getElementById('userTotalViews')) {
+  document.getElementById('userTotalViews').textContent = `$${avgSales.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+}
+
+if (userTotalSales) {
+  const formattedSales = totalSales.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  userTotalSales.textContent = `$${formattedSales}` || '$0';
+}
+
+if (userTotalBookings) {
+  userTotalBookings.textContent = userInfo.total_bookings || '0';
+}
+
+          // Await the result of getTotalProducts before updating the userTotalProducts element
+          if (userTotalProducts) {
+            const total = await getTotalProducts(db); // Await the promise
+            userTotalProducts.textContent = total || '0';
+          }
+        }
+    
+        // Function to get the total number of product document IDs
+        async function getTotalProducts(db) {
+          try {
+            // Reference to the "products" collection within the vendor's document
+            const productsCollection = collection(db, "vendors", auth.currentUser.uid, "products");
+    
+            // Fetch all documents in the "products" collection
+            const querySnapshot = await getDocs(productsCollection);
+    
+            // Get the total number of documents (products)
+            const totalProducts = querySnapshot.size; // size is the number of documents in the querySnapshot
+    
+            // Return the total number of products
+            return totalProducts;
+    
+          } catch (error) {
+            console.error("Error getting products:", error);
+            return 0; // Return 0 in case of an error
+          }
+        }
+      });
+    </script>
+    
+
+  </script>
+  </head>
+
+  <body
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <div
+              class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5"
+            >
+              <!-- Card Item Start -->
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                class="fill-primary dark:fill-white"
+                width="22"
+                height="22"
+                viewBox="0 0 394.4 394.4"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M37.4,377.4c-5.223,0-10.438-1.992-14.423-5.977c-7.97-7.963-7.97-20.883,0-28.846l319.6-319.601
+                  c7.97-7.97,20.876-7.97,28.846,0c7.97,7.962,7.97,20.882,0,28.845l-319.6,319.601C47.838,375.408,42.623,377.4,37.4,377.4z
+                  M394.4,299.199c0-52.496-42.704-95.199-95.2-95.199S204,246.703,204,299.199s42.704,95.201,95.2,95.201
+                  S394.4,351.695,394.4,299.199z M353.601,299.199c0,29.996-24.405,54.4-54.4,54.4s-54.4-24.404-54.4-54.4
+                  c0-29.994,24.405-54.398,54.4-54.398S353.601,269.205,353.601,299.199z M190.4,95.2C190.4,42.704,147.696,0,95.2,0S0,42.704,0,95.2
+                  s42.704,95.2,95.2,95.2S190.4,147.696,190.4,95.2z M149.6,95.2c0,29.995-24.405,54.4-54.4,54.4s-54.4-24.405-54.4-54.4
+                  s24.405-54.4,54.4-54.4S149.6,65.206,149.6,95.2z"
+                  fill=""
+                />
+              </svg>
+              
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userTotalViews"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Avg. Booking</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card Item End -->
+
+              <!-- Card Item Start -->
+              <a href="/payments.html" class="block">
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                class="fill-primary dark:fill-white"
+                width="40"
+                height="40"
+                viewBox="0 0 1024 1024"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M541.7 768v-45.3c46.3-2.4 81.5-15 108.7-37.8 27.2-22.8 40.8-53.1 40.8-88.2 0-37.8-11-65.7-35.3-83.4-24.6-20.1-59.8-35.4-111.6-45.3h-2.6V351.8c35.3 5.1 65.3 15 95.1 35.4l43.6-55.5c-43.6-27.9-89.9-42.9-138.8-45.3V256h-40.8v30.3c-40.8 2.4-76.3 15-103.5 37.8-27.2 22.8-40.8 53.1-40.8 88.2s11 63 35.3 80.7c21.7 17.7 59.8 32.7 108.7 42.9v118.5c-38.2-5.1-76.3-22.8-114.2-53.1l-48.9 53.1c48.9 40.5 103.5 63 163.3 68.1V768h41zm2.6-219.6c27.2 7.5 43.6 15 54.4 22.8 8.1 10.2 13.6 20.1 13.6 35.4s-5.5 25.2-19.1 35.4c-13.6 10.2-30.1 15-48.9 17.7V548.4zM449.2 440c-8.1-7.5-13.6-20.1-13.6-32.7 0-15 5.5-25.2 16.2-35.4 13.6-10.2 27.2-15 48.9-17.7v108.6c-27.2-7.8-43.4-15.3-51.5-22.8z"
+                />
+              </svg>
+              
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userTotalSales"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Total Sales</span>
+                  </div>
+                </div>
+              </div>
+              </a>
+              <!-- Card Item End -->
+
+              <!-- Card Item Start -->
+              <a href="/listings.html" class="block">
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                class="fill-primary dark:fill-white"
+                width="22"
+                height="22"
+                viewBox="0 0 64 64"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="8" y="8" width="12" height="12" />
+                <rect x="26" y="8" width="12" height="12" />
+                <rect x="26" y="44" width="12" height="12" />
+                <rect x="44" y="8" width="12" height="12" />
+                <rect x="8" y="26" width="12" height="12" />
+                <rect x="26" y="26" width="12" height="12" />
+                <rect x="44" y="26" width="12" height="12" />
+                <rect x="8" y="44" width="12" height="12" />
+                <rect x="44" y="44" width="12" height="12" />
+              </svg>
+              
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userTotalProducts"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Total Products</span>
+                  </div>
+                </div>
+              </div>
+              </a>
+              <!-- Card Item End -->
+
+              <!-- Card Item Start -->
+              <a href="/payments.html" class="block">
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                class="fill-primary dark:fill-white"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"
+                />
+                <rect x="7" y="11" width="2" height="2" />
+                <rect x="11" y="11" width="2" height="2" />
+                <rect x="15" y="11" width="2" height="2" />
+                <rect x="7" y="15" width="2" height="2" />
+                <rect x="11" y="15" width="2" height="2" />
+                <rect x="15" y="15" width="2" height="2" />
+              </svg>
+              
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userTotalBookings"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Total Bookings</span>
+                  </div>
+                </div>
+              </div>
+              </a>
+              <!-- Card Item End -->
+            </div>
+
+            <div
+              class="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5"
+            >
+              <!-- ====== Chart One Start -->
+              <include src="./partials/chart-01.html" />
+              <!-- ====== Chart One End -->
+
+              <!-- ====== Chart Two Start -->
+              <include src="./partials/chart-02.html" />
+              <!-- ====== Chart Two End -->
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

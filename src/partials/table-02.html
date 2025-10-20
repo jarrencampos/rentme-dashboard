@@ -1,0 +1,57 @@
+<div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+  <div class="px-4 py-6 md:px-6 xl:px-7.5 flex justify-between items-center">
+    <h4 class="text-xl font-bold text-black dark:text-white">Top Products</h4>
+    <!-- Plus button -->
+    <button 
+    onclick="window.location.href='form-elements.html'" 
+    class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full text-white hover:bg-blue-600">
+      <!-- Plus icon (SVG) -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Table headers -->
+  <div class="grid grid-cols-6 border-t border-stroke px-4 py-4.5 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
+    <div class="col-span-3 flex items-center">
+      <p class="font-medium">Title</p>
+    </div>
+    <div class="col-span-2 hidden items-center sm:flex">
+      <p class="font-medium">Category</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="font-medium">Price</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="font-medium">Bookings</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="font-medium">Earned</p>
+    </div>
+  </div>
+  <!-- Product item 1 -->
+  <div class="grid grid-cols-6 border-t border-stroke px-4 py-4.5 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5">
+    <div class="col-span-3 flex items-center">
+      <a href="/product/1" class="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div class="h-12.5 w-15 rounded-md">
+          <img src="./images/product/product-04.png" alt="Product" />
+        </div>
+        <p class="text-sm font-medium text-black dark:text-white">HP Probook 450</p>
+      </a>
+    </div>
+    <div class="col-span-2 hidden items-center sm:flex">
+      <p class="text-sm font-medium text-black dark:text-white">Electronics</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="text-sm font-medium text-black dark:text-white">$499</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="text-sm font-medium text-black dark:text-white">72</p>
+    </div>
+    <div class="col-span-1 flex items-center">
+      <p class="text-sm font-medium text-meta-3">$1443</p>
+    </div>
+  </div>
+  <!-- Product rows will be dynamically added here -->
+</div>

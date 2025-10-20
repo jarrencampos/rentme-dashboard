@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Orders
+    </title>
+  </head>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+      authDomain: "ryntit-b503c.firebaseapp.com",
+      databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+      projectId: "ryntit-b503c",
+      storageBucket: "ryntit-b503c.appspot.com",
+      messagingSenderId: "908115066071",
+      appId: "1:908115066071:web:1de252c17cce4346be0492",
+      measurementId: "G-PDBZNLKYKC"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+    // Function to fetch all order IDs for the current vendor
+    async function getOrderIds() {
+      const ordersCollection = collection(db, "vendors", auth.currentUser.uid, "orders");
+      const ordersSnapshot = await getDocs(ordersCollection);
+      return ordersSnapshot.docs.map(doc => doc.id);
+    }
+  
+    // Function to fetch order details for a given order ID
+    async function getOrderDetails(orderId) {
+      const orderDocRef = doc(db, "vendors", auth.currentUser.uid, "orders", orderId);
+      const orderDocSnapshot = await getDoc(orderDocRef);
+      return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
+    }
+  
+    // Function to generate the order table dynamically
+    async function generateOrderTable() {
+      try {
+        const tableBody = document.querySelector("tbody");
+  
+        const orderIds = await getOrderIds(); // Fetch all order IDs
+        const orderDetailsPromises = orderIds.map(orderId => getOrderDetails(orderId));
+        const orderDetails = await Promise.all(orderDetailsPromises);
+  
+        // Sort orders based on earliestRentalDate (assuming rentalDate is in 'YYYY-MM-DD' format)
+        orderDetails.sort((a, b) => {
+          const dateA = new Date(a.earliestRentalDate);  // Convert rentalDate to a Date object
+          const dateB = new Date(b.earliestRentalDate);
+          return dateA - dateB;  // Sort by earliest rental date
+        });
+  
+        orderDetails.forEach(order => {
+          if (order) {
+            const orderRow = createOrderRow(order);
+            tableBody.appendChild(orderRow);
+          }
+        });
+      } catch (error) {
+        console.error("Error generating the order table:", error);
+      }
+    }
+  
+    // Helper function to create an order row
+    function createOrderRow(order) {
+      const orderRow = document.createElement("tr");
+  
+      orderRow.onclick = () => {
+        window.location.href = `/order.html?id=${order.orderNumber}`;
+      };
+  
+      // Order Number Column
+      const orderNumberCell = document.createElement("td");
+      orderNumberCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "pl-9", "dark:border-strokedark", "xl:pl-11");
+      const orderNumberText = document.createElement("h5");
+      orderNumberText.classList.add("font-medium", "text-black", "dark:text-white");
+      orderNumberText.textContent = `#${order.orderNumber || 'N/A'}`;
+      const orderAmount = document.createElement("p");
+      orderAmount.classList.add("text-sm");
+      orderAmount.textContent = `$${order.orderAmount || '0.00'}`;
+      orderNumberCell.appendChild(orderNumberText);
+      orderNumberCell.appendChild(orderAmount);
+      orderRow.appendChild(orderNumberCell);
+  
+      // Invoice Date Column
+      const invoiceDateCell = document.createElement("td");
+      invoiceDateCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "dark:border-strokedark");
+      const invoiceDateText = document.createElement("p");
+      invoiceDateText.classList.add("text-black", "dark:text-white");
+      invoiceDateText.textContent = order.rentalDate || "N/A";
+      invoiceDateCell.appendChild(invoiceDateText);
+      orderRow.appendChild(invoiceDateCell);
+  
+      // Status Column
+      const statusCell = document.createElement("td");
+      statusCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "dark:border-strokedark");
+      const statusText = document.createElement("p");
+      statusText.classList.add("inline-flex", "rounded-full", "px-3", "py-1", "text-sm", "font-medium");
+      statusText.textContent = order.status || "Pending";
+  
+      // Apply color based on status
+      if (order.status === "Paid") {
+        statusText.classList.add("bg-success", "bg-opacity-10", "text-success");
+      } else if (order.status === "Pending") {
+        statusText.classList.add("bg-warning", "bg-opacity-10", "text-warning");
+      } else {
+        statusText.classList.add("bg-danger", "bg-opacity-10", "text-danger");
+      }
+  
+      statusCell.appendChild(statusText);
+      orderRow.appendChild(statusCell);
+  
+      return orderRow;
+    }
+  
+    // Listen for authentication state changes and only generate table when user is signed in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is signed in:", user.uid);
+        generateOrderTable(); // Generate the table only when the user is signed in
+      } else {
+        console.log("No user is signed in.");
+        window.location.href = 'signin.html'; // Redirect to your login page
+      }
+    });
+  </script>
+  
+  <body
+  x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+  x-init="
+       darkMode = JSON.parse(localStorage.getItem('darkMode'));
+       $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+  :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+>
+  <!-- ===== Preloader Start ===== -->
+  <include src="./partials/preloader.html"></include>
+  <!-- ===== Preloader End ===== -->
+
+  <!-- ===== Page Wrapper Start ===== -->
+  <div class="flex h-screen overflow-hidden">
+    <!-- ===== Sidebar Start ===== -->
+    <include src="./partials/sidebar.html"></include>
+    <!-- ===== Sidebar End ===== -->
+
+    <!-- ===== Content Area Start ===== -->
+    <div
+      class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+    >
+      <!-- ===== Header Start ===== -->
+      <include src="./partials/header.html" />
+      <!-- ===== Header End ===== -->
+
+      <!-- ===== Main Content Start ===== -->
+      <main>
+        <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+
+        <div class="flex flex-col gap-10">
+          <include src="./partials/table-03.html" />
+        </div>
+      </div>
+        </main>
+        </div>
+        </div>
+        </body>
+</html>

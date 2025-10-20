@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Ryntit Vendor Dashboard
+    </title>
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    
+      document.addEventListener("DOMContentLoaded", () => {
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+          authDomain: "ryntit-b503c.firebaseapp.com",
+          databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+          projectId: "ryntit-b503c",
+          storageBucket: "ryntit-b503c.appspot.com",
+          messagingSenderId: "908115066071",
+          appId: "1:908115066071:web:1de252c17cce4346be0492",
+          measurementId: "G-PDBZNLKYKC"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    
+        // Check authentication state
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            console.log("User is signed in:", user.uid);
+    
+            // Fetch data from Firestore
+            const userCollection = collection(db, "vendors");
+            const userQuery = query(userCollection, where("uid", "==", user.uid));
+            const querySnapshot = await getDocs(userQuery);
+    
+            getUserInfo(user.uid);
+            createTransactionRows(user.uid); // Call the function to populate the table with transaction rows
+    
+            querySnapshot.forEach((doc) => {
+              console.log(`${doc.id} =>`, doc.data());
+            });
+          } else {
+            console.log("No user is signed in.");
+            window.location.href = 'signin.html'; // Redirect to your login page
+          }
+        });
+    
+        // Function to fetch user data
+        async function getUserInfo(userId) {
+          try {
+            const userDoc = doc(db, 'vendors', userId);
+            const docSnap = await getDoc(userDoc);
+    
+            if (docSnap.exists()) {
+              const userInfo = docSnap.data();
+              displayUserInfo(userInfo);
+            } else {
+              console.log('No such document!');
+            }
+          } catch (error) {
+            console.error('Error getting document:', error);
+          }
+        }
+        async function fetchTransactionData(vendorId) {
+          try {
+            const paymentsRef = collection(db, "vendors", vendorId, "payments"); // Adjust path if needed
+            const paymentsSnapshot = await getDocs(paymentsRef);
+            
+            if (!paymentsSnapshot.empty) {
+              const transactions = paymentsSnapshot.docs.map(doc => doc.data());
+              return transactions;
+            } else {
+              console.log("No payments found.");
+              return [];
+            }
+          } catch (error) {
+            console.error("Error fetching transaction data:", error);
+            return [];
+          }
+        }
+
+        async function createTransactionRows(vendorId) {
+  const transactions = await fetchTransactionData(vendorId);
+  const tableBody = document.getElementById('transaction-table-body'); // Make sure the table has an id 'transaction-table-body'
+
+  // Clear any existing rows
+  tableBody.innerHTML = '';
+
+  // Loop through transactions and create rows
+  transactions.forEach(transaction => {
+    const row = document.createElement('tr');
+    row.classList.add('border-b', 'border-gray-300'); // Add a bottom border divider for each row
+
+    // Create Transaction ID cell
+    const transactionIdCell = document.createElement('td');
+    transactionIdCell.classList.add('px-4', 'py-3', 'text-left'); // Add padding
+    transactionIdCell.textContent = transaction.transactionId || 'N/A';
+    row.appendChild(transactionIdCell);
+
+    // Create Order Number cell
+    const orderNumberCell = document.createElement('td');
+    orderNumberCell.classList.add('px-4', 'py-3', 'text-left'); // Add padding
+        // Create anchor element
+const orderLink = document.createElement('a');
+orderLink.href = `/order.html?id=${transaction.orderNumber}`; // Update URL as needed
+orderLink.textContent = `#${transaction.orderNumber}` || 'N/A';
+orderLink.classList.add('text-blue-500', 'hover:underline'); // Styling classes
+orderNumberCell.appendChild(orderLink);
+row.appendChild(orderNumberCell);
+
+
+    // Create Rental Date cell
+    const rentalDateCell = document.createElement('td');
+    rentalDateCell.classList.add('px-4', 'py-3', 'text-left'); // Add padding
+    rentalDateCell.textContent = transaction.rentalDate || 'N/A';
+    row.appendChild(rentalDateCell);
+
+    // Create Amount cell
+    const amountCell = document.createElement('td');
+    amountCell.classList.add('px-4', 'py-3', 'text-left'); // Add padding
+    amountCell.textContent = `$${parseFloat(transaction.amount).toFixed(2)}` || 'N/A';
+    row.appendChild(amountCell);
+
+    // Create Status cell with conditional styling for capsules
+    const statusCell = document.createElement('td');
+    statusCell.classList.add('px-4', 'py-3', 'text-left'); // Add padding
+
+    // Create a span for the status capsule
+    const statusSpan = document.createElement('span');
+    statusSpan.classList.add('inline-block', 'px-4', 'py-1', 'rounded-full', 'text-white', 'font-medium');
+    
+    // Set the color based on the status
+    switch (transaction.status.toLowerCase()) {
+      case 'pending':
+        statusSpan.classList.add('bg-yellow-500');
+        statusSpan.textContent = 'Pending';
+        break;
+      case 'paid':
+        statusSpan.classList.add('bg-green-500');
+        statusSpan.textContent = 'Paid';
+        break;
+      case 'refund':
+        statusSpan.classList.add('bg-red-500');
+        statusSpan.textContent = 'Refund';
+        break;
+      default:
+        statusSpan.classList.add('bg-gray-500');
+        statusSpan.textContent = 'Unknown';
+        break;
+    }
+
+    statusCell.appendChild(statusSpan);
+    row.appendChild(statusCell);
+
+    // Append the row to the table body
+    tableBody.appendChild(row);
+  });
+}
+
+
+
+    
+        // Function to display user info
+        async function displayUserInfo(userInfo) {
+          const userLifetimeEarnings = document.getElementById('userLifetimeEarnings');
+          const userTotalSales = document.getElementById('userTotalSales');
+          const userTotalProducts = document.getElementById('userTotalProducts');
+          const userTotalBookings = document.getElementById('userTotalBookings');
+
+          const formattedSales = userInfo.total_sales
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+
+
+// Update elements if they exist
+if (userLifetimeEarnings) userLifetimeEarnings.textContent = `$${formattedSales}` || '$0';
+if (userPendingDeposits) userPendingDeposits.textContent = `$${userInfo.pending_deposits.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` || '$0';
+
+          if (userTotalBookings) userTotalBookings.textContent = userInfo.total_bookings || '0';
+
+          // Await the result of getTotalProducts before updating the userTotalProducts element
+          if (userTotalProducts) {
+            const total = await getTotalProducts(db); // Await the promise
+            userTotalProducts.textContent = total || '0';
+          }
+        }
+      });
+    </script>
+  </head>
+
+  <body
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
+      >
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <div
+              class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5 mb-10"
+            >
+              <!-- Card Item Start -->
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                class="fill-primary dark:fill-white"
+                width="40"
+                height="40"
+                viewBox="0 0 1024 1024"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M541.7 768v-45.3c46.3-2.4 81.5-15 108.7-37.8 27.2-22.8 40.8-53.1 40.8-88.2 0-37.8-11-65.7-35.3-83.4-24.6-20.1-59.8-35.4-111.6-45.3h-2.6V351.8c35.3 5.1 65.3 15 95.1 35.4l43.6-55.5c-43.6-27.9-89.9-42.9-138.8-45.3V256h-40.8v30.3c-40.8 2.4-76.3 15-103.5 37.8-27.2 22.8-40.8 53.1-40.8 88.2s11 63 35.3 80.7c21.7 17.7 59.8 32.7 108.7 42.9v118.5c-38.2-5.1-76.3-22.8-114.2-53.1l-48.9 53.1c48.9 40.5 103.5 63 163.3 68.1V768h41zm2.6-219.6c27.2 7.5 43.6 15 54.4 22.8 8.1 10.2 13.6 20.1 13.6 35.4s-5.5 25.2-19.1 35.4c-13.6 10.2-30.1 15-48.9 17.7V548.4zM449.2 440c-8.1-7.5-13.6-20.1-13.6-32.7 0-15 5.5-25.2 16.2-35.4 13.6-10.2 27.2-15 48.9-17.7v108.6c-27.2-7.8-43.4-15.3-51.5-22.8z"
+                />
+              </svg>
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userLifetimeEarnings"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Lifetime Earnings</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card Item End -->
+
+              <!-- Card Item Start -->
+              <a class="block">
+              <div
+                class="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                <div
+                  class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4"
+                >
+                <svg
+                width="22"
+                height="22"
+                viewBox="-0.5 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- Dollar Sign -->
+                <path
+                  class="fill-primary dark:fill-white"
+                  d="M12.8702 16.97V18.0701C12.8702 18.2478 12.7995 18.4181 12.6739 18.5437C12.5482 18.6694 12.3778 18.74 12.2001 18.74C12.0224 18.74 11.852 18.6694 11.7264 18.5437C11.6007 18.4181 11.5302 18.2478 11.5302 18.0701V16.9399C11.0867 16.8668 10.6625 16.7051 10.2828 16.4646C9.90316 16.2241 9.57575 15.9097 9.32013 15.54C9.21763 15.428 9.16061 15.2817 9.16016 15.1299C9.16006 15.0433 9.17753 14.9576 9.21155 14.8779C9.24557 14.7983 9.29545 14.7263 9.35809 14.6665C9.42074 14.6067 9.49484 14.5601 9.57599 14.5298C9.65713 14.4994 9.7436 14.4859 9.83014 14.49C9.91602 14.4895 10.0009 14.5081 10.0787 14.5444C10.1566 14.5807 10.2254 14.6338 10.2802 14.7C10.6 15.1178 11.0342 15.4338 11.5302 15.6099V13.0701C10.2002 12.5401 9.53015 11.77 9.53015 10.76C9.55019 10.2193 9.7627 9.70353 10.1294 9.30566C10.4961 8.9078 10.9929 8.65407 11.5302 8.59009V7.47998C11.5302 7.30229 11.6007 7.13175 11.7264 7.0061C11.852 6.88045 12.0224 6.81006 12.2001 6.81006C12.3778 6.81006 12.5482 6.88045 12.6739 7.0061C12.7995 7.13175 12.8702 7.30229 12.8702 7.47998V8.58008C13.2439 8.63767 13.6021 8.76992 13.9234 8.96924C14.2447 9.16856 14.5226 9.43077 14.7402 9.73999C14.8284 9.85568 14.8805 9.99471 14.8901 10.1399C14.8928 10.2256 14.8783 10.3111 14.8473 10.3911C14.8163 10.4711 14.7696 10.5439 14.7099 10.6055C14.6502 10.667 14.5787 10.7161 14.4998 10.7495C14.4208 10.7829 14.3359 10.8001 14.2501 10.8C14.1607 10.7989 14.0725 10.7787 13.9915 10.7407C13.9104 10.7028 13.8384 10.648 13.7802 10.5801C13.5417 10.2822 13.2274 10.054 12.8702 9.91992V12.1699L13.1202 12.27C14.3902 12.76 15.1802 13.4799 15.1802 14.6299C15.163 15.2399 14.9149 15.8208 14.4862 16.2551C14.0575 16.6894 13.4799 16.9449 12.8702 16.97Z"
+                />
+                <!-- Other Paths (Borders, Container, etc.) -->
+                <path
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12.58 3.96997H6C4.93913 3.96997 3.92178 4.39146 3.17163 5.1416C2.42149 5.89175 2 6.9091 2 7.96997V17.97C2 19.0308 2.42149 20.0482 3.17163 20.7983C3.92178 21.5485 4.93913 21.97 6 21.97H18C19.0609 21.97 20.0783 21.5485 20.8284 20.7983C21.5786 20.0482 22 19.0308 22 17.97V11.8999"
+                />
+                <path
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.3398 8.57992L21.9998 2.91992"
+                />
+                <path
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.4805 2.91992H22.0005V7.44992"
+                />
+              </svg>
+              
+              
+         
+              
+                </div>
+
+                <div class="mt-4 flex items-end justify-between">
+                  <div>
+                    <h4
+                      class="text-title-md font-bold text-black dark:text-white"
+                      id="userPendingDeposits"
+                    >
+                      ...
+                    </h4>
+                    <span class="text-sm font-medium">Pending Deposits</span>
+                  </div>
+                </div>
+              </div>
+              </a>
+              <!-- Card Item End -->
+
+          </div>
+            <div class="flex flex-col gap-10 mt-10">
+              <include src="./partials/table-04.html" />
+            </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terms</title>
+  </head>
+  <body
+    x-data="{ page: 'ecommerce', loaded: true, darkMode: true, stickyMenu: false, sidebarToggle: false, scrollTop: false }"
+    x-init="
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main class="p-6">
+          <h1 class="text-4xl font-bold mb-4">Terms and Conditions</h1>
+          <p class="text-gray-600 mb-6">Effective Date: February 11, 2025</p>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">1. Acceptance of Terms</h2>
+          <p class="mb-4">By accessing, using, or creating an account on Ryntit, you acknowledge that you have read, understood, and agreed to be legally bound by these Terms and Conditions. If you do not accept these Terms, you must discontinue use of Ryntit immediately.</p>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">2. Nature of the Service</h2>
+          <p class="mb-4">Ryntit is a <strong>neutral</strong> online platform facilitating <strong>third-party party rental transactions</strong> between vendors and renters. Ryntit does <strong>not own, manage, inspect, deliver, or guarantee</strong> any of the rental items listed. We do <strong>not</strong> act as an agent for either party.</p>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">3. User Eligibility</h2>
+          <p class="mb-4">By using Ryntit, you represent and warrant that you are <strong>at least 18 years old</strong> and have the legal authority to enter into binding agreements.</p>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">4. Data Collection & Privacy</h2>
+          <p class="mb-2">By using Ryntit, you <strong>expressly consent</strong> to the collection, processing, and storage of your personal data as outlined in our <a href="privacy-policy.html" class="text-blue-500 hover:underline">Privacy Policy</a>. This includes but is not limited to:</p>
+          <ul class="list-disc list-inside mb-4">
+              <li>Personal details provided during account creation</li>
+              <li>Transaction and rental history</li>
+              <li>Device and location data</li>
+              <li>Usage behavior on the platform</li>
+          </ul>
+          <p class="mb-4">If you do not agree to our data collection practices, do not use Ryntit.</p>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">5. Vendor Responsibilities</h2>
+          <ul class="list-disc list-inside mb-4">
+              <li>All listings must be <strong>accurate, legal, and up-to-date</strong>.</li>
+              <li>Vendors <strong>assume all risks</strong> related to renting their items, including but not limited to loss, damage, theft, and non-return.</li>
+              <li>Vendors agree that <strong>Ryntit is not responsible</strong> for enforcing rental agreements or recovering lost/damaged property.</li>
+              <li>All rental items must comply with <strong>local, state, and federal regulations</strong>.</li>
+          </ul>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">6. Renter Responsibilities</h2>
+          <ul class="list-disc list-inside mb-4">
+              <li>They are <strong>fully responsible</strong> for the item’s condition from the time of pickup/delivery until its return.</li>
+              <li>They will <strong>pay for any damages, loss, theft, or unreturned items</strong> at the vendor’s discretion.</li>
+              <li>Ryntit <strong>does not guarantee</strong> item quality, safety, or fitness for a particular purpose.</li>
+              <li>They assume <strong>all risks</strong> associated with using rented items, including injury, property damage, or any third-party claims.</li>
+          </ul>
+
+          <h2 class="text-2xl font-semibold mt-4 mb-2">7. No Liability & Indemnification</h2>
+          <p class="mb-4"><strong>Ryntit is not liable for any damages, injuries, losses, or disputes arising from any rental transactions.</strong></p>
+          <p class="mb-4">By using Ryntit, you <strong>waive and release</strong> Ryntit, its employees, officers, directors, and affiliates from <strong>any and all claims, demands, liabilities, damages, losses, costs, expenses, and legal fees</strong> arising from your use of the platform.</p>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

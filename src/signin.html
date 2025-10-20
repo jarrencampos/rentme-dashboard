@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+</head>
+
+<body
+    x-data="{ page: 'signin', loaded: true, darkMode: true, stickyMenu: false, sidebarToggle: false, scrollTop: false }"
+    x-init="
+          darkMode = JSON.parse(localStorage.getItem('darkMode'));
+          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+>
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- ===== Content Area Start ===== -->
+        <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <!-- ===== Main Content Start ===== -->
+            <main>
+                <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    <!-- ====== Forms Section Start ====== -->
+                    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                        <div class="flex flex-wrap items-center">
+                            <div class="hidden w-full xl:block xl:w-1/2">
+                                <div class="px-26 py-17.5 text-center">
+                                    <a class="mb-5.5 inline-block">
+                                        <img class="hidden dark:block" src="./images/logo/logo-icon.png" alt="Logo" />
+                                        <img class="dark:hidden" src="./images/logo/logo-icon-dark.png" alt="Logo" />
+                                    </a>
+                                    <p class="font-medium 2xl:px-20">Sign in to your vendor account to manage your inventory!</p>
+                                    <span class="mt-15 inline-block">
+                                        <img src="./images/illustration/onboarding2.png" alt="illustration" />
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
+                                <div class="w-full p-4 sm:p-12.5 xl:p-17.5">
+                                    <h2 class="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">Vendor Dashboard</h2>
+
+                                    <form id="loginForm">
+                                        <div class="mb-4">
+                                            <label class="mb-2.5 block font-medium text-black dark:text-white">Email</label>
+                                            <div class="relative">
+                                                <input
+                                                    type="email"
+                                                    id="loginEmail"
+                                                    placeholder="Enter your email"
+                                                    class="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-6">
+                                            <label class="mb-2.5 block font-medium text-black dark:text-white">Password</label>
+                                            <div class="relative">
+                                                <input
+                                                    type="password"
+                                                    id="signInPassword"
+                                                    placeholder="Enter your password"
+                                                    class="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-5">
+                                            <input
+                                                type="button"
+                                                id="loginButton"
+                                                value="Sign In"
+                                                class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
+                                            />
+                                        </div>
+
+                                        <div class="mt-6 text-center">
+                                            <p class="font-medium">
+                                                Don’t have an account?
+                                                <a href="signup.html" class="text-primary">Sign Up</a>
+                                            </p>
+                                            <button id="forgotPasswordButton">Forgot Password?</button>
+                                        </div>
+                                    </form>
+                                    <div id="loadingIndicator" style="display: none;">Loading...</div>
+                                    <div id="message"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ====== Forms Section End ====== -->
+                </div>
+            </main>
+            <!-- ===== Main Content End ===== -->
+        </div>
+        <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword , sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+            authDomain: "ryntit-b503c.firebaseapp.com",
+            databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+            projectId: "ryntit-b503c",
+            storageBucket: "ryntit-b503c.appspot.com",
+            messagingSenderId: "908115066071",
+            appId: "1:908115066071:web:1de252c17cce4346be0492",
+            measurementId: "G-PDBZNLKYKC"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('forgotPasswordButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent form submission / page reload
+
+    const email = prompt('Please enter your email address:');
+    const actionCodeSettings = {
+    // This URL will be the landing page after the password is reset
+    url: 'https://dashboard.ryntit.com/signin.html',
+    handleCodeInApp: false // Keep this false for password reset redirects
+};
+
+    if (email) {
+        sendPasswordResetEmail(auth, email, actionCodeSettings)
+            .then(() => {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Password reset email sent! Check your inbox.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    iconColor: '#3085d6',
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+            })
+            .catch((error) => {
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    iconColor: '#d33',
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+            });
+    } else {
+        Swal.fire({
+            title: 'Oops!',
+            text: 'Email address is required.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            iconColor: '#f0ad4e',
+            customClass: {
+                confirmButton: 'custom-ok-button'
+            }
+        });
+    }
+});
+
+            // Sign In Form Submission
+            document.getElementById('loginButton').addEventListener('click', function(event) {
+                const loginButton = this;
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                loadingIndicator.style.display = 'block'; // Show loading indicator
+                loginButton.disabled = true; // Disable button to prevent multiple clicks
+
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('signInPassword').value;
+
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        document.getElementById('message').textContent = 'Login successful!';
+                        window.location.href = "index.html"; // Redirect to the main site
+                    })
+                    .catch((error) => {
+                        const errorMessage = error.message;
+                        document.getElementById('message').textContent = 'Error: ' + errorMessage;
+                    })
+                    .finally(() => {
+                        loadingIndicator.style.display = 'none'; // Hide loading indicator
+                        loginButton.disabled = false; // Re-enable the button
+                    });
+            });
+
+            // Check authentication state
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    console.log("User is signed in:", user.uid);
+                    window.location.href = "index.html"; // Redirect to the main site
+                } else {
+                    console.log("No user is signed in.");
+                }
+            });
+        });
+    </script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <style>
+        /* Define the custom button style */
+        .custom-ok-button {
+          background-color: #292929;
+          /* Green background */
+          color: white;
+          /* Text color */
+          border: none;
+          /* Remove border */
+          padding: 10px 20px;
+          /* Add padding */
+          font-size: 16px;
+          /* Adjust font size */
+          border-radius: 5px;
+          /* Round the corners */
+        }
+        /* Hover effect for the button */
+        .custom-ok-button:hover {
+          background-color: #000000;
+          /* Darker green on hover */
+        }
+      </style>
+</body>
+</html>

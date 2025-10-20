@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Listings</title>
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+        authDomain: "ryntit-b503c.firebaseapp.com",
+        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+        projectId: "ryntit-b503c",
+        storageBucket: "ryntit-b503c.appspot.com",
+        messagingSenderId: "908115066071",
+        appId: "1:908115066071:web:1de252c17cce4346be0492",
+        measurementId: "G-PDBZNLKYKC"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Listen for authentication state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // If the user is signed in, run your function
+    // Run the function you need after the user is signed in
+    generateMainSection();
+  } else {
+    // If no user is signed in, log a message
+    console.log("No user signed in.");
+  }
+});
+
+      // Function to fetch all listing IDs
+      async function getListingIds() {
+        const listingsCollection = collection(db, "vendors", auth.currentUser.uid, "products"); 
+        const listingsSnapshot = await getDocs(listingsCollection);
+        return listingsSnapshot.docs.map(doc => doc.id);
+      }
+
+      // Function to fetch product details for a given listing ID
+      async function getListingDetails(listingId) {
+        const listingDocRef = doc(db, "products", listingId);
+        const listingDocSnapshot = await getDoc(listingDocRef);
+        return listingDocSnapshot.exists() ? listingDocSnapshot.data() : null;
+      }
+
+      // Function to generate the entire <main> section dynamically
+      async function generateMainSection() {
+        try {
+          const mainElement = document.querySelector("main"); // Grab the main element directly
+
+          const containerDiv = document.createElement("div");
+          containerDiv.classList.add("flex", "flex-col", "gap-10");
+
+          const productListCard = document.createElement("div");
+          productListCard.classList.add("rounded-sm", "border", "border-stroke", "bg-white", "shadow-default", "dark:border-strokedark", "dark:bg-boxdark");
+
+          const headerDiv = document.createElement("div");
+          headerDiv.classList.add("px-4", "py-6", "md:px-6", "xl:px-7.5", "flex", "justify-between", "items-center");
+
+          const headerTitle = document.createElement("h4");
+          headerTitle.classList.add("text-xl", "font-bold", "text-black", "dark:text-white");
+          headerTitle.textContent = "Listings";
+
+          const addButton = document.createElement("button");
+          addButton.onclick = () => window.location.href = 'add-product.html';
+          addButton.classList.add("flex", "items-center", "justify-center", "w-8", "h-8", "bg-primary", "rounded-full", "text-white", "hover:bg-primary");
+
+          const addIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          addIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          addIcon.setAttribute("fill", "none");
+          addIcon.setAttribute("viewBox", "0 0 24 24");
+          addIcon.setAttribute("stroke", "currentColor");
+          addIcon.setAttribute("class", "w-5 h-5");
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("stroke-linecap", "round");
+          path.setAttribute("stroke-linejoin", "round");
+          path.setAttribute("stroke-width", "2");
+          path.setAttribute("d", "M12 4v16m8-8H4");
+
+          addIcon.appendChild(path);
+          addButton.appendChild(addIcon);
+
+          headerDiv.appendChild(headerTitle);
+          headerDiv.appendChild(addButton);
+          productListCard.appendChild(headerDiv);
+
+          const tableHeaders = document.createElement("div");
+          tableHeaders.classList.add("grid", "grid-cols-5", "border-t", "border-stroke", "px-4", "py-4.5", "dark:border-strokedark", "sm:grid-cols-8", "md:px-6", "2xl:px-7.5");
+
+          const titleColumnHeader = document.createElement("div");
+          titleColumnHeader.classList.add("col-span-5", "flex", "items-center", "sm:col-span-5");
+          const titleText = document.createElement("p");
+          titleText.classList.add("font-medium");
+          titleText.textContent = "Title";
+          titleColumnHeader.appendChild(titleText);
+
+          const priceColumnHeader = document.createElement("div");
+          priceColumnHeader.classList.add("col-span-1", "flex", "items-center");
+          const priceText = document.createElement("p");
+          priceText.classList.add("font-medium");
+          priceText.textContent = "Price";
+          priceColumnHeader.appendChild(priceText);
+
+          const bookingsColumnHeader = document.createElement("div");
+          bookingsColumnHeader.classList.add("col-span-1", "flex", "items-center");
+          const bookingsText = document.createElement("p");
+          bookingsText.classList.add("font-medium");
+          bookingsText.textContent = "Booked";
+          bookingsColumnHeader.appendChild(bookingsText);
+
+          const earnedColumnHeader = document.createElement("div");
+          earnedColumnHeader.classList.add("col-span-1", "flex", "items-center");
+          const earnedText = document.createElement("p");
+          earnedText.classList.add("font-medium");
+          earnedText.textContent = "Earned";
+          earnedColumnHeader.appendChild(earnedText);
+
+          tableHeaders.appendChild(titleColumnHeader);
+          tableHeaders.appendChild(priceColumnHeader);
+          tableHeaders.appendChild(bookingsColumnHeader);
+          tableHeaders.appendChild(earnedColumnHeader);
+
+          productListCard.appendChild(tableHeaders);
+
+          const listingIds = await getListingIds(); // Fetch all listing IDs
+          const listingDetailsPromises = listingIds.map(listingId => getListingDetails(listingId)); 
+          const listingDetails = await Promise.all(listingDetailsPromises); 
+
+          listingDetails.forEach(product => {
+            if (product) {
+              const productRow = createProductRow(product);
+              productListCard.appendChild(productRow);
+            }
+          });
+
+          containerDiv.appendChild(productListCard);
+          mainElement.appendChild(containerDiv); // Append directly to the main content area
+        } catch (error) {
+          console.error("Error generating the main section:", error);
+        }
+      }
+
+      // Helper function to create a product row
+      function createProductRow(product) {
+    // Create the product row button
+    const productRowButton = document.createElement("button");
+    productRowButton.classList.add(
+        "grid", "grid-cols-5", "border-t", "border-stroke", "px-4", "py-4.5",
+        "dark:border-strokedark", "sm:grid-cols-8", "md:px-6", "2xl:px-7.5",
+        "w-full", "text-left", "hover:bg-gray-100", "dark:hover:bg-gray-800", "transition-all", "focus:outline-none"
+    );
+
+    // Add onclick to the entire button (navigate to product details page)
+    productRowButton.onclick = () => {
+        window.location.href = `/product.html?id=${product.id}`;
+    };
+
+    // Title Column
+    const titleColumn = document.createElement("div");
+    titleColumn.classList.add("col-span-5", "flex", "items-center");
+    const titleLink = document.createElement("a");
+    titleLink.classList.add("flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-center");
+
+    const imageDiv = document.createElement("div");
+    imageDiv.classList.add("h-12.5", "w-15", "rounded-md");
+    const img = document.createElement("img");
+    img.src = product.image_url;
+    img.alt = product.title;
+    imageDiv.appendChild(img);
+
+    const titleText = document.createElement("p");
+    titleText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
+    titleText.textContent = product.title;
+
+    titleLink.appendChild(imageDiv);
+    titleLink.appendChild(titleText);
+    titleColumn.appendChild(titleLink);
+    productRowButton.appendChild(titleColumn);
+
+    // Price Column
+    const priceColumn = document.createElement("div");
+    priceColumn.classList.add("col-span-1", "flex", "items-center");
+    const priceText = document.createElement("p");
+    priceText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
+    priceText.textContent = `$${product.price}`;
+    priceColumn.appendChild(priceText);
+    productRowButton.appendChild(priceColumn);
+
+    // Bookings Column
+    const bookingsColumn = document.createElement("div");
+    bookingsColumn.classList.add("col-span-1", "flex", "items-center");
+    const bookingsText = document.createElement("p");
+    bookingsText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
+    bookingsText.textContent = product.bookings || '0';
+    bookingsColumn.appendChild(bookingsText);
+    productRowButton.appendChild(bookingsColumn);
+
+    // Earned Column
+    const earnedColumn = document.createElement("div");
+    earnedColumn.classList.add("col-span-1", "flex", "items-center");
+    const earnedText = document.createElement("p");
+    earnedText.classList.add("text-sm", "font-medium", "text-meta-3");
+    earnedText.textContent = `$${product.earned || '0'}`;
+    earnedColumn.appendChild(earnedText);
+    productRowButton.appendChild(earnedColumn);
+
+    return productRowButton;
+}
+
+      document.addEventListener("DOMContentLoaded", generateMainSection);
+
+    </script>
+  </head>
+
+  <body
+    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- Preloader Start -->
+    <include src="./partials/preloader.html"></include>
+    <!-- Preloader End -->
+
+    <!-- Page Wrapper Start -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- Sidebar Start -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- Sidebar End -->
+
+      <!-- Content Area Start -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- Header Start -->
+        <include src="./partials/header.html"></include>
+        <!-- Header End -->
+
+        <!-- Main Content Section Start -->
+        <main class="mx-auto w-[90%] max-w-[1600px] p-4 md:p-6 2xl:p-10"></main>
+        <!-- Main Content Section End -->
+
+      </div>
+    </div>
+    <!-- Page Wrapper End -->
+  </body>
+</html>
