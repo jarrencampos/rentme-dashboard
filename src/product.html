@@ -5,11 +5,123 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    Edit Listing
-  </title>
+  <title>Edit Listing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <style>
+    /* Modern form styling */
+    .form-section {
+      transition: all 0.2s ease;
+    }
+    .form-section:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .dark .form-section:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Image upload styling */
+    .image-upload-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    }
+    .dark .image-upload-card {
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    }
+    .image-upload-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    .image-upload-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-upload-card .upload-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .image-upload-card:hover .upload-overlay {
+      opacity: 1;
+    }
+    .main-image-card {
+      aspect-ratio: 16/10;
+    }
+
+    /* Input styling */
+    .modern-input {
+      transition: all 0.2s ease;
+      border-width: 2px;
+    }
+    .modern-input:focus {
+      border-color: #3C50E0;
+      box-shadow: 0 0 0 3px rgba(60, 80, 224, 0.1);
+    }
+
+    /* Flatpickr customization */
+    .flatpickr-calendar {
+      border-radius: 16px !important;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15) !important;
+      border: none !important;
+    }
+    .flatpickr-day.selected {
+      background: #3C50E0 !important;
+      border-color: #3C50E0 !important;
+    }
+
+    /* Tooltip styling */
+    .tooltip-trigger:hover .tooltip-content {
+      display: block;
+    }
+
+    /* Button styling */
+    .btn-primary {
+      background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(60, 80, 224, 0.35);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+      transition: all 0.2s ease;
+    }
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+    }
+
+    /* Custom SweetAlert buttons */
+    .custom-ok-button {
+      background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%) !important;
+      border: none !important;
+      border-radius: 12px !important;
+      padding: 12px 24px !important;
+      font-weight: 600 !important;
+    }
+    .custom-delete-button {
+      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%) !important;
+      border: none !important;
+      border-radius: 12px !important;
+      padding: 12px 24px !important;
+      font-weight: 600 !important;
+    }
+  </style>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <body
   x-data="{ page: 'formElements', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
@@ -17,430 +129,386 @@
           darkMode = JSON.parse(localStorage.getItem('darkMode'));
           $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
   :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}">
-  <!-- ===== Preloader Start ===== -->
+
   <include src="./partials/preloader.html"></include>
-  <!-- ===== Preloader End ===== -->
 
-  <!-- ===== Page Wrapper Start ===== -->
   <div class="flex h-screen overflow-hidden">
-    <!-- ===== Sidebar Start ===== -->
     <include src="./partials/sidebar.html"></include>
-    <!-- ===== Sidebar End ===== -->
 
-    <!-- ===== Content Area Start ===== -->
     <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-      <!-- ===== Header Start ===== -->
       <include src="./partials/header.html" />
-      <!-- ===== Header End ===== -->
 
-      <!-- ===== Main Content Start ===== -->
-      <main>
-        <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-          <!-- Breadcrumb Start -->
-          <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-title-md2 font-bold text-black dark:text-white">
+      <main class="flex-1">
+        <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+
+          <!-- Header -->
+          <div class="mb-8">
+            <a href="listings.html" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              Back to listings
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               Edit Listing
-            </h2>
+            </h1>
+            <p class="mt-1 text-gray-500 dark:text-gray-400">
+              Update your listing details and images
+            </p>
           </div>
-          <!-- Breadcrumb End -->
 
-          <!-- ====== Form Elements Section Start -->
-          <div class="grid grid-cols-1 gap-9 sm:grid-cols-1">
-            <form id="listingForm">
-              <div class="flex flex-col gap-9">
-                <!-- Input Fields -->
-                <div
-                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                    <h3 class="font-medium text-black dark:text-white">
-                      Main Info
-                    </h3>
-                  </div>
-                  <div class="flex flex-col gap-5.5 p-6.5">
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Title
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter a descriptive title for your rental item. This should be a short catchy title that quickly describes your item.
-                          </span>
-                        </span>
-                      </label>
-                      <input type="text" id="title" maxlength="30" placeholder="White Jump Castle"
-                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
-                    </div>
-                    
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Subtitle
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter a descriptive subtitle for your rental item. This will be under the main title and more descriptive than the main title.
-                          </span>
-                        </span>
-                      </label>
-                      <input type="text" id="subtitle" maxlength="55"
-                        placeholder="Multiple color options available for the ball pit!"
-                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
-                    </div>
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Location
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter the actual location of this item. This will not be seen by the users and only used to determine the distance to the renters venue.
-                          </span>
-                        </span>
-                      </label>
-                      <input type="text" id="location" maxlength="75"
-                        placeholder="1600 Pennsylvania Avenue NW, Washington, DC 20500"
-                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" />
-                    </div>
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Service radius from location
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter your service radius from your location that you are willing to deliver.
-                          </span>
-                        </span>
-                      </label>
-                      <div
-                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg">
-                        <!-- Input with rounded corners -->
-                        <input type="number" id="serviceMiles" placeholder="50" step="1" min="1"
-                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary rounded-l-lg" />
-                        <span class="price-per-day text-black dark:text-white text-lg rounded-r-lg">miles</span>
-                        <!-- added rounded-r-lg -->
-                      </div>
-                    </div>
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Quantity
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter your quantity of your inventory of this item.
-                          </span>
-                        </span>
-                      </label>
-                      <div
-                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg">
-                        <!-- Input with rounded corners -->
-                        <input type="number" id="quantity" placeholder="1" step="1" min="1"
-                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary rounded-l-lg" />
-                      </div>
-                    </div>
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Description
-                        <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter a detailed description for your rental item.
-                          </span>
-                      </label>
-                      <textarea type="text" rows="6" id="description" maxlength="1500"
-                        placeholder="Bring the enchantment of a castle to your backyard with our Inflatable White Castle featuring a delightful ball pit – the ultimate playtime paradise for kids aged 0-5! This inflatable castle combines the thrill of bouncing with the joy of splashing around in a sea of colorful balls. PLEASE NOTE: No facepainting allowed with this rental."
-                        class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"></textarea>
-                    </div>
-                  </div>
+          <form id="listingForm" class="space-y-8">
+
+            <!-- Images Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20">
+                  <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
                 </div>
-                <div
-                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                    <h3 class="font-medium text-black dark:text-white">
-                      Pricing
-                    </h3>
-                  </div>
-                  <div class="flex flex-col gap-5.5 p-6.5">
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white flex items-center">
-                        Rental Cost
-                                                <span class="relative group ml-1 flex items-center">
-                          <svg class="w-4 h-4 fill-gray-400 dark:fill-gray-500 cursor-pointer group-hover:fill-black dark:group-hover:fill-white" 
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                          </svg>
-                          <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-40 text-xs bg-black text-white p-2 rounded shadow-md">
-                            Enter your cost per unit please include your cost including delivery and set up.
-                          </span>
-                      </label>
-                      <!-- Price input field with static $ and per day text -->
-                      <div
-                        class="flex items-center border-[1.5px] border-stroke dark:border-form-strokedark rounded-lg price-container">
-                        <span class="px-5 text-black dark:text-white">$</span>
-                        <input type="number" id="pricing" placeholder="100.00" step="0.01" min="0.01"
-                          class="price-input w-full bg-transparent border-0 px-2 py-3 text-black dark:text-white outline-none focus:ring-0 dark:bg-form-input dark:focus:border-primary" />
-                        <span class="price-per-day text-black dark:text-white text-lg">/ per day</span>
-                      </div>
-
-                    </div>
-                  </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Photos</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Add up to 3 photos of your listing</p>
                 </div>
-                <!-- File upload -->
-                <div
-                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-8">
-                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                    <h3 class="font-medium text-black dark:text-white">
-                      Images
-                    </h3>
-                  </div>
-                  <div class="flex flex-col gap-5.5 p-6.5">
-                    <!-- Main Image -->
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Main Image
-                      </label>
-                      <input type="file" id="imageInput"
-                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
-                      <!-- Image Preview Box -->
-                      <div id="imagePreview1"
-                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
-                        <span class="text-gray-500">No image selected</span>
-                      </div>
-                    </div>
+              </div>
 
-                    <!-- Image 2 -->
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Image 2
-                      </label>
-                      <input type="file" id="imageInput2"
-                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
-                      <!-- Image Preview Box -->
-                      <div id="imagePreview2"
-                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
-                        <span class="text-gray-500">No image selected</span>
-                      </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Main Image -->
+                <div class="sm:col-span-2">
+                  <input type="file" id="imageInput" class="hidden" accept="image/*" />
+                  <div id="imagePreview1" class="image-upload-card main-image-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput').click()">
+                    <div class="text-center p-6">
+                      <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                      </svg>
+                      <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Main Photo</p>
+                      <p class="text-xs text-gray-400 mt-1">Click to upload</p>
                     </div>
-
-                    <!-- Image 3 -->
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Image 3
-                      </label>
-                      <input type="file" id="imageInput3"
-                        class="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent font-normal outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary" />
-                      <!-- Image Preview Box -->
-                      <div id="imagePreview3"
-                        class="image-preview-box mt-3 w-40 h-40 bg-gray-200 border-[1px] border-stroke flex justify-center items-center">
-                        <span class="text-gray-500">No image selected</span>
-                      </div>
+                    <div class="upload-overlay">
+                      <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      </svg>
+                      <span class="text-white text-sm font-medium">Change photo</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="flex flex-col gap-9">
-                  <!-- Select input -->
-                  <div
-                    class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                    <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                      <h3 class="font-medium text-black dark:text-white">
-                        Category selection
-                      </h3>
+                <!-- Secondary Images -->
+                <div class="flex flex-col gap-4">
+                  <input type="file" id="imageInput2" class="hidden" accept="image/*" />
+                  <div id="imagePreview2" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput2').click()">
+                    <div class="text-center p-4">
+                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                      </svg>
+                      <p class="text-xs text-gray-400">Photo 2</p>
                     </div>
-                    <div class="flex flex-col gap-5.5 p-6.5">
-                      <!-- Main Category Dropdown -->
-                      <div>
-                        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                          Main Categories
-                        </label>
-                        <div class="relative z-20 bg-white dark:bg-form-input">
-                          <select
-                            class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
-                            id="mainCategory">
-                            <option value="" class="text-body">Select a Category</option>
-                            <option value="inflatable" class="text-body">Inflatable</option>
-                            <option value="furniture" class="text-body">Furniture</option>
-                            <option value="games" class="text-body">Games</option>
-                            <option value="food-service" class="text-body">Food Service</option>
-                            <option value="audiovisual" class="text-body">Audiovisual</option>
-                            <option value="flooring" class="text-body">Flooring</option>
-                          </select>
-                          <span class="absolute right-4 top-1/2 z-10 -translate-y-1/2">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <g opacity="0.8">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                  d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
-                                  fill="#637381"></path>
-                              </g>
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-
-                      <!-- Subcategory Dropdown -->
-                      <div>
-                        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                          Sub-Categories
-                        </label>
-                        <div class="relative z-20 bg-white dark:bg-form-input">
-                          <select
-                            class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
-                            id="subCategory">
-                            <option value="" class="text-body">Select a Sub-Category</option>
-                          </select>
-                          <span class="absolute right-4 top-1/2 z-10 -translate-y-1/2">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <g opacity="0.8">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                  d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
-                                  fill="#637381"></path>
-                              </g>
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-
-
-                    </div>
-
-                  </div>
-                </div>
-                <!-- Time and date -->
-                <div
-                  class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                  <div class="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                    <h3 class="font-medium text-black dark:text-white">Available Dates</h3>
-                  </div>
-                  <div class="flex flex-col gap-5.5 p-6.5">
-                    <div>
-                      <label class="mb-3 block text-sm font-medium text-black dark:text-white">Block Dates</label>
-                      <div class="relative flex justify-center"> <!-- Added flex and justify-center -->
-                        <!-- Hidden Input for Flatpickr initialization -->
-                        <input type="text" id="datepicker" style="display: none;" />
-                      </div>
+                    <div class="upload-overlay">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      </svg>
                     </div>
                   </div>
-                  <div id="blockedDates" class="mt-4 text-center text-sm text-black dark:text-white">
-                    <!-- Dates will appear here -->
+
+                  <input type="file" id="imageInput3" class="hidden" accept="image/*" />
+                  <div id="imagePreview3" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput3').click()">
+                    <div class="text-center p-4">
+                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                      </svg>
+                      <p class="text-xs text-gray-400">Photo 3</p>
+                    </div>
+                    <div class="upload-overlay">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div id="selected-dates" class="mt-4 text-center text-sm text-black dark:text-white">
-                    <!-- Dates will appear here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Basic Info Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Tell renters about your item</p>
+                </div>
+              </div>
+
+              <div class="space-y-5">
+                <!-- Title -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" id="title" maxlength="30" placeholder="e.g., White Bounce Castle"
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
+                  <p class="mt-1.5 text-xs text-gray-400">A short, catchy title (max 30 characters)</p>
+                </div>
+
+                <!-- Subtitle -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Subtitle
+                  </label>
+                  <input type="text" id="subtitle" maxlength="55" placeholder="e.g., Perfect for kids birthday parties!"
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
+                  <p class="mt-1.5 text-xs text-gray-400">A brief description shown below the title</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description
+                  </label>
+                  <textarea id="description" rows="4" maxlength="1500" placeholder="Describe your rental item in detail. Include features, dimensions, what's included, and any rules or restrictions..."
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 resize-none"></textarea>
+                  <p class="mt-1.5 text-xs text-gray-400">Detailed description of your item (max 1500 characters)</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Location & Delivery Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-green-500/10 dark:bg-green-500/20">
+                  <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Location & Delivery</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Set your pickup location and delivery radius</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Location -->
+                <div class="sm:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Item Location
+                  </label>
+                  <input type="text" id="location" maxlength="75" placeholder="Enter address or zip code"
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
+                  <p class="mt-1.5 text-xs text-gray-400">This won't be shown publicly, only used for distance calculation</p>
+                </div>
+
+                <!-- Service Radius -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Delivery Radius
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="serviceMiles" placeholder="50" min="1"
+                      class="modern-input w-full px-4 py-3 pr-16 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">miles</span>
                   </div>
                 </div>
 
-
-                <!-- Disclaimer Section -->
-                <div class="flex justify-center mt-4">
-                  <p class="text-sm text-gray-600 dark:text-gray-300 text-center">
-                    By clicking update, you are agreeing to our
-                    <a href="/terms.html" target="_blank" class="text-blue-500 hover:text-blue-700">Terms and
-                      Conditions</a>
-                    and
-                    <a href="/privacy.html" target="_blank" class="text-blue-500 hover:text-blue-700">Privacy
-                      Policy</a>.
-                  </p>
+                <!-- Quantity -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Quantity Available
+                  </label>
+                  <input type="number" id="quantity" placeholder="1" min="1"
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
                 </div>
-                <!-- Update/Delete Buttons -->
-                <div class="flex justify-center gap-4 mt-8">
-                  <button id="uploadButton" type="submit"
-                    class="px-5 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
-                    Update
-                  </button>
-                  <button type="submit" id="deleteButton"
-                  class="px-5 py-3 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                  Delete
-                </button>
-                
-                  <!-- Spinner -->
-                  <div id="loading-spinner" class="hidden mt-1">
-                    <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none"
-                      viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </div>
+            </div>
+
+            <!-- Pricing Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-yellow-500/10 dark:bg-yellow-500/20">
+                  <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Pricing</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Set your daily rental rate</p>
+                </div>
+              </div>
+
+              <div class="max-w-xs">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Price per day <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg font-medium">$</span>
+                  <input type="number" id="pricing" placeholder="100" step="0.01" min="0.01"
+                    class="modern-input w-full pl-10 pr-20 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 text-lg font-semibold" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">/ day</span>
+                </div>
+                <p class="mt-1.5 text-xs text-gray-400">Include delivery and setup in your price</p>
+              </div>
+            </div>
+
+            <!-- Category Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/10 dark:bg-purple-500/20">
+                  <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Category</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Help renters find your listing</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Main Category -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Main Category
+                  </label>
+                  <div class="relative">
+                    <select id="mainCategory"
+                      class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white focus:outline-none dark:bg-gray-800/50 appearance-none cursor-pointer">
+                      <option value="">Select a category</option>
+                      <option value="inflatable">Inflatable</option>
+                      <option value="furniture">Furniture</option>
+                      <option value="games">Games</option>
+                      <option value="food-service">Food Service</option>
+                      <option value="audiovisual">Audiovisual</option>
+                      <option value="flooring">Flooring</option>
+                    </select>
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Sub Category -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Sub Category
+                  </label>
+                  <div class="relative">
+                    <select id="subCategory"
+                      class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white focus:outline-none dark:bg-gray-800/50 appearance-none cursor-pointer">
+                      <option value="">Select a sub-category</option>
+                    </select>
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                   </div>
                 </div>
               </div>
-            </form>
+            </div>
 
-          </div>
+            <!-- Availability Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-red-500/10 dark:bg-red-500/20">
+                  <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Availability</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Block dates when your item is unavailable</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-center">
+                <input type="text" id="datepicker" class="hidden" />
+                <div id="blockedDates" class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400"></div>
+                <div id="selected-dates" class="mt-2 text-center text-sm font-medium text-primary"></div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+                By updating, you agree to our
+                <a href="terms.html" target="_blank" class="text-primary hover:underline">Terms</a> and
+                <a href="privacy.html" target="_blank" class="text-primary hover:underline">Privacy Policy</a>
+              </p>
+
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="uploadButton" type="submit"
+                  class="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  Save Changes
+                </button>
+
+                <button id="deleteButton" type="submit"
+                  class="btn-danger w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  Delete Listing
+                </button>
+
+                <div id="loading-spinner" class="hidden">
+                  <svg class="animate-spin h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
           </form>
         </div>
-        <!-- ====== Form Elements Section End -->
+      </main>
     </div>
-    </main>
-    <!-- ===== Main Content End ===== -->
   </div>
-  <!-- ===== Content Area End ===== -->
-  </div>
-  <!-- ===== Page Wrapper End ===== -->
+
+  <!-- Image Preview Handler -->
   <script>
-    // Function to handle image file input and preview
-    function handleFileSelect(inputId, previewId) {
+    function setupImagePreview(inputId, previewId, isMain = false) {
       const input = document.getElementById(inputId);
       const previewBox = document.getElementById(previewId);
 
-      input.addEventListener('change', function (event) {
+      input.addEventListener('change', function(event) {
         const file = event.target.files[0];
-
         if (file) {
-          // Create an object URL for the image and set it as the background image
           const reader = new FileReader();
-          reader.onload = function (e) {
-            previewBox.innerHTML = `<img src="${e.target.result}" alt="Image Preview" />`;
+          reader.onload = function(e) {
+            previewBox.innerHTML = `
+              <img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover" />
+              <div class="upload-overlay">
+                <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                ${isMain ? '<span class="text-white text-sm font-medium">Change photo</span>' : ''}
+              </div>
+            `;
           };
           reader.readAsDataURL(file);
-        } else {
-          previewBox.innerHTML = `<span class="text-gray-500">No image selected</span>`;
         }
-      });
-
-      // Click event to trigger the file input on image click
-      previewBox.addEventListener('click', function () {
-        input.click();  // Simulate a click on the file input
       });
     }
 
-    // Initialize the file input listeners
-    document.addEventListener('DOMContentLoaded', function () {
-      handleFileSelect('imageInput', 'imagePreview1');
-      handleFileSelect('imageInput2', 'imagePreview2');
-      handleFileSelect('imageInput3', 'imagePreview3');
+    document.addEventListener('DOMContentLoaded', function() {
+      setupImagePreview('imageInput', 'imagePreview1', true);
+      setupImagePreview('imageInput2', 'imagePreview2', false);
+      setupImagePreview('imageInput3', 'imagePreview3', false);
     });
   </script>
 
+  <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, setDoc, Timestamp, getDoc, getDocs, updateDoc} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getFirestore, doc, Timestamp, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
       authDomain: "ryntit-b503c.firebaseapp.com",
@@ -454,46 +522,37 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app); // Firebase Auth instance
-    const storage = getStorage(app); // Firebase Storage instance
+    const auth = getAuth(app);
+    const storage = getStorage(app);
 
     document.addEventListener("DOMContentLoaded", () => {
       let currentUserId = null;
 
-      // Check if the user is logged in
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          currentUserId = user.uid; // Get the current user's UID
-        } else {
-          console.log("No user logged in");
+          currentUserId = user.uid;
         }
       });
 
-
-      // Extract the id parameter from the URL
       const urlParams = new URLSearchParams(window.location.search);
       const productId = urlParams.get('id');
-      let initialValues = {}; // Store initial values globally
-      let productData;  // Declare this variable at a higher scope
+      let initialValues = {};
+      let productData;
       let selectedBlockDates = [];
 
-
       if (productId) {
-        const productRef = doc(db, "products", productId);  // Get a reference to the product document
+        const productRef = doc(db, "products", productId);
 
         getDoc(productRef).then((docSnap) => {
           if (docSnap.exists()) {
             productData = docSnap.data();
-
-            // Populate the form with the data from Firebase
-            const detailsId = productData.details_id;  // Assuming `detailsId` is stored in the product document
+            const detailsId = productData.details_id;
 
             if (detailsId) {
-              // Fetch the 'details' document using the details_id field from the 'details' collection
               const detailsRef = doc(db, "details", detailsId);
               getDoc(detailsRef).then((detailsSnap) => {
                 if (detailsSnap.exists()) {
-                  const detailsData = detailsSnap.data();  // Get the data from the 'details' document
+                  const detailsData = detailsSnap.data();
 
                   document.getElementById('title').value = productData.title;
                   document.getElementById('subtitle').value = detailsData.subtitle || '';
@@ -502,35 +561,31 @@
                   document.getElementById('serviceMiles').value = detailsData.serviceMiles || 0;
                   document.getElementById('quantity').value = detailsData.num_items || 0;
                   document.getElementById('pricing').value = productData.price || 0;
-
                   document.getElementById('mainCategory').value = detailsData.mainCategory || '';
 
                   const event = new Event('change');
                   document.getElementById('mainCategory').dispatchEvent(event);
-
                   document.getElementById('subCategory').value = detailsData.subCategory || '';
 
-                  updateImagePreview('imageInput', 'imagePreview1', productData.image_url); // Main Image
+                  updateImagePreview('imageInput', 'imagePreview1', productData.image_url, true);
 
-              initialValues = {                
-                title: productData.title || '',
-                subtitle: detailsData.subtitle || '',
-                description: detailsData.description || '',
-                location: productData.location || '',
-                serviceMiles: String(detailsData.serviceMiles) || '',
-                quantity: String(detailsData.num_items) || '',
-                pricing: String(productData.price) || '',
-                mainCategory: detailsData.mainCategory || '',
-                subCategory: detailsData.subCategory || '',
-                mainImageFile: productData.image_url || '',
-                block_dates: detailsData.block_dates || []
-            };
-                  // Get today's date
+                  initialValues = {
+                    title: productData.title || '',
+                    subtitle: detailsData.subtitle || '',
+                    description: detailsData.description || '',
+                    location: productData.location || '',
+                    serviceMiles: String(detailsData.serviceMiles) || '',
+                    quantity: String(detailsData.num_items) || '',
+                    pricing: String(productData.price) || '',
+                    mainCategory: detailsData.mainCategory || '',
+                    subCategory: detailsData.subCategory || '',
+                    mainImageFile: productData.image_url || '',
+                    block_dates: detailsData.block_dates || []
+                  };
+
                   const today = new Date();
-
-                  // Calculate the date one year from today
                   const oneYearFromToday = new Date();
-                  oneYearFromToday.setFullYear(today.getFullYear() + 1); // Set it to one year ahead
+                  oneYearFromToday.setFullYear(today.getFullYear() + 1);
 
                   flatpickr("#datepicker", {
                     mode: "multiple",
@@ -541,88 +596,60 @@
                     minDate: "today",
                     maxDate: oneYearFromToday,
                     inline: true,
-                    onChange: function (selectedDatesArr) {
-                      selectedBlockDates = selectedDatesArr.map(date => {
-                        return date.toISOString().split('T')[0]; // Format to 'YYYY-MM-DD'
-                      });
+                    onChange: function(selectedDatesArr) {
+                      selectedBlockDates = selectedDatesArr.map(date => date.toISOString().split('T')[0]);
                       const selectedDatesDiv = document.getElementById("selected-dates");
                       selectedDatesDiv.textContent = selectedBlockDates.length > 0
-                        ? `Blocked Dates: ${selectedBlockDates.join(', ')}`
+                        ? `${selectedBlockDates.length} date${selectedBlockDates.length > 1 ? 's' : ''} blocked`
                         : '';
                     },
-                    onReady: function (selectedDates, dateStr, instance) {
+                    onReady: function(selectedDates, dateStr, instance) {
                       if (Array.isArray(detailsData.block_dates) && detailsData.block_dates.length > 0) {
-                        const formattedDates = detailsData.block_dates.map(dateStr => {
-                          return instance.parseDate(dateStr, "Y-m-d"); // Correctly parses dates
-                        });
+                        const formattedDates = detailsData.block_dates.map(dateStr => instance.parseDate(dateStr, "Y-m-d"));
                         instance.setDate(formattedDates, true);
-                        selectedBlockDates = detailsData.block_dates
+                        selectedBlockDates = detailsData.block_dates;
                       }
                     }
                   });
 
-                  // Fetch the image URLs from the 'image' subcollection under the details document
                   const secondaryRef = doc(db, "details", detailsId, "photos", "secondary");
                   const thirdRef = doc(db, "details", detailsId, "photos", "third");
 
-// Fetch secondary image
-getDoc(secondaryRef).then((docSnap) => {
-  if (docSnap.exists()) {
-    const url = docSnap.data().image_url;
-    if (url) {
-      updateImagePreview('imageInput2', 'imagePreview2', url); // Image 2
-    }
-  }
-}).catch((error) => {
-  console.log("Error getting secondary image:", error);
-});
+                  getDoc(secondaryRef).then((docSnap) => {
+                    if (docSnap.exists() && docSnap.data().image_url) {
+                      updateImagePreview('imageInput2', 'imagePreview2', docSnap.data().image_url, false);
+                    }
+                  });
 
-// Fetch third image
-getDoc(thirdRef).then((docSnap) => {
-  if (docSnap.exists()) {
-    const url = docSnap.data().image_url;
-    if (url) {
-      updateImagePreview('imageInput3', 'imagePreview3', url); // Image 3
-    }
-  }
-}).catch((error) => {
-  console.log("Error getting third image:", error);
-});
-
-                } else {
-                  console.log("No such details document!");
+                  getDoc(thirdRef).then((docSnap) => {
+                    if (docSnap.exists() && docSnap.data().image_url) {
+                      updateImagePreview('imageInput3', 'imagePreview3', docSnap.data().image_url, false);
+                    }
+                  });
                 }
-              }).catch((error) => {
-                console.log("Error getting details document:", error);
               });
-            } else {
-              console.log("No details_id found in product document!");
             }
-          } else {
-            console.log("No such product document!");
           }
-        }).catch((error) => {
-          console.log("Error getting product document:", error);
         });
       }
 
-      // Function to handle image preview for input fields
-      function updateImagePreview(inputId, previewId, imageUrl) {
+      function updateImagePreview(inputId, previewId, imageUrl, isMain = false) {
         const previewBox = document.getElementById(previewId);
         const input = document.getElementById(inputId);
 
         if (imageUrl) {
-          // If an image URL exists, set it as the preview image
-          previewBox.innerHTML = `<img src="${imageUrl}" alt="Image Preview" />`;
-        } else {
-          // Fallback text if no image URL
-          previewBox.innerHTML = `<span class="text-gray-500">No image selected</span>`;
+          previewBox.innerHTML = `
+            <img src="${imageUrl}" alt="Preview" class="w-full h-full object-cover" />
+            <div class="upload-overlay">
+              <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+              </svg>
+              ${isMain ? '<span class="text-white text-sm font-medium">Change photo</span>' : ''}
+            </div>
+          `;
         }
 
-        // Click event to trigger the file input on image click
-        previewBox.addEventListener('click', function () {
-          input.click();  // Simulate a click on the file input
-        });
+        previewBox.onclick = () => input.click();
       }
 
       const submitBtn = document.getElementById('uploadButton');
@@ -630,22 +657,17 @@ getDoc(thirdRef).then((docSnap) => {
       const spinner = document.getElementById('loading-spinner');
 
       function haveDatesChanged(initialDates, newDates) {
-    if (initialDates.length !== newDates.length) return true;
+        if (initialDates.length !== newDates.length) return true;
+        const sortedInitial = [...initialDates].sort().map(d => new Date(d).toISOString());
+        const sortedNew = [...newDates].sort().map(d => new Date(d).toISOString());
+        for (let i = 0; i < sortedInitial.length; i++) {
+          if (sortedInitial[i] !== sortedNew[i]) return true;
+        }
+        return false;
+      }
 
-    // Sort and stringify for easy comparison
-    const sortedInitial = [...initialDates].sort().map(d => new Date(d).toISOString());
-    const sortedNew = [...newDates].sort().map(d => new Date(d).toISOString());
-
-    for (let i = 0; i < sortedInitial.length; i++) {
-        if (sortedInitial[i] !== sortedNew[i]) return true;
-    }
-
-    return false;
-}
-
-      // Handle form submission
-      document.getElementById('listingForm').addEventListener('submit', async function (event) {
-        event.preventDefault();  // Prevents the form from submitting the traditional way
+      document.getElementById('listingForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
         submitBtn.disabled = true;
         deleteBtn.disabled = true;
         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -654,294 +676,229 @@ getDoc(thirdRef).then((docSnap) => {
 
         const submitter = event.submitter;
 
-        // Check which button was clicked
         if (submitter.id === 'deleteButton') {
-          // Handle delete logic
           Swal.fire({
             title: 'Delete Listing',
-            text: 'Are you sure you want to delete your listing? This action cannot be undone.',
+            text: 'Are you sure you want to delete this listing? This cannot be undone.',
             icon: 'warning',
+            showCancelButton: true,
             confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
             customClass: {
-              confirmButton: 'custom-delete-button'  // Apply custom class to the "OK" button
+              confirmButton: 'custom-delete-button',
+              cancelButton: 'custom-ok-button'
             }
           }).then((result) => {
             if (result.isConfirmed) {
-              // The user confirmed the delete action
-              console.log('Deleting the listing...');
-              // Add your delete functionality here (e.g., delete from Firestore or database)
-
               Swal.fire({
                 title: 'Deleted!',
                 text: 'Your listing has been deleted.',
                 icon: 'success',
                 confirmButtonText: 'OK',
-                customClass: {
-                  confirmButton: 'custom-ok-button' // Apply custom class to the "OK" button
-                }
+                customClass: { confirmButton: 'custom-ok-button' }
               }).then(() => {
-                submitBtn.disabled = false;
-                deleteBtn.disabled = false;
-                deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
-                window.location.href = '/listings.html'; // Redirect after success
+                window.location.href = 'listings.html';
               });
+            } else {
+              submitBtn.disabled = false;
+              deleteBtn.disabled = false;
+              submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              spinner.classList.add('hidden');
             }
           });
-          // Add your delete functionality here
-        } else if (submitter.id === 'uploadButton') {
-          // Handle upload logic
+          return;
+        }
 
-          // Make sure the user is logged in
-          if (!currentUserId) {
+        if (!currentUserId) {
+          Swal.fire({
+            title: 'Not Logged In',
+            text: 'You must be logged in to update this listing.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            customClass: { confirmButton: 'custom-ok-button' }
+          });
+          submitBtn.disabled = false;
+          deleteBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          spinner.classList.add('hidden');
+          return;
+        }
+
+        try {
+          const hasChanges = (
+            initialValues.title !== document.getElementById('title').value ||
+            initialValues.subtitle !== document.getElementById('subtitle').value ||
+            initialValues.description !== document.getElementById('description').value ||
+            initialValues.location !== document.getElementById('location').value ||
+            initialValues.serviceMiles !== document.getElementById('serviceMiles').value ||
+            initialValues.pricing !== document.getElementById('pricing').value ||
+            initialValues.mainCategory !== document.getElementById('mainCategory').value ||
+            initialValues.subCategory !== document.getElementById('subCategory').value ||
+            initialValues.quantity !== document.getElementById('quantity').value ||
+            haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
+            document.getElementById('imageInput').files.length > 0 ||
+            document.getElementById('imageInput2').files.length > 0 ||
+            document.getElementById('imageInput3').files.length > 0
+          );
+
+          if (!hasChanges) {
             Swal.fire({
-              title: 'Not Logged In',
-              text: 'You must be logged in to submit the listing.',
-              icon: 'warning',
-              confirmButtonText: 'Login',
-              customClass: {
-                confirmButton: 'bg-primary text-white',
-              },
+              title: 'No Changes',
+              text: 'No changes were made to the listing.',
+              icon: 'info',
+              confirmButtonText: 'OK',
+              customClass: { confirmButton: 'custom-ok-button' }
             });
             submitBtn.disabled = false;
             deleteBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
-            return;
-          }
-          const pricingNumber = parseFloat(initialValues.pricing); // Use parseInt(pricing) if you need an integer
-
-          if (isNaN(pricingNumber)) {
-            Swal.fire({
-              title: 'Invalid Price',
-              text: 'Please enter a valid price.',
-              icon: 'error',
-              confirmButtonText: 'Ok',
-              customClass: {
-                confirmButton: 'bg-primary text-white',
-              },
-            });
-            submitBtn.disabled = false;
-            deleteBtn.disabled = false;
-            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
+            spinner.classList.add('hidden');
             return;
           }
 
-          try {
-            // Step 1: Check if any field has changed
-            const hasChanges = (
-              initialValues.title !== document.getElementById('title').value ||
-              initialValues.subtitle !== document.getElementById('subtitle').value ||
-              initialValues.description !== document.getElementById('description').value ||
-              initialValues.location !== document.getElementById('location').value ||
-              initialValues.serviceMiles !== document.getElementById('serviceMiles').value ||
-              initialValues.pricing !== document.getElementById('pricing').value ||
-              initialValues.mainCategory !== document.getElementById('mainCategory').value ||
-              initialValues.subCategory !== document.getElementById('subCategory').value ||
-              initialValues.quantity !== document.getElementById('quantity').value ||
-              haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
-              // Check if any image files have been updated
-              document.getElementById('imageInput').files.length > 0 ||
-              document.getElementById('imageInput2').files.length > 0 ||
-              document.getElementById('imageInput3').files.length > 0
-            );
+          const fieldMappings = {
+            title: { inputId: 'title', target: 'products' },
+            location: { inputId: 'location', target: 'products' },
+            price: { inputId: 'pricing', target: 'products' },
+            num_items: { inputId: 'quantity', target: 'details' },
+            mainCategory: { inputId: 'mainCategory', target: 'details' },
+            subCategory: { inputId: 'subCategory', target: 'details' },
+            subtitle: { inputId: 'subtitle', target: 'details' },
+            description: { inputId: 'description', target: 'details' },
+            serviceMiles: { inputId: 'serviceMiles', target: 'details' }
+          };
 
-            if (!hasChanges) {
-              Swal.fire({
-                title: 'No Changes',
-                text: 'No changes were made to the listing.',
-                icon: 'info',
-                confirmButtonText: 'Ok',
-                customClass: {
-                  confirmButton: 'bg-primary text-white',
-                },
-              });
-              submitBtn.disabled = false;
-              deleteBtn.disabled = false;
-              deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
-              return; // Do not proceed with the upload if no changes were made
+          const numericFields = ['price', 'serviceMiles', 'num_items'];
+          const productUpdates = {};
+          const detailUpdates = {};
+
+          for (const [initialKey, config] of Object.entries(fieldMappings)) {
+            const { inputId, target } = config;
+            let newValue = document.getElementById(inputId).value;
+            let originalValue = initialValues[initialKey];
+
+            if (numericFields.includes(initialKey)) {
+              newValue = newValue.trim() === '' ? 0 : parseFloat(newValue);
+              originalValue = parseFloat(originalValue);
             }
-           // Upload to product page first.
-           const fieldMappings = {
-            //product 
-  title:        { inputId: 'title', target: 'products' },
-  location:     { inputId: 'location', target: 'products' },
-  price:      { inputId: 'pricing', target: 'products'},
-//details
-num_items: { inputId: 'quantity', target: 'details'},
-mainCategory: { inputId: 'mainCategory', target: 'details'},
-subCategory:  { inputId: 'subCategory',  target: 'details'},
-  subtitle:     { inputId: 'subtitle', target: 'details' },
-  description:  { inputId: 'description', target: 'details' },
-  serviceMiles: { inputId: 'serviceMiles', target: 'details' },
-};
 
-const numericFields = ['price', 'serviceMiles', 'num_items'];
-const productUpdates = {};
-const detailUpdates = {};
-
-for (const [initialKey, config] of Object.entries(fieldMappings)) {
-  const { inputId, target } = config;
-  let newValue = document.getElementById(inputId).value;
-  let originalValue = initialValues[initialKey];
-
-  if (numericFields.includes(initialKey)) {
-    newValue = newValue.trim() === '' ? 0 : parseFloat(newValue); // Use parseFloat for numeric conversion
-
-    // Ensure the original value is also treated as a number
-    originalValue = parseFloat(originalValue);
-    console.log(`New Value: ${newValue}, Original Value: ${originalValue}`);
-  }
-
-  if (newValue !== originalValue) {
-    if (target === 'products') {
-      productUpdates[initialKey] = newValue;
-    } else if (target === 'details') {
-      detailUpdates[initialKey] = newValue;
-    }
-  }
-}
-
-// Always add a timestamp to both if anything changes
-const timestamp = Timestamp.now();
-if (Object.keys(productUpdates).length > 0) productUpdates.timestamp = timestamp;
-if (Object.keys(detailUpdates).length > 0) detailUpdates.timestamp = timestamp;
-
-// Firestore updates
-const productRef = doc(db, "products", productId);
-const detailsRef = doc(db, "details", productData.details_id);
-
-if (selectedBlockDates && selectedBlockDates.length > 0) {
-  detailUpdates.block_dates = selectedBlockDates;
-}
-
-if (Object.keys(productUpdates).length > 0) {
-  await updateDoc(productRef, productUpdates);
-  console.log("Updated product fields:", productUpdates);
-}
-if (Object.keys(detailUpdates).length > 0) {
-  await updateDoc(detailsRef, detailUpdates);
-  console.log("Updated detail fields:", detailUpdates);
-}
-
-const imageUploadPromises = [];
-
-const mainImageFile = document.getElementById('imageInput').files[0];
-const image2File = document.getElementById('imageInput2').files[0];
-const image3File = document.getElementById('imageInput3').files[0];
-
-const getFileExtension = (file) => file.name.split('.').pop();
-
-const uniqueFileName = (label, file) => {
-  const ext = getFileExtension(file);
-  const timestamp = Date.now();
-  return `${label}_${timestamp}.${ext}`;
-};
-
-const uploadImage = async (imageFile, storagePath, fileName, index) => {
-  const fullPath = `${storagePath}/${fileName}`;
-  const storageRef = ref(storage, fullPath);
-  const uploadTask = uploadBytesResumable(storageRef, imageFile);
-
-  return new Promise((resolve, reject) => {
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload ${index} is ${progress.toFixed(2)}% done`);
-      },
-      (error) => {
-        console.error(`Error uploading image ${index}:`, error);
-        reject(error);
-      },
-      async () => {
-        const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log(`Image ${index} uploaded successfully:`, imageUrl);
-        resolve(imageUrl);
-      }
-    );
-  });
-};
-
-if (mainImageFile) {
-  const fileName = uniqueFileName('main', mainImageFile);
-  const mainImageUpload = uploadImage(mainImageFile, `vendors/${currentUserId}/products/${productId}`, fileName, 1)
-    .then(url => updateDoc(doc(db, "products", productId), { image_id: url }));
-  imageUploadPromises.push(mainImageUpload);
-}
-
-if (image2File) {
-  const fileName = uniqueFileName('second', image2File);
-  const image2Upload = uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName, 2)
-    .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
-      image_url: url,
-      timestamp: Timestamp.now()
-    }));
-  imageUploadPromises.push(image2Upload);
-}
-
-if (image3File) {
-  const fileName = uniqueFileName('third', image3File);
-  const image3Upload = uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName, 3)
-    .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
-      image_url: url,
-      timestamp: Timestamp.now()
-    }));
-  imageUploadPromises.push(image3Upload);
-}
-
-            // Wait for all image uploads to complete
-            await Promise.all(imageUploadPromises);
-
-            Swal.fire({
-              title: 'Success!',
-              text: 'Your listing was uploaded successfully.',
-              icon: 'success',
-              confirmButtonText: 'OK',
-              iconColor: '#3085d6',
-              customClass: {
-                confirmButton: 'custom-ok-button'  // Apply custom class to the "OK" button
+            if (newValue !== originalValue) {
+              if (target === 'products') {
+                productUpdates[initialKey] = newValue;
+              } else if (target === 'details') {
+                detailUpdates[initialKey] = newValue;
               }
-            }).then(() => {
-              submitBtn.disabled = false;
-              deleteBtn.disabled = false;
-              deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
-              window.location.href = '/listings.html'; // Redirect after success
-            });
-
-            // Reset the form fields
-            document.getElementById('listingForm').reset();
-          } catch (error) {
-            console.error("Error writing document: ", error);
-            Swal.fire({
-              title: 'Error',
-              text: 'There was an issue uploading your listing. Please reach out to us support@ryntit.com',
-              icon: 'error',
-              confirmButtonText: 'OK',
-              customClass: {
-                confirmButton: 'custom-ok-button'  // Apply custom class to the "OK" button
-              }
-            });
-            submitBtn.disabled = false;
-            deleteBtn.disabled = false;
-            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    spinner.classList.add('hidden');
+            }
           }
+
+          const timestamp = Timestamp.now();
+          if (Object.keys(productUpdates).length > 0) productUpdates.timestamp = timestamp;
+          if (Object.keys(detailUpdates).length > 0) detailUpdates.timestamp = timestamp;
+
+          const productRef = doc(db, "products", productId);
+          const detailsRef = doc(db, "details", productData.details_id);
+
+          if (selectedBlockDates && selectedBlockDates.length > 0) {
+            detailUpdates.block_dates = selectedBlockDates;
+          }
+
+          if (Object.keys(productUpdates).length > 0) {
+            await updateDoc(productRef, productUpdates);
+          }
+          if (Object.keys(detailUpdates).length > 0) {
+            await updateDoc(detailsRef, detailUpdates);
+          }
+
+          const imageUploadPromises = [];
+          const mainImageFile = document.getElementById('imageInput').files[0];
+          const image2File = document.getElementById('imageInput2').files[0];
+          const image3File = document.getElementById('imageInput3').files[0];
+
+          const getFileExtension = (file) => file.name.split('.').pop();
+          const uniqueFileName = (label, file) => `${label}_${Date.now()}.${getFileExtension(file)}`;
+
+          const uploadImage = async (imageFile, storagePath, fileName) => {
+            const storageRef = ref(storage, `${storagePath}/${fileName}`);
+            const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+            return new Promise((resolve, reject) => {
+              uploadTask.on('state_changed', null,
+                (error) => reject(error),
+                async () => {
+                  const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                  resolve(imageUrl);
+                }
+              );
+            });
+          };
+
+          if (mainImageFile) {
+            const fileName = uniqueFileName('main', mainImageFile);
+            imageUploadPromises.push(
+              uploadImage(mainImageFile, `vendors/${currentUserId}/products/${productId}`, fileName)
+                .then(url => updateDoc(doc(db, "products", productId), { image_url: url }))
+            );
+          }
+
+          if (image2File) {
+            const fileName = uniqueFileName('second', image2File);
+            imageUploadPromises.push(
+              uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName)
+                .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
+                  image_url: url,
+                  timestamp: Timestamp.now()
+                }))
+            );
+          }
+
+          if (image3File) {
+            const fileName = uniqueFileName('third', image3File);
+            imageUploadPromises.push(
+              uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName)
+                .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
+                  image_url: url,
+                  timestamp: Timestamp.now()
+                }))
+            );
+          }
+
+          await Promise.all(imageUploadPromises);
+
+          Swal.fire({
+            title: 'Success!',
+            text: 'Your listing has been updated.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            customClass: { confirmButton: 'custom-ok-button' }
+          }).then(() => {
+            window.location.href = 'listings.html';
+          });
+
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Something went wrong. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            customClass: { confirmButton: 'custom-ok-button' }
+          });
+          submitBtn.disabled = false;
+          deleteBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          spinner.classList.add('hidden');
         }
       });
     });
   </script>
+
+  <!-- Category Selection Logic -->
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
       const subCategories = {
         inflatable: ['Extreme', 'Water Slides', 'Games', 'Course', 'Bounce'],
         furniture: ['Chairs', 'Tables', 'Tent', 'Heating'],
@@ -954,105 +911,25 @@ if (image3File) {
       const mainCategorySelect = document.getElementById('mainCategory');
       const subCategorySelect = document.getElementById('subCategory');
 
-      // Listen for changes in the main category dropdown
-      mainCategorySelect.addEventListener('change', function () {
+      mainCategorySelect.addEventListener('change', function() {
         const selectedMainCategory = mainCategorySelect.value;
+        subCategorySelect.innerHTML = '<option value="">Select a sub-category</option>';
 
-        // Clear current subcategory options
-        subCategorySelect.innerHTML = '<option value="" class="text-body">Select a Sub-Category</option>';
-
-        // If a valid category is selected, populate the subcategories
         if (subCategories[selectedMainCategory]) {
-          subCategories[selectedMainCategory].forEach(function (subCategory) {
+          subCategories[selectedMainCategory].forEach(function(subCategory) {
             const option = document.createElement('option');
-            option.value = subCategory.toLowerCase();  // Store lowercase value for consistency
+            option.value = subCategory.toLowerCase();
             option.textContent = subCategory;
             subCategorySelect.appendChild(option);
           });
-
-          // Enable the subcategory dropdown
           subCategorySelect.disabled = false;
         } else {
-          // If no valid category is selected, disable the subcategory dropdown
           subCategorySelect.disabled = true;
         }
       });
-
-      // Define your custom function that gets called when the main category changes
-      function yourFunction(mainCategory) {
-        console.log("Main category changed to: " + mainCategory);
-        // Add any custom logic you want to run based on the main category
-      }
     });
-
-
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    /* Define the custom button style */
-    .custom-ok-button {
-      background-color: #292929;
-      /* Green background */
-      color: white;
-      /* Text color */
-      border: none;
-      /* Remove border */
-      padding: 10px 20px;
-      /* Add padding */
-      font-size: 16px;
-      /* Adjust font size */
-      border-radius: 5px;
-      /* Round the corners */
-    }
-
-    /* Hover effect for the button */
-    .custom-ok-button:hover {
-      background-color: #000000;
-      /* Darker green on hover */
-    }
-
-    .custom-delete-button {
-      background-color: #ff0000;
-      /* Green background */
-      color: white;
-      /* Text color */
-      border: none;
-      /* Remove border */
-      padding: 10px 20px;
-      /* Add padding */
-      font-size: 16px;
-      /* Adjust font size */
-      border-radius: 5px;
-      /* Round the corners */
-    }
-
-    /* Hover effect for the button */
-    .custom-delete-button:hover {
-      background-color: #a40000;
-      /* Darker green on hover */
-    }
-    .image-preview-box {
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    .image-preview-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      /* Ensures image maintains aspect ratio and covers the box */
-    }
-
-    /* Make sure the image preview box is square */
-    .image-preview-box span {
-      display: block;
-      text-align: center;
-      line-height: 2.5rem;
-      color: #aaa;
-      font-size: 1rem;
-    }
-  </style>
 </body>
 </html>

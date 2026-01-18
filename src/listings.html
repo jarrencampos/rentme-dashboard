@@ -5,13 +5,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Listings</title>
+    <style>
+      /* Airbnb-style card animations and effects */
+      .listing-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .listing-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+      .dark .listing-card:hover {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      }
+      .listing-image {
+        transition: transform 0.3s ease;
+      }
+      .listing-card:hover .listing-image {
+        transform: scale(1.05);
+      }
+      .status-badge {
+        backdrop-filter: blur(8px);
+      }
+      /* Loading skeleton animation */
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+        background-size: 200% 100%;
+      }
+    </style>
     <script type="module">
-      // Import Firebase modules
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-      // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
         authDomain: "ryntit-b503c.firebaseapp.com",
@@ -23,204 +57,143 @@
         measurementId: "G-PDBZNLKYKC"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // Listen for authentication state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // If the user is signed in, run your function
-    // Run the function you need after the user is signed in
-    generateMainSection();
-  } else {
-    // If no user is signed in, log a message
-    console.log("No user signed in.");
-  }
-});
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          loadVendorProducts(user.uid);
+        } else {
+          console.log("No user signed in.");
+        }
+      });
 
-      // Function to fetch all listing IDs
-      async function getListingIds() {
-        const listingsCollection = collection(db, "vendors", auth.currentUser.uid, "products"); 
-        const listingsSnapshot = await getDocs(listingsCollection);
-        return listingsSnapshot.docs.map(doc => doc.id);
+      async function getVendorProducts(vendorId) {
+        const productsRef = collection(db, "products");
+        const q = query(productsRef, where("vendor_id", "==", vendorId));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       }
 
-      // Function to fetch product details for a given listing ID
-      async function getListingDetails(listingId) {
-        const listingDocRef = doc(db, "products", listingId);
-        const listingDocSnapshot = await getDoc(listingDocRef);
-        return listingDocSnapshot.exists() ? listingDocSnapshot.data() : null;
-      }
-
-      // Function to generate the entire <main> section dynamically
-      async function generateMainSection() {
+      async function loadVendorProducts(vendorId) {
         try {
-          const mainElement = document.querySelector("main"); // Grab the main element directly
+          const gridContainer = document.getElementById("listings-grid");
+          const emptyState = document.getElementById("empty-state");
+          const loadingState = document.getElementById("loading-state");
+          const statsContainer = document.getElementById("stats-container");
 
-          const containerDiv = document.createElement("div");
-          containerDiv.classList.add("flex", "flex-col", "gap-10");
+          const products = await getVendorProducts(vendorId);
 
-          const productListCard = document.createElement("div");
-          productListCard.classList.add("rounded-sm", "border", "border-stroke", "bg-white", "shadow-default", "dark:border-strokedark", "dark:bg-boxdark");
+          // Hide loading state
+          loadingState.classList.add("hidden");
 
-          const headerDiv = document.createElement("div");
-          headerDiv.classList.add("px-4", "py-6", "md:px-6", "xl:px-7.5", "flex", "justify-between", "items-center");
+          if (products.length === 0) {
+            emptyState.classList.remove("hidden");
+            statsContainer.classList.add("hidden");
+          } else {
+            // Update stats
+            const totalListings = products.length;
+            const totalBookings = products.reduce((sum, p) => sum + (p.bookings || 0), 0);
+            const totalEarned = products.reduce((sum, p) => sum + (p.earned || 0), 0);
 
-          const headerTitle = document.createElement("h4");
-          headerTitle.classList.add("text-xl", "font-bold", "text-black", "dark:text-white");
-          headerTitle.textContent = "Listings";
+            document.getElementById("stat-listings").textContent = totalListings;
+            document.getElementById("stat-bookings").textContent = totalBookings;
+            document.getElementById("stat-earned").textContent = `$${totalEarned.toLocaleString()}`;
 
-          const addButton = document.createElement("button");
-          addButton.onclick = () => window.location.href = 'add-product.html';
-          addButton.classList.add("flex", "items-center", "justify-center", "w-8", "h-8", "bg-primary", "rounded-full", "text-white", "hover:bg-primary");
-
-          const addIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          addIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-          addIcon.setAttribute("fill", "none");
-          addIcon.setAttribute("viewBox", "0 0 24 24");
-          addIcon.setAttribute("stroke", "currentColor");
-          addIcon.setAttribute("class", "w-5 h-5");
-
-          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          path.setAttribute("stroke-linecap", "round");
-          path.setAttribute("stroke-linejoin", "round");
-          path.setAttribute("stroke-width", "2");
-          path.setAttribute("d", "M12 4v16m8-8H4");
-
-          addIcon.appendChild(path);
-          addButton.appendChild(addIcon);
-
-          headerDiv.appendChild(headerTitle);
-          headerDiv.appendChild(addButton);
-          productListCard.appendChild(headerDiv);
-
-          const tableHeaders = document.createElement("div");
-          tableHeaders.classList.add("grid", "grid-cols-5", "border-t", "border-stroke", "px-4", "py-4.5", "dark:border-strokedark", "sm:grid-cols-8", "md:px-6", "2xl:px-7.5");
-
-          const titleColumnHeader = document.createElement("div");
-          titleColumnHeader.classList.add("col-span-5", "flex", "items-center", "sm:col-span-5");
-          const titleText = document.createElement("p");
-          titleText.classList.add("font-medium");
-          titleText.textContent = "Title";
-          titleColumnHeader.appendChild(titleText);
-
-          const priceColumnHeader = document.createElement("div");
-          priceColumnHeader.classList.add("col-span-1", "flex", "items-center");
-          const priceText = document.createElement("p");
-          priceText.classList.add("font-medium");
-          priceText.textContent = "Price";
-          priceColumnHeader.appendChild(priceText);
-
-          const bookingsColumnHeader = document.createElement("div");
-          bookingsColumnHeader.classList.add("col-span-1", "flex", "items-center");
-          const bookingsText = document.createElement("p");
-          bookingsText.classList.add("font-medium");
-          bookingsText.textContent = "Booked";
-          bookingsColumnHeader.appendChild(bookingsText);
-
-          const earnedColumnHeader = document.createElement("div");
-          earnedColumnHeader.classList.add("col-span-1", "flex", "items-center");
-          const earnedText = document.createElement("p");
-          earnedText.classList.add("font-medium");
-          earnedText.textContent = "Earned";
-          earnedColumnHeader.appendChild(earnedText);
-
-          tableHeaders.appendChild(titleColumnHeader);
-          tableHeaders.appendChild(priceColumnHeader);
-          tableHeaders.appendChild(bookingsColumnHeader);
-          tableHeaders.appendChild(earnedColumnHeader);
-
-          productListCard.appendChild(tableHeaders);
-
-          const listingIds = await getListingIds(); // Fetch all listing IDs
-          const listingDetailsPromises = listingIds.map(listingId => getListingDetails(listingId)); 
-          const listingDetails = await Promise.all(listingDetailsPromises); 
-
-          listingDetails.forEach(product => {
-            if (product) {
-              const productRow = createProductRow(product);
-              productListCard.appendChild(productRow);
-            }
-          });
-
-          containerDiv.appendChild(productListCard);
-          mainElement.appendChild(containerDiv); // Append directly to the main content area
+            // Render product cards
+            gridContainer.innerHTML = products.map(product => createProductCard(product)).join('');
+            gridContainer.classList.remove("hidden");
+          }
         } catch (error) {
-          console.error("Error generating the main section:", error);
+          console.error("Error loading products:", error);
         }
       }
 
-      // Helper function to create a product row
-      function createProductRow(product) {
-    // Create the product row button
-    const productRowButton = document.createElement("button");
-    productRowButton.classList.add(
-        "grid", "grid-cols-5", "border-t", "border-stroke", "px-4", "py-4.5",
-        "dark:border-strokedark", "sm:grid-cols-8", "md:px-6", "2xl:px-7.5",
-        "w-full", "text-left", "hover:bg-gray-100", "dark:hover:bg-gray-800", "transition-all", "focus:outline-none"
-    );
+      function createProductCard(product) {
+        const rating = product.rating || '0';
+        const numReviews = product.num_reviews || 0;
+        const location = product.location || 'Location not set';
+        const bookings = product.bookings || 0;
+        const imageUrl = product.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
 
-    // Add onclick to the entire button (navigate to product details page)
-    productRowButton.onclick = () => {
-        window.location.href = `/product.html?id=${product.id}`;
-    };
+        // Generate star rating HTML
+        const fullStars = Math.floor(parseFloat(rating));
+        const hasHalfStar = parseFloat(rating) % 1 >= 0.5;
+        let starsHtml = '';
+        for (let i = 0; i < 5; i++) {
+          if (i < fullStars) {
+            starsHtml += '<svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+          } else if (i === fullStars && hasHalfStar) {
+            starsHtml += '<svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><defs><linearGradient id="half"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="#D1D5DB"/></linearGradient></defs><path fill="url(#half)" d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+          } else {
+            starsHtml += '<svg class="w-4 h-4 text-gray-300 dark:text-gray-600 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+          }
+        }
 
-    // Title Column
-    const titleColumn = document.createElement("div");
-    titleColumn.classList.add("col-span-5", "flex", "items-center");
-    const titleLink = document.createElement("a");
-    titleLink.classList.add("flex", "flex-col", "gap-4", "sm:flex-row", "sm:items-center");
+        return `
+          <a href="product.html?id=${product.id}" class="listing-card block bg-white dark:bg-boxdark rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-strokedark cursor-pointer">
+            <!-- Image Container -->
+            <div class="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <img
+                src="${imageUrl}"
+                alt="${product.title || 'Product'}"
+                class="listing-image w-full h-full object-cover"
+                onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
+              />
+              <!-- Status Badge -->
+              <div class="absolute top-3 left-3">
+                <span class="status-badge inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-black/70 text-gray-800 dark:text-white">
+                  ${bookings > 0 ? `<span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>Active` : `<span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>No bookings`}
+                </span>
+              </div>
+              <!-- Quick Stats Overlay -->
+              <div class="absolute bottom-3 right-3 flex gap-2">
+                <span class="status-badge inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-black/60 text-white">
+                  ${bookings} booked
+                </span>
+              </div>
+            </div>
 
-    const imageDiv = document.createElement("div");
-    imageDiv.classList.add("h-12.5", "w-15", "rounded-md");
-    const img = document.createElement("img");
-    img.src = product.image_url;
-    img.alt = product.title;
-    imageDiv.appendChild(img);
+            <!-- Content -->
+            <div class="p-4">
+              <!-- Location -->
+              <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="truncate">${location}</span>
+              </div>
 
-    const titleText = document.createElement("p");
-    titleText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
-    titleText.textContent = product.title;
+              <!-- Title -->
+              <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2 line-clamp-1">
+                ${product.title || 'Untitled Listing'}
+              </h3>
 
-    titleLink.appendChild(imageDiv);
-    titleLink.appendChild(titleText);
-    titleColumn.appendChild(titleLink);
-    productRowButton.appendChild(titleColumn);
+              <!-- Rating -->
+              <div class="flex items-center gap-1 mb-3">
+                <div class="flex items-center">
+                  ${starsHtml}
+                </div>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">${rating}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">(${numReviews} reviews)</span>
+              </div>
 
-    // Price Column
-    const priceColumn = document.createElement("div");
-    priceColumn.classList.add("col-span-1", "flex", "items-center");
-    const priceText = document.createElement("p");
-    priceText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
-    priceText.textContent = `$${product.price}`;
-    priceColumn.appendChild(priceText);
-    productRowButton.appendChild(priceColumn);
-
-    // Bookings Column
-    const bookingsColumn = document.createElement("div");
-    bookingsColumn.classList.add("col-span-1", "flex", "items-center");
-    const bookingsText = document.createElement("p");
-    bookingsText.classList.add("text-sm", "font-medium", "text-black", "dark:text-white");
-    bookingsText.textContent = product.bookings || '0';
-    bookingsColumn.appendChild(bookingsText);
-    productRowButton.appendChild(bookingsColumn);
-
-    // Earned Column
-    const earnedColumn = document.createElement("div");
-    earnedColumn.classList.add("col-span-1", "flex", "items-center");
-    const earnedText = document.createElement("p");
-    earnedText.classList.add("text-sm", "font-medium", "text-meta-3");
-    earnedText.textContent = `$${product.earned || '0'}`;
-    earnedColumn.appendChild(earnedText);
-    productRowButton.appendChild(earnedColumn);
-
-    return productRowButton;
-}
-
-      document.addEventListener("DOMContentLoaded", generateMainSection);
-
+              <!-- Price and Type -->
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div>
+                  <span class="text-xl font-bold text-gray-900 dark:text-white">$${product.price || 0}</span>
+                  <span class="text-gray-500 dark:text-gray-400 text-sm"> / day</span>
+                </div>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20">
+                  ${product.type || 'Rental'}
+                </span>
+              </div>
+            </div>
+          </a>
+        `;
+      }
     </script>
   </head>
 
@@ -248,7 +221,147 @@ onAuthStateChanged(auth, (user) => {
         <!-- Header End -->
 
         <!-- Main Content Section Start -->
-        <main class="mx-auto w-[90%] max-w-[1600px] p-4 md:p-6 2xl:p-10"></main>
+        <main class="mx-auto w-full max-w-[1600px] p-4 md:p-6 2xl:p-10">
+
+          <!-- Page Header -->
+          <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  My Listings
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                  Manage and track all your rental products
+                </p>
+              </div>
+              <a
+                href="add-product.html"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add New Listing
+              </a>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div id="stats-container" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Listings</p>
+                  <p id="stat-listings" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-500/10 dark:bg-green-500/20">
+                  <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Bookings</p>
+                  <p id="stat-bookings" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-yellow-500/10 dark:bg-yellow-500/20">
+                  <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Earned</p>
+                  <p id="stat-earned" class="text-2xl font-bold text-gray-900 dark:text-white">$0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-state" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Skeleton Cards -->
+            <div class="bg-white dark:bg-boxdark rounded-2xl overflow-hidden border border-gray-100 dark:border-strokedark">
+              <div class="skeleton aspect-[4/3]"></div>
+              <div class="p-4 space-y-3">
+                <div class="skeleton h-4 w-24 rounded"></div>
+                <div class="skeleton h-6 w-full rounded"></div>
+                <div class="skeleton h-4 w-32 rounded"></div>
+                <div class="skeleton h-8 w-20 rounded mt-4"></div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl overflow-hidden border border-gray-100 dark:border-strokedark hidden sm:block">
+              <div class="skeleton aspect-[4/3]"></div>
+              <div class="p-4 space-y-3">
+                <div class="skeleton h-4 w-24 rounded"></div>
+                <div class="skeleton h-6 w-full rounded"></div>
+                <div class="skeleton h-4 w-32 rounded"></div>
+                <div class="skeleton h-8 w-20 rounded mt-4"></div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl overflow-hidden border border-gray-100 dark:border-strokedark hidden lg:block">
+              <div class="skeleton aspect-[4/3]"></div>
+              <div class="p-4 space-y-3">
+                <div class="skeleton h-4 w-24 rounded"></div>
+                <div class="skeleton h-6 w-full rounded"></div>
+                <div class="skeleton h-4 w-32 rounded"></div>
+                <div class="skeleton h-8 w-20 rounded mt-4"></div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl overflow-hidden border border-gray-100 dark:border-strokedark hidden xl:block">
+              <div class="skeleton aspect-[4/3]"></div>
+              <div class="p-4 space-y-3">
+                <div class="skeleton h-4 w-24 rounded"></div>
+                <div class="skeleton h-6 w-full rounded"></div>
+                <div class="skeleton h-4 w-32 rounded"></div>
+                <div class="skeleton h-8 w-20 rounded mt-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Listings Grid -->
+          <div id="listings-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards will be inserted here by JavaScript -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="hidden">
+            <div class="flex flex-col items-center justify-center py-16 px-4">
+              <div class="w-24 h-24 mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No listings yet
+              </h3>
+              <p class="text-gray-500 dark:text-gray-400 text-center max-w-sm mb-6">
+                Start earning by adding your first rental product. It only takes a few minutes to get started.
+              </p>
+              <a
+                href="add-product.html"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-xl transition-all"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create Your First Listing
+              </a>
+            </div>
+          </div>
+
+        </main>
         <!-- Main Content Section End -->
 
       </div>
