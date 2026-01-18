@@ -31,8 +31,8 @@
                             <div class="hidden w-full xl:block xl:w-1/2">
                                 <div class="px-26 py-17.5 text-center">
                                     <a class="mb-5.5 inline-block">
-                                        <img class="hidden dark:block" src="./images/logo/logo-icon.png" alt="Logo" />
-                                        <img class="dark:hidden" src="./images/logo/logo-icon-dark.png" alt="Logo" />
+                                        <img class="hidden dark:block" src="./images/logo/rentme-blue.png" alt="Logo" />
+                                        <img class="dark:hidden" src="./images/logo/rentme-blue.png" alt="Logo" />
                                     </a>
                                     <p class="font-medium 2xl:px-20">Sign in to your vendor account to manage your inventory!</p>
                                     <span class="mt-15 inline-block">
@@ -100,117 +100,8 @@
         <!-- ===== Content Area End ===== -->
     </div>
     <!-- ===== Page Wrapper End ===== -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword , sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
-            authDomain: "ryntit-b503c.firebaseapp.com",
-            databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
-            projectId: "ryntit-b503c",
-            storageBucket: "ryntit-b503c.appspot.com",
-            messagingSenderId: "908115066071",
-            appId: "1:908115066071:web:1de252c17cce4346be0492",
-            measurementId: "G-PDBZNLKYKC"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('forgotPasswordButton').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent form submission / page reload
-
-    const email = prompt('Please enter your email address:');
-    const actionCodeSettings = {
-    // This URL will be the landing page after the password is reset
-    url: 'https://dashboard.ryntit.com/signin.html',
-    handleCodeInApp: false // Keep this false for password reset redirects
-};
-
-    if (email) {
-        sendPasswordResetEmail(auth, email, actionCodeSettings)
-            .then(() => {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Password reset email sent! Check your inbox.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    iconColor: '#3085d6',
-                    customClass: {
-                        confirmButton: 'custom-ok-button'
-                    }
-                });
-            })
-            .catch((error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: error.message,
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    iconColor: '#d33',
-                    customClass: {
-                        confirmButton: 'custom-ok-button'
-                    }
-                });
-            });
-    } else {
-        Swal.fire({
-            title: 'Oops!',
-            text: 'Email address is required.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            iconColor: '#f0ad4e',
-            customClass: {
-                confirmButton: 'custom-ok-button'
-            }
-        });
-    }
-});
-
-            // Sign In Form Submission
-            document.getElementById('loginButton').addEventListener('click', function(event) {
-                const loginButton = this;
-                const loadingIndicator = document.getElementById('loadingIndicator');
-                loadingIndicator.style.display = 'block'; // Show loading indicator
-                loginButton.disabled = true; // Disable button to prevent multiple clicks
-
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('signInPassword').value;
-
-                signInWithEmailAndPassword(auth, email, password)
-                    .then((userCredential) => {
-                        document.getElementById('message').textContent = 'Login successful!';
-                        window.location.href = "index.html"; // Redirect to the main site
-                    })
-                    .catch((error) => {
-                        const errorMessage = error.message;
-                        document.getElementById('message').textContent = 'Error: ' + errorMessage;
-                    })
-                    .finally(() => {
-                        loadingIndicator.style.display = 'none'; // Hide loading indicator
-                        loginButton.disabled = false; // Re-enable the button
-                    });
-            });
-
-            // Check authentication state
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    console.log("User is signed in:", user.uid);
-                    window.location.href = "index.html"; // Redirect to the main site
-                } else {
-                    console.log("No user is signed in.");
-                }
-            });
-        });
-    </script>
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 for password reset notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <style>
         /* Define the custom button style */
         .custom-ok-button {

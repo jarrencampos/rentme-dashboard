@@ -48,12 +48,12 @@
                     <a class="mb-5.5 inline-block" href="index.html">
                       <img
                         class="hidden dark:block"
-                        src="./images/logo/logo.png"
+                        src="./images/logo/rentme-blue.png"
                         alt="Logo"
                       />
                       <img
                         class="dark:hidden"
-                        src="./images/logo/logo-icon-dark.png"
+                        src="./images/logo/rentme-blue.png"
                         alt="Logo"
                       />
                     </a>
@@ -307,98 +307,5 @@
       <!-- ===== Content Area End ===== -->
     </div>
     <!-- ===== Page Wrapper End ===== -->
-    <script type="module">
-      // Import Firebase modules
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-      import { getFirestore, doc, setDoc, collection, query, where, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-    
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-          apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
-          authDomain: "ryntit-b503c.firebaseapp.com",
-          databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
-          projectId: "ryntit-b503c",
-          storageBucket: "ryntit-b503c.appspot.com",
-          messagingSenderId: "908115066071",
-          appId: "1:908115066071:web:1de252c17cce4346be0492",
-          measurementId: "G-PDBZNLKYKC"
-      };
-    
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-    
-      document.addEventListener('DOMContentLoaded', function() {
-          const createAccountForm = document.getElementById('createAccountForm');
-          
-          if (createAccountForm) {
-              createAccountForm.addEventListener('submit', async (event) => {
-                  event.preventDefault();
-    
-                  const email = document.getElementById('email').value;
-                  const password = document.getElementById('password').value;
-                  const name = document.getElementById('name').value;
-                  const businessName = document.getElementById('businessName').value;
-                  const phone = document.getElementById('phone').value;
-    
-                  try {
-                      // Create user with email and password
-                      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                      const user = userCredential.user;
-    
-                      // Save additional user information in Firestore using uid as document ID
-                      const userDocRef = doc(db, 'vendors', user.uid); // Use user.uid for the document ID
-    
-                      await setDoc(userDocRef, {
-                          uid: user.uid,
-                          name: name,
-                          phone: phone,
-                          email: email,
-                          businessName: businessName,
-                          image: getRandomLink(),
-                          ref: getReferralCookie(),
-                          pending_deposits: 0,
-                          total_bookings: 0,
-                          total_sales: 0,
-                      });
-                      
-                      window.location.href = 'index.html'; // Redirect to home page
-                      createAccountForm.reset(); // Reset the form after successful registration
-                      // Confirmation alert
-                  } catch (error) {
-                      console.error('Error signing up: ', error);
-                      alert(error.message);
-                  }
-              });
-          } else {
-              console.error('Form element not found');
-          }
-          function getRandomLink() {
-            const links = [
-                'https://firebasestorage.googleapis.com/v0/b/ryntit-b503c.appspot.com/o/defaults%2FdefaultProfileIcon1.png?alt=media&token=2b3f84aa-5e9d-4cae-b5ec-8374d39a396b',
-                'https://firebasestorage.googleapis.com/v0/b/ryntit-b503c.appspot.com/o/defaults%2FdefaultProfileIcon2.png?alt=media&token=254bacd2-b243-4c94-aeaa-024228449772',
-                'https://firebasestorage.googleapis.com/v0/b/ryntit-b503c.appspot.com/o/defaults%2FdefaultProfileIcon3.png?alt=media&token=bfdd993a-8cac-4e27-95e5-d7afb6d66dbb',
-                'https://firebasestorage.googleapis.com/v0/b/ryntit-b503c.appspot.com/o/defaults%2FdefaultProfileIcon.png?alt=media&token=8d2318cf-b7da-4ac7-a11a-88736a044414'
-            ];
-
-            const randomIndex = Math.floor(Math.random() * links.length);
-            return links[randomIndex];
-        }
-      });
-  </script>
-  <script>
-    //Cookie adder
-  const urlParams = new URLSearchParams(window.location.search);
-  const ref = urlParams.get('ref');
-  if (ref) {
-    document.cookie = `referral=${ref}; path=/; max-age=2592000`; // 30 days
-  }
-  function getReferralCookie() {
-  const match = document.cookie.match(/(?:^|;) ?referral=([^;]*)/);
-  return match ? match[1] : null;
-}
-  </script>
   </body>
 </html>

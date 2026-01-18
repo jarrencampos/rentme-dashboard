@@ -1,53 +1,23 @@
-import ApexCharts from "apexcharts";
+// js/components/chart-03.js - Device Breakdown Donut Chart
+import { renderChart, chartColors } from "./chart-factory";
 
-// ===== chartThree
 const chart03 = () => {
-  const chartThreeOptions = {
+  renderChart("#chartThree", {
     series: [65, 34, 45, 12],
-    chart: {
-      type: "donut",
-      width: 380,
-    },
-    colors: ["#7AD9FF", "#6577F3", "#8FD0EF", "#0FADCF"],
+    chart: { type: "donut", width: 380 },
+    colors: [chartColors.primary, chartColors.tertiary, chartColors.quaternary, chartColors.quinary],
     labels: ["Desktop", "Tablet", "Mobile", "Unknown"],
-    legend: {
-      show: false,
-      position: "bottom",
-    },
-
+    legend: { show: false, position: "bottom" },
     plotOptions: {
       pie: {
-        donut: {
-          size: "65%",
-          background: "transparent",
-        },
+        donut: { size: "65%", background: "transparent" },
       },
     },
-
-    dataLabels: {
-      enabled: false,
-    },
+    dataLabels: { enabled: false },
     responsive: [
-      {
-        breakpoint: 640,
-        options: {
-          chart: {
-            width: 200,
-          },
-        },
-      },
+      { breakpoint: 640, options: { chart: { width: 200 } } },
     ],
-  };
-
-  const chartSelector = document.querySelectorAll("#chartThree");
-
-  if (chartSelector.length) {
-    const chartThree = new ApexCharts(
-      document.querySelector("#chartThree"),
-      chartThreeOptions
-    );
-    chartThree.render();
-  }
+  });
 };
 
 export default chart03;

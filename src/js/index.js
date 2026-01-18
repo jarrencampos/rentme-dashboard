@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import 'jsvectormap/dist/css/jsvectormap.css';  // If this is inside node_modules, Webpack should resolve it automatically
 import "flatpickr/dist/flatpickr.min.css";
 import "../css/satoshi.css";
@@ -12,18 +13,20 @@ import chart03 from "./components/chart-03";
 import chart04 from "./components/chart-04";
 import map01 from "./components/map-01";
 
-import { app, auth, db } from './firebase-config.js';
+import './firebase-config.js';
+import './auth-service.js';
+import './dashboard.js';
+import './pages/header.js';
+import './pages/signin-page.js';
+import './pages/signup-page.js';
+import { logOut } from './auth-service.js';
 
 Alpine.plugin(persist);
 window.Alpine = Alpine;
 Alpine.start();
 
-// Export functions that can be used in other files
-export const checkUser = () => {
-  return auth.onAuthStateChanged((user) => {
-    return user ? user : null;
-  });
-};
+// Make logOut available globally for onclick handlers
+window.logOut = logOut;
 
 // Init flatpickr
 flatpickr(".datepicker", {

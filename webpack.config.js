@@ -3,9 +3,12 @@ const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+// Determine build mode
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Custom HTML preprocessor logic
 const INCLUDE_PATTERN = /<include src="(.+)"\s*\/?>(?:<\/include>)?/gi;
-const processNestedHtml = (content, loaderContext, dir = null) => 
+const processNestedHtml = (content, loaderContext, dir = null) =>
   !INCLUDE_PATTERN.test(content)
     ? content
     : content.replace(INCLUDE_PATTERN, (m, src) => {
@@ -19,7 +22,7 @@ const processNestedHtml = (content, loaderContext, dir = null) =>
       });
 
 // Generate HTML Plugins from the src folder
-const generateHTMLPlugins = () => 
+const generateHTMLPlugins = () =>
   glob.sync('./src/*.html').map((filePath) => {
     const filename = path.basename(filePath);
     return new HtmlWebpackPlugin({
@@ -27,28 +30,42 @@ const generateHTMLPlugins = () =>
       template: filePath,
       favicon: './src/images/favicon.ico',
       inject: 'body',
+      minify: isProduction ? {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+      } : false,
     });
   });
 
 module.exports = {
-  mode: 'development',
-  entry: './src/js/index.js',  // Ensure this points to your JS entry
+  mode: isProduction ? 'production' : 'development',
+  entry: './src/js/index.js',
+
+  // Source maps for debugging
+  devtool: isProduction ? 'source-map' : 'eval-source-map',
+
   devServer: {
     static: {
-      directory: path.join(__dirname, 'build'),  // Output directory for the dev server
+      directory: path.join(__dirname, 'build'),
     },
     compress: true,
     port: 3000,
+    hot: true,
+    open: true,
+    historyApiFallback: true,
   },
+
   resolve: {
-    extensions: ['.js', '.json'],  // Allow these extensions to be resolved
+    extensions: ['.js', '.json'],
     alias: {
-      '@firebase-config': path.resolve(__dirname, 'src/js/firebase-config.js'),  // Alias for Firebase config
+      '@': path.resolve(__dirname, 'src/js'),
     },
   },
+
   module: {
     rules: [
-      // Babel loader for JavaScript files (transpiling ES6+ to ES5)
+      // Babel loader for JavaScript
       {
         test: /\.m?js$/,
         exclude: /node_modules/,
@@ -69,7 +86,7 @@ module.exports = {
           },
         },
       },
-      // CSS file handling and extraction
+      // CSS handling
       {
         test: /\.css$/i,
         use: [
@@ -89,38 +106,54 @@ module.exports = {
           },
         ],
       },
-      // Image and font file handling
+      // Images
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|ico)$/i,
         type: 'asset/resource',
+        generator: {
+          filename: isProduction ? 'images/[name].[contenthash:8][ext]' : 'images/[name][ext]',
+        },
       },
+      // Fonts
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]',
+        },
       },
-      // Handling HTML files
+      // HTML
       {
         test: /\.html$/,
         loader: 'html-loader',
         options: {
-          preprocessor: processNestedHtml,  // Custom HTML preprocessor
+          preprocessor: processNestedHtml,
         },
       },
     ],
   },
+
   plugins: [
-    ...generateHTMLPlugins(),  // Automatically generate HTML files from templates
+    ...generateHTMLPlugins(),
     new MiniCssExtractPlugin({
-      filename: 'style.css',  // Extract CSS into a separate file
-      chunkFilename: 'style.css',
+      filename: isProduction ? 'css/style.[contenthash:8].css' : 'css/style.css',
     }),
   ],
+
   output: {
-    filename: 'bundle.js',  // Output JavaScript bundle
-    path: path.resolve(__dirname, 'build'),  // Build directory
-    clean: true,  // Clean the build folder before each build
-    assetModuleFilename: '[path][name][ext]',  // Asset file names
+    filename: isProduction ? 'js/bundle.[contenthash:8].js' : 'js/bundle.js',
+    path: path.resolve(__dirname, 'build'),
+    clean: true,
+    publicPath: '/',
   },
-  target: 'web',  // Target the web platform
-  stats: 'errors-only',  // Only log errors in the console
+
+  // Performance hints
+  performance: {
+    hints: isProduction ? 'warning' : false,
+    maxAssetSize: 500000,
+    maxEntrypointSize: 500000,
+  },
+
+  target: 'web',
+  stats: isProduction ? 'normal' : 'errors-warnings',
 };
