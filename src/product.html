@@ -87,24 +87,6 @@
       display: block;
     }
 
-    /* Button styling */
-    .btn-primary {
-      background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%);
-      transition: all 0.2s ease;
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(60, 80, 224, 0.35);
-    }
-    .btn-danger {
-      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
-      transition: all 0.2s ease;
-    }
-    .btn-danger:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
-    }
-
     /* Custom SweetAlert buttons */
     .custom-ok-button {
       background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%) !important;
@@ -497,15 +479,15 @@
 
               <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button id="uploadButton" type="submit"
-                  class="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl">
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl bg-primary hover:bg-opacity-90 transition-all duration-200 hover:shadow-lg">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
                   Save Changes
                 </button>
 
-                <button id="deleteButton" type="submit"
-                  class="btn-danger w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl">
+                <button id="deleteButton" type="button"
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-white font-semibold rounded-xl bg-red-500 hover:bg-red-600 transition-all duration-200 hover:shadow-lg">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
