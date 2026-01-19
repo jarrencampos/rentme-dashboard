@@ -6,290 +6,662 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Calendar</title>
     <style>
-      /* Tailwind-inspired custom styles */
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f7fafc;
-        margin: 0;
+      /* Calendar container */
+      .calendar-card {
+        transition: all 0.2s ease;
+      }
+      .calendar-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .dark .calendar-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
-      /* Flex container for page layout */
-      .page-wrapper {
+      /* Navigation buttons */
+      .nav-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
         display: flex;
-        height: 100vh;
-      }
-
-      /* Sidebar styles */
-      .sidebar {
-        width: 250px;
-        background-color: #2d3748;
-        color: white;
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Sidebar Links */
-      .sidebar a {
-        color: white;
-        text-decoration: none;
-        padding: 0.75rem 1rem;
-        margin-bottom: 1rem;
-        font-size: 1.1rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-      }
-
-      .sidebar a:hover {
-        background-color: #00b7ff;
-      }
-
-      /* Content Area */
-      .content-area {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 2rem;
-      }
-
-      .calendar-container {
-  width: 100%;
-  max-width: 900px;
-  height: calc(100vh - 4rem); /* Full viewport height minus the 2rem top and bottom margins */
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  margin: 2rem auto; /* Centers the calendar horizontally and gives 2rem space at top and bottom */
-  display: flex;
-  flex-direction: column;
-}
-
-
-      .calendar-header {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
-      }
-
-      .calendar-header h2 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #1a202c;
-      }
-
-      .calendar-header button {
-        background-color: #7AD9FF;
-        color: #ffffff;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
+        justify-content: center;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%);
         border: none;
         cursor: pointer;
-        font-size: 1rem;
-        transition: background-color 0.2s;
+      }
+      .nav-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(60, 80, 224, 0.35);
+      }
+      .nav-btn:active {
+        transform: translateY(0);
       }
 
-      .calendar-header button:hover {
-        background-color: #7AD9FF;
+      /* Calendar table */
+      .calendar-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 4px;
       }
-
-      table {
-  width: 100%;
-  height: 100%; /* Make sure the table takes up the remaining space */
-  border-collapse: collapse;
-  table-layout: fixed; /* Ensures cells fill available space */
-}
-
-td, th {
-  height: calc(100% / 6); /* Equal height for each row */
-  vertical-align: middle;
-  text-align: center;
-  padding: 0.75rem;
-  font-size: 1rem;
-  color: #4a5568;
-}
-
-      th {
-        background-color: #edf2f7;
-        font-weight: 600;
-      }
-
-      td {
-        background-color: #fff;
-        border: 1px solid #e2e8f0;
-        position: relative;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      td:hover {
-        background-color: #f7fafc;
-      }
-
-      td.today {
-        background-color: #7AD9FF;
-        color: white;
-        font-weight: 600;
-      }
-
-      .event {
-        position: absolute;
-        bottom: 5px;
-        left: 5px;
-        background-color: #FF7A81;
-        color: white;
+      .calendar-table th {
+        padding: 12px 8px;
         font-size: 0.75rem;
-        padding: 4px;
-        border-radius: 4px;
-        max-width: 80%;
-        text-overflow: ellipsis;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6B7280;
+      }
+      .dark .calendar-table th {
+        color: #9CA3AF;
+      }
+      .calendar-table td {
+        position: relative;
+        padding: 0;
+        vertical-align: top;
+        height: 100px;
+        border-radius: 12px;
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .dark .calendar-table td {
+        background: #1F2937;
+        border-color: #374151;
+      }
+      .calendar-table td:hover:not(.empty) {
+        background: #F3F4F6;
+        border-color: #D1D5DB;
+        transform: scale(1.02);
+        z-index: 1;
+      }
+      .dark .calendar-table td:hover:not(.empty) {
+        background: #374151;
+        border-color: #4B5563;
+      }
+      .calendar-table td.empty {
+        background: transparent;
+        border: none;
+        cursor: default;
+      }
+      .calendar-table td.today {
+        background: linear-gradient(135deg, #3C50E0 0%, #5B6FE8 100%);
+        border-color: #3C50E0;
+      }
+      .calendar-table td.today .day-number {
+        color: white;
+      }
+      .calendar-table td.today:hover {
+        background: linear-gradient(135deg, #3647c7 0%, #4a5ed6 100%);
+      }
+
+      /* Day number */
+      .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        border-radius: 8px;
+      }
+      .dark .day-number {
+        color: #E5E7EB;
+      }
+
+      /* Events */
+      .event-badge {
+        display: block;
+        margin: 2px 6px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        color: white;
+        border-radius: 6px;
         white-space: nowrap;
         overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100% - 12px);
+      }
+      .event-badge.order {
+        background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
       }
 
-      /* Mobile Responsiveness */
+      /* Popup Modal */
+      .popup-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .popup-content {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 420px;
+        transform: scale(0.95) translateY(10px);
+        transition: all 0.3s ease;
+      }
+      .popup-overlay.active .popup-content {
+        transform: scale(1) translateY(0);
+      }
+      .dark .popup-content {
+        background: #1F2937;
+      }
+      .popup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #E5E7EB;
+      }
+      .dark .popup-header {
+        border-color: #374151;
+      }
+      .popup-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #F3F4F6;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #6B7280;
+      }
+      .dark .popup-close {
+        background: #374151;
+        color: #9CA3AF;
+      }
+      .popup-close:hover {
+        background: #E5E7EB;
+        color: #374151;
+      }
+      .dark .popup-close:hover {
+        background: #4B5563;
+        color: #E5E7EB;
+      }
+      .event-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .event-list li {
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #F9FAFB;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        color: #374151;
+        transition: all 0.2s ease;
+      }
+      .dark .event-list li {
+        background: #374151;
+        color: #E5E7EB;
+      }
+      .event-list li:hover {
+        background: #F3F4F6;
+      }
+      .dark .event-list li:hover {
+        background: #4B5563;
+      }
+      .event-list li a {
+        color: #3C50E0;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .event-list li a:hover {
+        text-decoration: underline;
+      }
+      .event-list .empty-state {
+        text-align: center;
+        color: #9CA3AF;
+        padding: 1.5rem;
+      }
+
+      /* Loading skeleton */
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+        background-size: 200% 100%;
+      }
+
+      /* Mobile responsiveness */
       @media (max-width: 768px) {
-        .calendar-container {
-          padding: 1rem;
+        .calendar-table td {
+          height: 70px;
         }
-
-        .calendar-header h2 {
-          font-size: 1.25rem;
+        .calendar-table th {
+          padding: 8px 4px;
+          font-size: 0.65rem;
         }
-
-        th,
-        td {
-          font-size: 0.9rem;
+        .day-number {
+          width: 24px;
+          height: 24px;
+          font-size: 0.75rem;
+          margin: 4px;
+        }
+        .event-badge {
+          font-size: 0.6rem;
+          padding: 2px 4px;
+          margin: 1px 4px;
         }
       }
-      
-      #prev-month, #next-month {
-  background-color: #7AD9FF;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
 
-#prev-month:hover, #next-month:hover {
-  background-color: #7AD9FF;
-}
+      @media (max-width: 480px) {
+        .calendar-table td {
+          height: 55px;
+        }
+        .event-badge {
+          display: none;
+        }
+        .has-events::after {
+          content: '';
+          position: absolute;
+          bottom: 6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 6px;
+          height: 6px;
+          background: #10B981;
+          border-radius: 50%;
+        }
+      }
 
-#prev-month i, #next-month i {
-  margin-left: 0.5rem; /* Space between the icon and text */
-}
+      .hidden {
+        display: none !important;
+      }
 
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 250px; /* Offset for sidebar */
-  width: calc(100% - 250px); /* Remaining content area */
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  transition: all 0.3s ease;
-}
+      /* Vacation mode styles */
+      .vacation-toggle {
+        position: relative;
+        width: 52px;
+        height: 28px;
+        background: #E5E7EB;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .dark .vacation-toggle {
+        background: #374151;
+      }
+      .vacation-toggle.active {
+        background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+      }
+      .vacation-toggle::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .vacation-toggle.active::after {
+        left: 26px;
+      }
 
-.popup-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 600px; /* Max width for readability */
-  text-align: center;
-  position: relative;
-}
+      .vacation-input {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 2px solid #E5E7EB;
+        background: transparent;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        color: #374151;
+      }
+      .dark .vacation-input {
+        border-color: #374151;
+        color: #E5E7EB;
+        background: #1F2937;
+      }
+      .vacation-input:focus {
+        outline: none;
+        border-color: #F59E0B;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+      }
 
-/* Adjust positioning when sidebar is hidden on smaller screens */
-@media (max-width: 1024px) {
-  .popup-overlay {
-    left: 0;
-    width: 100%; /* Take full width when sidebar is hidden */
-  }
-}
+      /* Vacation day styling on calendar */
+      .calendar-table td.vacation-day {
+        background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+        border-color: #F59E0B;
+      }
+      .dark .calendar-table td.vacation-day {
+        background: linear-gradient(135deg, #78350F 0%, #92400E 100%);
+        border-color: #F59E0B;
+      }
+      .calendar-table td.vacation-day .day-number {
+        color: #92400E;
+      }
+      .dark .calendar-table td.vacation-day .day-number {
+        color: #FDE68A;
+      }
+      .vacation-badge {
+        display: block;
+        margin: 2px 6px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        color: white;
+        border-radius: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.5rem;
-  color: #333;
-  cursor: pointer;
-}
+      /* Vacation card animation */
+      .vacation-card {
+        transition: all 0.3s ease;
+      }
+      .vacation-card.vacation-active {
+        border-color: #F59E0B;
+        box-shadow: 0 0 0 1px #F59E0B, 0 4px 12px rgba(245, 158, 11, 0.15);
+      }
 
-.hidden {
-  display: none;
-}
+      /* Vacation list items */
+      .vacation-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .vacation-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+        border: 1px solid #F59E0B;
+        border-radius: 12px;
+        gap: 12px;
+      }
+      .dark .vacation-item {
+        background: linear-gradient(135deg, #78350F 0%, #92400E 100%);
+      }
+      .vacation-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .vacation-item-label {
+        font-weight: 600;
+        color: #92400E;
+        font-size: 0.875rem;
+      }
+      .dark .vacation-item-label {
+        color: #FDE68A;
+      }
+      .vacation-item-dates {
+        font-size: 0.75rem;
+        color: #A16207;
+        margin-top: 2px;
+      }
+      .dark .vacation-item-dates {
+        color: #FCD34D;
+      }
+      .vacation-delete-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(185, 28, 28, 0.1);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+      .vacation-delete-btn:hover {
+        background: rgba(185, 28, 28, 0.2);
+      }
+      .vacation-delete-btn svg {
+        width: 16px;
+        height: 16px;
+        color: #B91C1C;
+      }
+
+      /* Add vacation form */
+      .add-vacation-form {
+        display: none;
+        margin-top: 16px;
+        padding: 16px;
+        background: #F9FAFB;
+        border-radius: 12px;
+        border: 1px dashed #D1D5DB;
+      }
+      .dark .add-vacation-form {
+        background: #1F2937;
+        border-color: #374151;
+      }
+      .add-vacation-form.active {
+        display: block;
+      }
+
+      /* Empty state */
+      .vacation-empty {
+        text-align: center;
+        padding: 20px;
+        color: #9CA3AF;
+        font-size: 0.875rem;
+      }
     </style>
   </head>
 
   <body
-    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-data="{ page: 'calendar', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
     x-init="
          darkMode = JSON.parse(localStorage.getItem('darkMode'));
          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
     :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
   >
-    <!-- ===== Preloader Start ===== -->
     <include src="./partials/preloader.html"></include>
-    <!-- ===== Preloader End ===== -->
 
-    <!-- ===== Page Wrapper Start ===== -->
     <div class="flex h-screen overflow-hidden">
-      <!-- ===== Sidebar Start ===== -->
       <include src="./partials/sidebar.html"></include>
-      <!-- ===== Sidebar End ===== -->
 
-      <!-- ===== Content Area Start ===== -->
       <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-        <!-- ===== Header Start ===== -->
         <include src="./partials/header.html"></include>
-        <!-- ===== Header End ===== -->
-        <div id="event-popup" class="popup-overlay hidden">
+
+        <!-- Event Popup -->
+        <div id="event-popup" class="popup-overlay">
           <div class="popup-content">
-            <span class="close-btn" onclick="closePopup()">&times;</span>
-            <h3 id="popup-date"></h3>
-            <ul id="popup-events"></ul>
-            <!-- Add your button here -->
-            <!-- <button
-              id="block-dates-btn"
-              class="mt-4 w-full bg-secondary text-white font-medium py-2 px-4 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
-            >
-              Block Date for All Listings
-            </button> -->
+            <div class="popup-header">
+              <div>
+                <h3 id="popup-date" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events for this day</p>
+              </div>
+              <button class="popup-close" onclick="closePopup()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <ul id="popup-events" class="event-list"></ul>
           </div>
         </div>
-        
-        
 
-        <!-- ===== Main Content Start ===== -->
-        <main>
-          <div class="calendar-container">
-            <div class="calendar-header">
-              <button id="prev-month">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 18l-6-6 6-6"></path>
+        <main class="mx-auto w-full max-w-[1200px] p-4 md:p-6 2xl:p-10">
+          <!-- Page Header -->
+          <div class="mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              My Calendar
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400">
+              View and manage your bookings and events
+            </p>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">This Month</p>
+                  <p id="stat-month-events" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-500/10 dark:bg-green-500/20">
+                  <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Upcoming</p>
+                  <p id="stat-upcoming" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-yellow-500/10 dark:bg-yellow-500/20">
+                  <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Today</p>
+                  <p id="stat-today" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vacation Mode Card -->
+          <div id="vacation-card" class="vacation-card bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-5 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-yellow-500/10 dark:bg-yellow-500/20">
+                  <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-gray-900 dark:text-white">Vacation Periods</h3>
+                  <p id="vacation-status" class="text-sm text-gray-500 dark:text-gray-400">No scheduled time off</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <button id="add-vacation-btn" onclick="toggleAddVacationForm()" class="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-yellow-500/25 transition-all flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Add Time Off
+                </button>
+              </div>
+            </div>
+
+            <!-- Vacation List -->
+            <div id="vacation-list-container" class="mt-5 pt-5 border-t border-gray-100 dark:border-gray-700">
+              <div id="vacation-list" class="vacation-list">
+                <!-- Vacation items will be rendered here -->
+              </div>
+              <div id="vacation-empty" class="vacation-empty">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                No vacation periods scheduled. Click "Add Time Off" to block dates.
+              </div>
+            </div>
+
+            <!-- Add Vacation Form -->
+            <div id="add-vacation-form" class="add-vacation-form">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">New Vacation Period</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="sm:col-span-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Label (optional)</label>
+                  <input type="text" id="vacation-label" placeholder="e.g., Summer Trip" class="vacation-input w-full" />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
+                  <input type="date" id="vacation-start" class="vacation-input w-full" />
+                </div>
+                <div class="sm:col-span-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date</label>
+                  <input type="date" id="vacation-end" class="vacation-input w-full" />
+                </div>
+                <div class="sm:col-span-1 flex items-end gap-2">
+                  <button onclick="saveVacation()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-yellow-500/25 transition-all text-sm">
+                    Save
+                  </button>
+                  <button onclick="toggleAddVacationForm()" class="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all text-sm">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                All your listings will be unavailable during this period.
+              </p>
+            </div>
+          </div>
+
+          <!-- Calendar Card -->
+          <div class="calendar-card bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-4 sm:p-6">
+            <!-- Calendar Header -->
+            <div class="flex items-center justify-between mb-6">
+              <button id="prev-month" class="nav-btn">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
               </button>
-              
-                            <h2 id="calendar-title">Loading...</h2>
-              <button id="next-month">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6l6 6-6 6"></path>
+
+              <div class="text-center">
+                <h2 id="calendar-title" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Loading...</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <span id="calendar-year"></span>
+                </p>
+              </div>
+
+              <button id="next-month" class="nav-btn">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
-                        </div>
-            <table id="calendar-table">
+            </div>
+
+            <!-- Calendar Table -->
+            <table id="calendar-table" class="calendar-table">
               <thead>
                 <tr>
                   <th>Sun</th>
@@ -301,21 +673,41 @@ td, th {
                   <th>Sat</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody id="calendar-body">
+                <!-- Calendar days will be generated here -->
+              </tbody>
             </table>
           </div>
+
+          <!-- Legend -->
+          <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-green-400"></span>
+              <span>Event</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400"></span>
+              <span>Order</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-gradient-to-r from-yellow-200 to-yellow-300 dark:from-yellow-800 dark:to-yellow-700 border border-yellow-500"></span>
+              <span>Vacation</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-blue-400"></span>
+              <span>Today</span>
+            </div>
+          </div>
         </main>
-        <!-- ===== Main Content End ===== -->
       </div>
-      <!-- ===== Content Area End ===== -->
     </div>
-    <!-- ===== Page Wrapper End ===== -->
+
+    <!-- Firebase Logic -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, doc, setDoc, Timestamp, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-  
-      // Your Firebase configuration
+
       const firebaseConfig = {
         apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
         authDomain: "ryntit-b503c.firebaseapp.com",
@@ -326,204 +718,455 @@ td, th {
         appId: "1:908115066071:web:1de252c17cce4346be0492",
         measurementId: "G-PDBZNLKYKC"
       };
-  
+
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-      const auth = getAuth(app); // Firebase Auth instance
-  
+      const auth = getAuth(app);
+
+      // Make db available globally for vacation functions
+      window.firebaseDb = db;
+
       document.addEventListener("DOMContentLoaded", () => {
-        
         onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      const calendarRef = collection(db, `vendors/${user.uid}/calendar`);
-      const snapshot = await getDocs(calendarRef);
+          if (user) {
+            window.currentUserId = user.uid;
 
-      events = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          date: data.date,
-          event: data.event?.replace(/^"|"$/g, '') || "Untitled Event"
-        };
+            // Load calendar events
+            const calendarRef = collection(db, `vendors/${user.uid}/calendar`);
+            const snapshot = await getDocs(calendarRef);
+
+            window.events = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                date: data.date,
+                event: data.event?.replace(/^"|"$/g, '') || "Untitled Event"
+              };
+            });
+
+            // Load vacation settings from vendor document
+            const vendorRef = doc(db, "vendors", user.uid);
+            const vendorSnap = await getDoc(vendorRef);
+
+            if (vendorSnap.exists()) {
+              const vendorData = vendorSnap.data();
+              // Support both old 'vacation' (single) and new 'vacations' (array) format
+              if (vendorData.vacations && Array.isArray(vendorData.vacations)) {
+                window.vacations = vendorData.vacations;
+              } else if (vendorData.vacation && vendorData.vacation.active) {
+                // Migrate old format to new format
+                window.vacations = [{
+                  id: 'migrated_' + Date.now(),
+                  startDate: vendorData.vacation.startDate,
+                  endDate: vendorData.vacation.endDate,
+                  label: 'Vacation'
+                }];
+              } else {
+                window.vacations = [];
+              }
+              renderVacationList();
+            }
+
+            generateCalendar();
+            updateStats();
+          } else {
+            console.log("User not logged in");
+            generateCalendar();
+          }
+        });
       });
 
-      generateCalendar(); // Call calendar rendering after data is loaded
-    } else {
-      console.log("User not logged in");
-    }
-  });
-      });
-        </script>
+      // Save vacations array to Firebase
+      window.saveVacationsToFirebase = async function(vacationsArray) {
+        if (!window.currentUserId) return;
+
+        const vendorRef = doc(db, "vendors", window.currentUserId);
+        await updateDoc(vendorRef, { vacations: vacationsArray });
+      };
+    </script>
+
+    <!-- Calendar Logic -->
     <script>
-      let events = []
-
+      window.events = [];
+      window.vacations = [];
       let currentMonth = new Date().getMonth();
       let currentYear = new Date().getFullYear();
-      // Get the current month and year
+
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+
+      // Vacation UI Functions
+      function formatDateShort(dateStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function renderVacationList() {
+        const listContainer = document.getElementById('vacation-list');
+        const emptyState = document.getElementById('vacation-empty');
+        const statusText = document.getElementById('vacation-status');
+        const card = document.getElementById('vacation-card');
+
+        // Clear existing items
+        listContainer.innerHTML = '';
+
+        if (window.vacations.length === 0) {
+          emptyState.style.display = 'block';
+          statusText.textContent = 'No scheduled time off';
+          card.classList.remove('vacation-active');
+        } else {
+          emptyState.style.display = 'none';
+          card.classList.add('vacation-active');
+
+          // Update status text
+          const upcoming = window.vacations.filter(v => v.endDate >= new Date().toISOString().split('T')[0]);
+          statusText.textContent = `${window.vacations.length} period${window.vacations.length > 1 ? 's' : ''} scheduled`;
+
+          // Render each vacation
+          window.vacations.forEach(vacation => {
+            const item = document.createElement('div');
+            item.className = 'vacation-item';
+            item.innerHTML = `
+              <div class="vacation-item-info">
+                <div class="vacation-item-label">${vacation.label || 'Time Off'}</div>
+                <div class="vacation-item-dates">${formatDateShort(vacation.startDate)} - ${formatDateShort(vacation.endDate)}</div>
+              </div>
+              <button class="vacation-delete-btn" onclick="deleteVacation('${vacation.id}')" title="Delete">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            `;
+            listContainer.appendChild(item);
+          });
+        }
+      }
+
+      function toggleAddVacationForm() {
+        const form = document.getElementById('add-vacation-form');
+        form.classList.toggle('active');
+
+        // Clear form when opening
+        if (form.classList.contains('active')) {
+          document.getElementById('vacation-label').value = '';
+          document.getElementById('vacation-start').value = '';
+          document.getElementById('vacation-end').value = '';
+        }
+      }
+
+      async function saveVacation() {
+        const label = document.getElementById('vacation-label').value.trim();
+        const startDate = document.getElementById('vacation-start').value;
+        const endDate = document.getElementById('vacation-end').value;
+
+        if (!startDate || !endDate) {
+          alert('Please select both start and end dates');
+          return;
+        }
+
+        if (startDate > endDate) {
+          alert('End date must be after start date');
+          return;
+        }
+
+        // Check for overlapping vacations
+        const hasOverlap = window.vacations.some(v => {
+          return (startDate <= v.endDate && endDate >= v.startDate);
+        });
+
+        if (hasOverlap) {
+          alert('This period overlaps with an existing vacation. Please choose different dates.');
+          return;
+        }
+
+        const newVacation = {
+          id: 'vac_' + Date.now(),
+          label: label || 'Time Off',
+          startDate: startDate,
+          endDate: endDate
+        };
+
+        window.vacations.push(newVacation);
+
+        // Sort by start date
+        window.vacations.sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+        try {
+          await window.saveVacationsToFirebase(window.vacations);
+          renderVacationList();
+          generateCalendar();
+          toggleAddVacationForm();
+        } catch (error) {
+          console.error('Error saving vacation:', error);
+          // Remove the vacation we just added
+          window.vacations = window.vacations.filter(v => v.id !== newVacation.id);
+          alert('Failed to save vacation. Please try again.');
+        }
+      }
+
+      async function deleteVacation(vacationId) {
+        if (!confirm('Are you sure you want to delete this vacation period?')) {
+          return;
+        }
+
+        const originalVacations = [...window.vacations];
+        window.vacations = window.vacations.filter(v => v.id !== vacationId);
+
+        try {
+          await window.saveVacationsToFirebase(window.vacations);
+          renderVacationList();
+          generateCalendar();
+        } catch (error) {
+          console.error('Error deleting vacation:', error);
+          window.vacations = originalVacations;
+          alert('Failed to delete vacation. Please try again.');
+        }
+      }
+
+      function isDateInVacation(dateStr) {
+        return window.vacations.some(vacation => {
+          return dateStr >= vacation.startDate && dateStr <= vacation.endDate;
+        });
+      }
+
+      function getVacationForDate(dateStr) {
+        return window.vacations.find(vacation => {
+          return dateStr >= vacation.startDate && dateStr <= vacation.endDate;
+        });
+      }
+
       function getCurrentMonthAndYear() {
         return { month: currentMonth, year: currentYear };
       }
 
-      // Update the calendar title
       function updateCalendarTitle() {
-        const monthNames = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ];
-        document.getElementById("calendar-title").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        document.getElementById("calendar-title").textContent = monthNames[currentMonth];
+        document.getElementById("calendar-year").textContent = currentYear;
+      }
+
+      function updateStats() {
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        // Events this month
+        const monthEvents = window.events.filter(e => {
+          const [year, month] = e.date.split('-').map(Number);
+          return year === currentYear && month === currentMonth + 1;
+        });
+        document.getElementById('stat-month-events').textContent = monthEvents.length;
+
+        // Upcoming events (future dates)
+        const upcomingEvents = window.events.filter(e => e.date > todayStr);
+        document.getElementById('stat-upcoming').textContent = upcomingEvents.length;
+
+        // Today's events
+        const todayEvents = window.events.filter(e => e.date === todayStr);
+        document.getElementById('stat-today').textContent = todayEvents.length;
       }
 
       function generateCalendar() {
-  const { month, year } = getCurrentMonthAndYear();
+        const { month, year } = getCurrentMonthAndYear();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const totalDays = lastDay.getDate();
+        const startDay = firstDay.getDay();
 
-  // Get first day of the month and the number of days in the month
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const totalDays = lastDay.getDate();
-  const startDay = firstDay.getDay(); // 0-Sun, 1-Mon, ..., 6-Sat
+        const today = new Date();
+        const todayDate = today.getDate();
+        const todayMonth = today.getMonth();
+        const todayYear = today.getFullYear();
 
-  // Get today's date
-  const today = new Date();
-  const todayDate = today.getDate();
-  const todayMonth = today.getMonth();
-  const todayYear = today.getFullYear();
+        let calendarHTML = "";
+        let day = 1;
 
-  let calendarHTML = "";
-  let day = 1;
+        for (let row = 0; row < 6; row++) {
+          calendarHTML += "<tr>";
+          for (let col = 0; col < 7; col++) {
+            if (row === 0 && col < startDay) {
+              calendarHTML += "<td class='empty'></td>";
+            } else if (day <= totalDays) {
+              const isToday = (day === todayDate && month === todayMonth && year === todayYear);
+              const currentDayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-  for (let row = 0; row < 6; row++) {
-    calendarHTML += "<tr>";
-    for (let col = 0; col < 7; col++) {
-      if (row === 0 && col < startDay) {
-        calendarHTML += "<td class='empty'></td>"; // Empty cells before the first day
-      } else if (day <= totalDays) {
-        const isToday = (day === todayDate && month === todayMonth && year === todayYear) ? "today" : "";
-        
-        // Format the current day as YYYY-MM-DD for comparison
-        const currentDayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              // Check for events on this day
+              const dayEvents = window.events.filter(event => event.date === currentDayString);
+              const hasEvents = dayEvents.length > 0;
 
-        calendarHTML += `<td class="${isToday}" data-day="${day}">${day}`;
+              // Check if day is in vacation period
+              const isVacationDay = isDateInVacation(currentDayString);
 
-        // Add events for the day
-        events.forEach(event => {
-          if (event.date === currentDayString) {
-            calendarHTML += `<div class="event">${event.event}</div>`;
+              // Build class list
+              let classes = [];
+              if (isToday) classes.push('today');
+              if (hasEvents) classes.push('has-events');
+              if (isVacationDay && !isToday) classes.push('vacation-day');
+
+              calendarHTML += `<td class="${classes.join(' ')}" data-day="${day}">`;
+              calendarHTML += `<span class="day-number">${day}</span>`;
+
+              // Add vacation badge if applicable (show first)
+              if (isVacationDay) {
+                calendarHTML += `<span class="vacation-badge">Vacation</span>`;
+              }
+
+              // Add event badges (max 2 visible, or 1 if vacation)
+              const maxBadges = isVacationDay ? 1 : 2;
+              dayEvents.slice(0, maxBadges).forEach(event => {
+                const isOrder = event.event.startsWith("Order");
+                calendarHTML += `<span class="event-badge ${isOrder ? 'order' : ''}">${event.event}</span>`;
+              });
+
+              const remaining = dayEvents.length - maxBadges;
+              if (remaining > 0) {
+                calendarHTML += `<span class="event-badge" style="background: #6B7280;">+${remaining} more</span>`;
+              }
+
+              calendarHTML += "</td>";
+              day++;
+            } else {
+              calendarHTML += "<td class='empty'></td>";
+            }
           }
-        });
-
-        calendarHTML += "</td>";
-        day++;
-      } else {
-        calendarHTML += "<td class='empty'></td>"; // Empty cells after the last day
-      }
-    }
-    calendarHTML += "</tr>";
-    if (day > totalDays) break; // Stop if we filled all days
-  }
-
-  document.getElementById("calendar-table").getElementsByTagName("tbody")[0].innerHTML = calendarHTML;
-
-  // Reattach event listeners after re-rendering
-  attachEventListeners();
-}
-
-// Function to attach event listeners to date cells
-function attachEventListeners() {
-  document.querySelectorAll('#calendar-table td').forEach(td => {
-    td.addEventListener('click', function () {
-      const day = this.getAttribute('data-day');
-      if (day) {
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
-        const eventDetails = events
-          .filter(event => event.date === dateStr)
-          .map(event => event.event);
-
-        openPopup(dateStr, eventDetails);
-      }
-    });
-  });
-}
-
-// Modify month navigation event listeners
-document.getElementById("prev-month").addEventListener("click", function () {
-  if (currentMonth === 0) {
-    currentMonth = 11;
-    currentYear--;
-  } else {
-    currentMonth--;
-  }
-  updateCalendarTitle();
-  generateCalendar();
-});
-
-document.getElementById("next-month").addEventListener("click", function () {
-  if (currentMonth === 11) {
-    currentMonth = 0;
-    currentYear++;
-  } else {
-    currentMonth++;
-  }
-  updateCalendarTitle();
-  generateCalendar();
-});
-
-// Initialize the calendar
-updateCalendarTitle();
-generateCalendar();
-
-    </script>
-    <script>
-function openPopup(date, events) {
-  document.getElementById('popup-date').textContent = `${date}`;
-
-  const eventList = document.getElementById('popup-events');
-  eventList.innerHTML = '';
-
-  if (events.length > 0) {
-    events.forEach(event => {
-      const li = document.createElement('li');
-
-      if (event.startsWith("Order #")) {
-        const match = event.match(/Order\s+#(\d+)/);
-        if (match && match[1]) {
-          const orderId = match[1];
-          li.innerHTML = `<a href="/order.html?id=${orderId}" style="color: black; text-decoration: underline;">${event}</a>`;
-        } else {
-          li.textContent = event;
+          calendarHTML += "</tr>";
+          if (day > totalDays) break;
         }
-      } else {
-        li.textContent = event;
+
+        document.getElementById("calendar-body").innerHTML = calendarHTML;
+        updateCalendarTitle();
+        attachEventListeners();
+        updateStats();
       }
 
-      eventList.appendChild(li);
-    });
-  } else {
-    eventList.innerHTML = '<li>No events</li>';
-  }
-
-  document.getElementById('event-popup').classList.remove('hidden');
-}
-
-    
-      function closePopup() {
-        document.getElementById('event-popup').classList.add('hidden');
-      }
-    
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('#calendar-table td').forEach(td => {
-          td.addEventListener('click', function () {
+      function attachEventListeners() {
+        document.querySelectorAll('#calendar-table td:not(.empty)').forEach(td => {
+          td.addEventListener('click', function() {
             const day = this.getAttribute('data-day');
             if (day) {
               const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              
-              const eventDetails = events
+              const eventDetails = window.events
                 .filter(event => event.date === dateStr)
                 .map(event => event.event);
-    
               openPopup(dateStr, eventDetails);
             }
           });
         });
+      }
+
+      document.getElementById("prev-month").addEventListener("click", function() {
+        if (currentMonth === 0) {
+          currentMonth = 11;
+          currentYear--;
+        } else {
+          currentMonth--;
+        }
+        generateCalendar();
+      });
+
+      document.getElementById("next-month").addEventListener("click", function() {
+        if (currentMonth === 11) {
+          currentMonth = 0;
+          currentYear++;
+        } else {
+          currentMonth++;
+        }
+        generateCalendar();
+      });
+
+      // Initialize
+      updateCalendarTitle();
+      generateCalendar();
+    </script>
+
+    <!-- Popup Logic -->
+    <script>
+      function formatDate(dateStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+      }
+
+      function openPopup(date, events) {
+        document.getElementById('popup-date').textContent = formatDate(date);
+
+        const eventList = document.getElementById('popup-events');
+        eventList.innerHTML = '';
+
+        // Check if this date is in vacation period
+        const vacation = getVacationForDate(date);
+
+        if (vacation) {
+          const vacationLi = document.createElement('li');
+          vacationLi.style.background = 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)';
+          vacationLi.style.border = '1px solid #F59E0B';
+          vacationLi.innerHTML = `
+            <div class="flex items-center gap-2" style="color: #92400E;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <strong>${vacation.label || 'Time Off'}</strong> - All listings unavailable
+            </div>
+          `;
+          eventList.appendChild(vacationLi);
+        }
+
+        if (events.length > 0) {
+          events.forEach(event => {
+            const li = document.createElement('li');
+
+            if (event.startsWith("Order #")) {
+              const match = event.match(/Order\s+#(\d+)/);
+              if (match && match[1]) {
+                const orderId = match[1];
+                li.innerHTML = `
+                  <a href="order.html?id=${orderId}" class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    ${event}
+                  </a>
+                `;
+              } else {
+                li.textContent = event;
+              }
+            } else {
+              li.innerHTML = `
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  ${event}
+                </div>
+              `;
+            }
+
+            eventList.appendChild(li);
+          });
+        } else if (!vacation) {
+          eventList.innerHTML = '<li class="empty-state">No events scheduled for this day</li>';
+        }
+
+        document.getElementById('event-popup').classList.add('active');
+      }
+
+      function closePopup() {
+        document.getElementById('event-popup').classList.remove('active');
+      }
+
+      // Close popup when clicking outside
+      document.getElementById('event-popup').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closePopup();
+        }
+      });
+
+      // Close popup with Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closePopup();
+        }
       });
     </script>
   </body>

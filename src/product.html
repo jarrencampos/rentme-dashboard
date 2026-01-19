@@ -120,6 +120,52 @@
       padding: 12px 24px !important;
       font-weight: 600 !important;
     }
+
+    /* Image remove button */
+    .image-remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.9);
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      opacity: 0;
+    }
+    .image-upload-card:hover .image-remove-btn {
+      opacity: 1;
+    }
+    .image-remove-btn:hover {
+      background: rgba(185, 28, 28, 1);
+      transform: scale(1.1);
+    }
+
+    /* Form validation styles */
+    .input-error {
+      border-color: #DC2626 !important;
+    }
+    .input-error:focus {
+      border-color: #DC2626 !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+    }
+    .error-message {
+      color: #DC2626;
+      font-size: 0.75rem;
+      margin-top: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .dark .error-message {
+      color: #F87171;
+    }
   </style>
 </head>
 
@@ -251,7 +297,13 @@
                   </label>
                   <input type="text" id="title" maxlength="30" placeholder="e.g., White Bounce Castle"
                     class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50" />
-                  <p class="mt-1.5 text-xs text-gray-400">A short, catchy title (max 30 characters)</p>
+                  <p id="title-hint" class="mt-1.5 text-xs text-gray-400">A short, catchy title (max 30 characters)</p>
+                  <p id="title-error" class="error-message hidden">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Title is required</span>
+                  </p>
                 </div>
 
                 <!-- Subtitle -->
@@ -349,7 +401,13 @@
                     class="modern-input w-full pl-10 pr-20 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 text-lg font-semibold" />
                   <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">/ day</span>
                 </div>
-                <p class="mt-1.5 text-xs text-gray-400">Include delivery and setup in your price</p>
+                <p id="pricing-hint" class="mt-1.5 text-xs text-gray-400">Include delivery and setup in your price</p>
+                <p id="pricing-error" class="error-message hidden">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Price is required</span>
+                </p>
               </div>
             </div>
 
@@ -471,7 +529,65 @@
 
   <!-- Image Preview Handler -->
   <script>
-    function setupImagePreview(inputId, previewId, isMain = false) {
+    // Track images to be removed
+    window.imagesToRemove = { main: false, secondary: false, third: false };
+    window.currentImageUrls = { main: null, secondary: null, third: null };
+
+    function getEmptyStateHTML(isMain = false) {
+      return `
+        <div class="text-center p-${isMain ? '6' : '4'}">
+          <svg class="w-${isMain ? '12' : '8'} h-${isMain ? '12' : '8'} mx-auto text-gray-400 mb-${isMain ? '3' : '2'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          <p class="text-${isMain ? 'sm' : 'xs'} font-medium text-gray-${isMain ? '600' : '400'} dark:text-gray-${isMain ? '300' : '400'}">${isMain ? 'Main Photo' : 'Photo'}</p>
+          ${isMain ? '<p class="text-xs text-gray-400 mt-1">Click to upload</p>' : ''}
+        </div>
+        <div class="upload-overlay">
+          <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          ${isMain ? '<span class="text-white text-sm font-medium">Upload photo</span>' : ''}
+        </div>
+      `;
+    }
+
+    function getImagePreviewHTML(imageSrc, isMain = false, imageKey = 'main') {
+      return `
+        <img src="${imageSrc}" alt="Preview" class="w-full h-full object-cover" />
+        <button type="button" class="image-remove-btn" onclick="event.stopPropagation(); removeImage('${imageKey}', ${isMain})">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="upload-overlay">
+          <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          ${isMain ? '<span class="text-white text-sm font-medium">Change photo</span>' : ''}
+        </div>
+      `;
+    }
+
+    function removeImage(imageKey, isMain) {
+      const previewMap = { main: 'imagePreview1', secondary: 'imagePreview2', third: 'imagePreview3' };
+      const inputMap = { main: 'imageInput', secondary: 'imageInput2', third: 'imageInput3' };
+
+      const previewBox = document.getElementById(previewMap[imageKey]);
+      const input = document.getElementById(inputMap[imageKey]);
+
+      // Clear the file input
+      input.value = '';
+
+      // Mark for removal if it was an existing image
+      if (window.currentImageUrls[imageKey]) {
+        window.imagesToRemove[imageKey] = true;
+      }
+
+      // Reset to empty state
+      previewBox.innerHTML = getEmptyStateHTML(isMain);
+    }
+
+    function setupImagePreview(inputId, previewId, isMain = false, imageKey = 'main') {
       const input = document.getElementById(inputId);
       const previewBox = document.getElementById(previewId);
 
@@ -480,15 +596,9 @@
         if (file) {
           const reader = new FileReader();
           reader.onload = function(e) {
-            previewBox.innerHTML = `
-              <img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover" />
-              <div class="upload-overlay">
-                <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                ${isMain ? '<span class="text-white text-sm font-medium">Change photo</span>' : ''}
-              </div>
-            `;
+            previewBox.innerHTML = getImagePreviewHTML(e.target.result, isMain, imageKey);
+            // If we're uploading a new file, we're not removing the old one anymore
+            window.imagesToRemove[imageKey] = false;
           };
           reader.readAsDataURL(file);
         }
@@ -496,18 +606,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      setupImagePreview('imageInput', 'imagePreview1', true);
-      setupImagePreview('imageInput2', 'imagePreview2', false);
-      setupImagePreview('imageInput3', 'imagePreview3', false);
+      setupImagePreview('imageInput', 'imagePreview1', true, 'main');
+      setupImagePreview('imageInput2', 'imagePreview2', false, 'secondary');
+      setupImagePreview('imageInput3', 'imagePreview3', false, 'third');
     });
   </script>
 
   <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getFirestore, doc, Timestamp, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getFirestore, doc, Timestamp, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
@@ -567,7 +677,7 @@
                   document.getElementById('mainCategory').dispatchEvent(event);
                   document.getElementById('subCategory').value = detailsData.subCategory || '';
 
-                  updateImagePreview('imageInput', 'imagePreview1', productData.image_url, true);
+                  updateImagePreview('imageInput', 'imagePreview1', productData.image_url, true, 'main');
 
                   initialValues = {
                     title: productData.title || '',
@@ -617,13 +727,13 @@
 
                   getDoc(secondaryRef).then((docSnap) => {
                     if (docSnap.exists() && docSnap.data().image_url) {
-                      updateImagePreview('imageInput2', 'imagePreview2', docSnap.data().image_url, false);
+                      updateImagePreview('imageInput2', 'imagePreview2', docSnap.data().image_url, false, 'secondary');
                     }
                   });
 
                   getDoc(thirdRef).then((docSnap) => {
                     if (docSnap.exists() && docSnap.data().image_url) {
-                      updateImagePreview('imageInput3', 'imagePreview3', docSnap.data().image_url, false);
+                      updateImagePreview('imageInput3', 'imagePreview3', docSnap.data().image_url, false, 'third');
                     }
                   });
                 }
@@ -633,13 +743,21 @@
         });
       }
 
-      function updateImagePreview(inputId, previewId, imageUrl, isMain = false) {
+      function updateImagePreview(inputId, previewId, imageUrl, isMain = false, imageKey = 'main') {
         const previewBox = document.getElementById(previewId);
         const input = document.getElementById(inputId);
 
         if (imageUrl) {
+          // Store the current URL for tracking
+          window.currentImageUrls[imageKey] = imageUrl;
+
           previewBox.innerHTML = `
             <img src="${imageUrl}" alt="Preview" class="w-full h-full object-cover" />
+            <button type="button" class="image-remove-btn" onclick="event.stopPropagation(); removeImage('${imageKey}', ${isMain})">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
             <div class="upload-overlay">
               <svg class="w-${isMain ? '8' : '6'} h-${isMain ? '8' : '6'} text-white ${isMain ? 'mb-2' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -688,17 +806,57 @@
               confirmButton: 'custom-delete-button',
               cancelButton: 'custom-ok-button'
             }
-          }).then((result) => {
+          }).then(async (result) => {
             if (result.isConfirmed) {
-              Swal.fire({
-                title: 'Deleted!',
-                text: 'Your listing has been deleted.',
-                icon: 'success',
-                confirmButtonText: 'OK',
-                customClass: { confirmButton: 'custom-ok-button' }
-              }).then(() => {
-                window.location.href = 'listings.html';
-              });
+              try {
+                // Delete images from storage
+                const storageFolder = ref(storage, `vendors/${currentUserId}/products/${productId}`);
+                try {
+                  const fileList = await listAll(storageFolder);
+                  const deletePromises = fileList.items.map(item => deleteObject(item));
+                  await Promise.all(deletePromises);
+                } catch (storageError) {
+                  console.log('No images to delete or storage error:', storageError);
+                }
+
+                // Delete photos subcollection in details
+                if (productData.details_id) {
+                  const photosRef = collection(db, "details", productData.details_id, "photos");
+                  const photosSnap = await getDocs(photosRef);
+                  const photoDeletePromises = photosSnap.docs.map(photoDoc => deleteDoc(photoDoc.ref));
+                  await Promise.all(photoDeletePromises);
+
+                  // Delete details document
+                  await deleteDoc(doc(db, "details", productData.details_id));
+                }
+
+                // Delete product document
+                await deleteDoc(doc(db, "products", productId));
+
+                Swal.fire({
+                  title: 'Deleted!',
+                  text: 'Your listing has been deleted.',
+                  icon: 'success',
+                  confirmButtonText: 'OK',
+                  customClass: { confirmButton: 'custom-ok-button' }
+                }).then(() => {
+                  window.location.href = 'listings.html';
+                });
+              } catch (error) {
+                console.error('Error deleting listing:', error);
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Failed to delete listing. Please try again.',
+                  icon: 'error',
+                  confirmButtonText: 'OK',
+                  customClass: { confirmButton: 'custom-ok-button' }
+                });
+                submitBtn.disabled = false;
+                deleteBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                spinner.classList.add('hidden');
+              }
             } else {
               submitBtn.disabled = false;
               deleteBtn.disabled = false;
@@ -726,6 +884,16 @@
           return;
         }
 
+        // Validate required fields
+        if (!window.validateForm()) {
+          submitBtn.disabled = false;
+          deleteBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          spinner.classList.add('hidden');
+          return;
+        }
+
         try {
           const hasChanges = (
             initialValues.title !== document.getElementById('title').value ||
@@ -740,7 +908,10 @@
             haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
             document.getElementById('imageInput').files.length > 0 ||
             document.getElementById('imageInput2').files.length > 0 ||
-            document.getElementById('imageInput3').files.length > 0
+            document.getElementById('imageInput3').files.length > 0 ||
+            window.imagesToRemove.main ||
+            window.imagesToRemove.secondary ||
+            window.imagesToRemove.third
           );
 
           if (!hasChanges) {
@@ -865,7 +1036,37 @@
             );
           }
 
-          await Promise.all(imageUploadPromises);
+          // Handle image removals
+          const imageRemovalPromises = [];
+
+          // Remove main image if marked and no new file uploaded
+          if (window.imagesToRemove.main && !mainImageFile) {
+            imageRemovalPromises.push(
+              updateDoc(doc(db, "products", productId), { image_url: '' })
+            );
+          }
+
+          // Remove secondary image if marked and no new file uploaded
+          if (window.imagesToRemove.secondary && !image2File) {
+            imageRemovalPromises.push(
+              updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
+                image_url: '',
+                timestamp: Timestamp.now()
+              })
+            );
+          }
+
+          // Remove third image if marked and no new file uploaded
+          if (window.imagesToRemove.third && !image3File) {
+            imageRemovalPromises.push(
+              updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
+                image_url: '',
+                timestamp: Timestamp.now()
+              })
+            );
+          }
+
+          await Promise.all([...imageUploadPromises, ...imageRemovalPromises]);
 
           Swal.fire({
             title: 'Success!',
@@ -893,6 +1094,80 @@
           spinner.classList.add('hidden');
         }
       });
+    });
+  </script>
+
+  <!-- Form Validation -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Validation helper functions
+      function showError(inputId, errorId, hintId) {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        const hint = document.getElementById(hintId);
+
+        input.classList.add('input-error');
+        error.classList.remove('hidden');
+        if (hint) hint.classList.add('hidden');
+      }
+
+      function hideError(inputId, errorId, hintId) {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        const hint = document.getElementById(hintId);
+
+        input.classList.remove('input-error');
+        error.classList.add('hidden');
+        if (hint) hint.classList.remove('hidden');
+      }
+
+      function validateField(inputId, errorId, hintId) {
+        const input = document.getElementById(inputId);
+        const value = input.value.trim();
+
+        if (!value || (input.type === 'number' && parseFloat(value) <= 0)) {
+          showError(inputId, errorId, hintId);
+          return false;
+        } else {
+          hideError(inputId, errorId, hintId);
+          return true;
+        }
+      }
+
+      // Real-time validation on blur
+      const titleInput = document.getElementById('title');
+      const pricingInput = document.getElementById('pricing');
+
+      titleInput.addEventListener('blur', () => validateField('title', 'title-error', 'title-hint'));
+      pricingInput.addEventListener('blur', () => validateField('pricing', 'pricing-error', 'pricing-hint'));
+
+      // Clear error on input
+      titleInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          hideError('title', 'title-error', 'title-hint');
+        }
+      });
+
+      pricingInput.addEventListener('input', function() {
+        if (this.value.trim() && parseFloat(this.value) > 0) {
+          hideError('pricing', 'pricing-error', 'pricing-hint');
+        }
+      });
+
+      // Expose validation function for form submission
+      window.validateForm = function() {
+        const titleValid = validateField('title', 'title-error', 'title-hint');
+        const pricingValid = validateField('pricing', 'pricing-error', 'pricing-hint');
+
+        // Scroll to first error
+        if (!titleValid) {
+          document.getElementById('title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (!pricingValid) {
+          document.getElementById('pricing').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        return titleValid && pricingValid;
+      };
     });
   </script>
 
