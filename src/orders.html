@@ -4,173 +4,477 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Orders
-    </title>
+    <title>Orders</title>
+    <style>
+      /* Modern animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-in {
+        animation: fadeInUp 0.5s ease-out forwards;
+        opacity: 0;
+      }
+
+      .delay-1 { animation-delay: 0.1s; }
+      .delay-2 { animation-delay: 0.2s; }
+      .delay-3 { animation-delay: 0.3s; }
+      .delay-4 { animation-delay: 0.4s; }
+
+      /* Stat card styling */
+      .stat-card {
+        transition: all 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+      .dark .stat-card:hover {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Order row styling */
+      .order-row {
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      .order-row:hover {
+        background-color: rgba(60, 80, 224, 0.04);
+        transform: translateX(4px);
+      }
+      .dark .order-row:hover {
+        background-color: rgba(60, 80, 224, 0.1);
+      }
+
+      /* Status badge styling */
+      .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+      .status-paid {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10B981;
+      }
+      .status-pending {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+      }
+      .status-cancelled {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+      }
+
+      /* Search input styling */
+      .search-input {
+        transition: all 0.2s ease;
+      }
+      .search-input:focus {
+        box-shadow: 0 0 0 3px rgba(60, 80, 224, 0.1);
+      }
+
+      /* Loading skeleton */
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
+        background-size: 200% 100%;
+      }
+
+      /* Empty state */
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+      }
+    </style>
   </head>
-  <script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-  
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
-      authDomain: "ryntit-b503c.firebaseapp.com",
-      databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
-      projectId: "ryntit-b503c",
-      storageBucket: "ryntit-b503c.appspot.com",
-      messagingSenderId: "908115066071",
-      appId: "1:908115066071:web:1de252c17cce4346be0492",
-      measurementId: "G-PDBZNLKYKC"
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-  
-    // Function to fetch all order IDs for the current vendor
-    async function getOrderIds() {
-      const ordersCollection = collection(db, "vendors", auth.currentUser.uid, "orders");
-      const ordersSnapshot = await getDocs(ordersCollection);
-      return ordersSnapshot.docs.map(doc => doc.id);
-    }
-  
-    // Function to fetch order details for a given order ID
-    async function getOrderDetails(orderId) {
-      const orderDocRef = doc(db, "vendors", auth.currentUser.uid, "orders", orderId);
-      const orderDocSnapshot = await getDoc(orderDocRef);
-      return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
-    }
-  
-    // Function to generate the order table dynamically
-    async function generateOrderTable() {
-      try {
-        const tableBody = document.querySelector("tbody");
-  
-        const orderIds = await getOrderIds(); // Fetch all order IDs
-        const orderDetailsPromises = orderIds.map(orderId => getOrderDetails(orderId));
-        const orderDetails = await Promise.all(orderDetailsPromises);
-  
-        // Sort orders based on earliestRentalDate (assuming rentalDate is in 'YYYY-MM-DD' format)
-        orderDetails.sort((a, b) => {
-          const dateA = new Date(a.earliestRentalDate);  // Convert rentalDate to a Date object
-          const dateB = new Date(b.earliestRentalDate);
-          return dateA - dateB;  // Sort by earliest rental date
-        });
-  
-        orderDetails.forEach(order => {
-          if (order) {
-            const orderRow = createOrderRow(order);
-            tableBody.appendChild(orderRow);
-          }
-        });
-      } catch (error) {
-        console.error("Error generating the order table:", error);
-      }
-    }
-  
-    // Helper function to create an order row
-    function createOrderRow(order) {
-      const orderRow = document.createElement("tr");
-  
-      orderRow.onclick = () => {
-        window.location.href = `/order.html?id=${order.orderNumber}`;
-      };
-  
-      // Order Number Column
-      const orderNumberCell = document.createElement("td");
-      orderNumberCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "pl-9", "dark:border-strokedark", "xl:pl-11");
-      const orderNumberText = document.createElement("h5");
-      orderNumberText.classList.add("font-medium", "text-black", "dark:text-white");
-      orderNumberText.textContent = `#${order.orderNumber || 'N/A'}`;
-      const orderAmount = document.createElement("p");
-      orderAmount.classList.add("text-sm");
-      orderAmount.textContent = `$${order.orderAmount || '0.00'}`;
-      orderNumberCell.appendChild(orderNumberText);
-      orderNumberCell.appendChild(orderAmount);
-      orderRow.appendChild(orderNumberCell);
-  
-      // Invoice Date Column
-      const invoiceDateCell = document.createElement("td");
-      invoiceDateCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "dark:border-strokedark");
-      const invoiceDateText = document.createElement("p");
-      invoiceDateText.classList.add("text-black", "dark:text-white");
-      invoiceDateText.textContent = order.rentalDate || "N/A";
-      invoiceDateCell.appendChild(invoiceDateText);
-      orderRow.appendChild(invoiceDateCell);
-  
-      // Status Column
-      const statusCell = document.createElement("td");
-      statusCell.classList.add("border-b", "border-[#eee]", "px-4", "py-5", "dark:border-strokedark");
-      const statusText = document.createElement("p");
-      statusText.classList.add("inline-flex", "rounded-full", "px-3", "py-1", "text-sm", "font-medium");
-      statusText.textContent = order.status || "Pending";
-  
-      // Apply color based on status
-      if (order.status === "Paid") {
-        statusText.classList.add("bg-success", "bg-opacity-10", "text-success");
-      } else if (order.status === "Pending") {
-        statusText.classList.add("bg-warning", "bg-opacity-10", "text-warning");
-      } else {
-        statusText.classList.add("bg-danger", "bg-opacity-10", "text-danger");
-      }
-  
-      statusCell.appendChild(statusText);
-      orderRow.appendChild(statusCell);
-  
-      return orderRow;
-    }
-  
-    // Listen for authentication state changes and only generate table when user is signed in
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("User is signed in:", user.uid);
-        generateOrderTable(); // Generate the table only when the user is signed in
-      } else {
-        console.log("No user is signed in.");
-        window.location.href = 'signin.html'; // Redirect to your login page
-      }
-    });
-  </script>
-  
+
   <body
-  x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
-  x-init="
-       darkMode = JSON.parse(localStorage.getItem('darkMode'));
-       $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-  :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
->
-  <!-- ===== Preloader Start ===== -->
-  <include src="./partials/preloader.html"></include>
-  <!-- ===== Preloader End ===== -->
+    x-data="{ page: 'orders', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
 
-  <!-- ===== Page Wrapper Start ===== -->
-  <div class="flex h-screen overflow-hidden">
-    <!-- ===== Sidebar Start ===== -->
-    <include src="./partials/sidebar.html"></include>
-    <!-- ===== Sidebar End ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
 
-    <!-- ===== Content Area Start ===== -->
-    <div
-      class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden"
-    >
-      <!-- ===== Header Start ===== -->
-      <include src="./partials/header.html" />
-      <!-- ===== Header End ===== -->
+      <!-- ===== Content Area Start ===== -->
+      <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
 
-      <!-- ===== Main Content Start ===== -->
-      <main>
-        <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
 
-        <div class="flex flex-col gap-10">
-          <include src="./partials/table-03.html" />
-        </div>
-      </div>
+            <!-- Page Header -->
+            <div class="mb-8 animate-in">
+              <h1 class="text-2xl font-bold text-black dark:text-white md:text-3xl">
+                Orders
+              </h1>
+              <p class="mt-1 text-gray-500 dark:text-gray-400">
+                Manage and track all your rental orders
+              </p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
+              <!-- Total Orders -->
+              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-1">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Orders</p>
+                    <h3 id="totalOrders" class="mt-1 text-2xl font-bold text-black dark:text-white">-</h3>
+                  </div>
+                  <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Orders -->
+              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-2">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
+                    <h3 id="pendingOrders" class="mt-1 text-2xl font-bold text-yellow-500">-</h3>
+                  </div>
+                  <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500/10">
+                    <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Completed Orders -->
+              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+                    <h3 id="completedOrders" class="mt-1 text-2xl font-bold text-green-500">-</h3>
+                  </div>
+                  <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Orders Table Card -->
+            <div class="rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-4">
+              <!-- Table Header with Search -->
+              <div class="p-6 border-b border-gray-100 dark:border-strokedark">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 class="text-lg font-semibold text-black dark:text-white">All Orders</h2>
+
+                  <!-- Search Input -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      id="searchInput"
+                      placeholder="Search orders..."
+                      class="search-input w-full sm:w-64 rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:border-primary focus:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
+                    />
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="flex gap-2 mt-4">
+                  <button onclick="filterOrders('all')" id="filter-all" class="filter-btn active px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white transition-all">
+                    All
+                  </button>
+                  <button onclick="filterOrders('pending')" id="filter-pending" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
+                    Pending
+                  </button>
+                  <button onclick="filterOrders('paid')" id="filter-paid" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
+                    Paid
+                  </button>
+                </div>
+              </div>
+
+              <!-- Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b border-gray-100 dark:border-strokedark">
+                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Order
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                        Customer
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Rental Date
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                        Amount
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTableBody">
+                    <!-- Loading Skeleton -->
+                    <tr class="loading-row">
+                      <td class="px-6 py-4"><div class="skeleton h-10 w-24"></div></td>
+                      <td class="px-6 py-4 hidden sm:table-cell"><div class="skeleton h-6 w-32"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-28"></div></td>
+                      <td class="px-6 py-4 hidden md:table-cell"><div class="skeleton h-6 w-20"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-16"></div></td>
+                    </tr>
+                    <tr class="loading-row">
+                      <td class="px-6 py-4"><div class="skeleton h-10 w-24"></div></td>
+                      <td class="px-6 py-4 hidden sm:table-cell"><div class="skeleton h-6 w-32"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-28"></div></td>
+                      <td class="px-6 py-4 hidden md:table-cell"><div class="skeleton h-6 w-20"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-16"></div></td>
+                    </tr>
+                    <tr class="loading-row">
+                      <td class="px-6 py-4"><div class="skeleton h-10 w-24"></div></td>
+                      <td class="px-6 py-4 hidden sm:table-cell"><div class="skeleton h-6 w-32"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-28"></div></td>
+                      <td class="px-6 py-4 hidden md:table-cell"><div class="skeleton h-6 w-20"></div></td>
+                      <td class="px-6 py-4"><div class="skeleton h-6 w-16"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden empty-state">
+                  <div class="flex flex-col items-center justify-center py-12">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-meta-4 flex items-center justify-center mb-4">
+                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                      </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-black dark:text-white mb-1">No orders yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Orders will appear here once customers book your listings</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </main>
-        </div>
-        </div>
-        </body>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+    <script>
+      let allOrders = [];
+      let currentFilter = 'all';
+
+      function filterOrders(filter) {
+        currentFilter = filter;
+
+        // Update button styles
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.classList.remove('bg-primary', 'text-white');
+          btn.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-meta-4', 'dark:text-gray-300');
+        });
+
+        const activeBtn = document.getElementById(`filter-${filter}`);
+        activeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-meta-4', 'dark:text-gray-300');
+        activeBtn.classList.add('bg-primary', 'text-white');
+
+        renderOrders();
+      }
+
+      function renderOrders() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const tableBody = document.getElementById('ordersTableBody');
+        const emptyState = document.getElementById('emptyState');
+
+        // Filter orders
+        let filteredOrders = allOrders.filter(order => {
+          const matchesFilter = currentFilter === 'all' ||
+            (order.status && order.status.toLowerCase() === currentFilter);
+
+          const matchesSearch = !searchTerm ||
+            (order.orderNumber && order.orderNumber.toString().includes(searchTerm)) ||
+            (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
+            (order.rentalProduct && order.rentalProduct.toLowerCase().includes(searchTerm));
+
+          return matchesFilter && matchesSearch;
+        });
+
+        // Clear table
+        tableBody.innerHTML = '';
+
+        if (filteredOrders.length === 0) {
+          emptyState.classList.remove('hidden');
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        // Render orders
+        filteredOrders.forEach(order => {
+          const row = createOrderRow(order);
+          tableBody.appendChild(row);
+        });
+      }
+
+      function createOrderRow(order) {
+        const row = document.createElement('tr');
+        row.className = 'order-row border-b border-gray-50 dark:border-strokedark';
+        row.onclick = () => window.location.href = `/order.html?id=${order.orderNumber}`;
+
+        // Status badge class
+        let statusClass = 'status-pending';
+        let statusIcon = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>';
+
+        if (order.status === 'Paid' || order.status === 'Completed') {
+          statusClass = 'status-paid';
+        } else if (order.status === 'Cancelled') {
+          statusClass = 'status-cancelled';
+        }
+
+        row.innerHTML = `
+          <td class="px-6 py-4">
+            <div class="flex flex-col">
+              <span class="font-semibold text-black dark:text-white">#${order.orderNumber || 'N/A'}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">${order.customerName || 'Customer'}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 hidden sm:table-cell">
+            <span class="text-sm text-gray-700 dark:text-gray-300">${order.customerName || 'N/A'}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-700 dark:text-gray-300">${order.rentalDate || 'N/A'}</span>
+          </td>
+          <td class="px-6 py-4 hidden md:table-cell">
+            <span class="font-medium text-black dark:text-white">$${order.orderAmount || '0.00'}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="status-badge ${statusClass}">
+              ${statusIcon}
+              ${order.status || 'Pending'}
+            </span>
+          </td>
+        `;
+
+        return row;
+      }
+
+      // Search functionality
+      document.getElementById('searchInput').addEventListener('input', renderOrders);
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+        authDomain: "ryntit-b503c.firebaseapp.com",
+        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+        projectId: "ryntit-b503c",
+        storageBucket: "ryntit-b503c.appspot.com",
+        messagingSenderId: "908115066071",
+        appId: "1:908115066071:web:1de252c17cce4346be0492",
+        measurementId: "G-PDBZNLKYKC"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      async function getOrderIds() {
+        const ordersCollection = collection(db, "vendors", auth.currentUser.uid, "orders");
+        const ordersSnapshot = await getDocs(ordersCollection);
+        return ordersSnapshot.docs.map(doc => doc.id);
+      }
+
+      async function getOrderDetails(orderId) {
+        const orderDocRef = doc(db, "vendors", auth.currentUser.uid, "orders", orderId);
+        const orderDocSnapshot = await getDoc(orderDocRef);
+        return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
+      }
+
+      async function loadOrders() {
+        try {
+          const orderIds = await getOrderIds();
+          const orderDetailsPromises = orderIds.map(orderId => getOrderDetails(orderId));
+          const orderDetails = await Promise.all(orderDetailsPromises);
+
+          // Filter out null values and sort by date
+          allOrders = orderDetails.filter(order => order !== null);
+          allOrders.sort((a, b) => {
+            const dateA = new Date(a.earliestRentalDate || a.rentalDate);
+            const dateB = new Date(b.earliestRentalDate || b.rentalDate);
+            return dateB - dateA; // Most recent first
+          });
+
+          // Update stats
+          const totalOrders = allOrders.length;
+          const pendingOrders = allOrders.filter(o => o.status === 'Pending' || !o.status).length;
+          const completedOrders = allOrders.filter(o => o.status === 'Paid' || o.status === 'Completed').length;
+
+          document.getElementById('totalOrders').textContent = totalOrders;
+          document.getElementById('pendingOrders').textContent = pendingOrders;
+          document.getElementById('completedOrders').textContent = completedOrders;
+
+          // Remove loading skeletons
+          document.querySelectorAll('.loading-row').forEach(row => row.remove());
+
+          // Render orders
+          renderOrders();
+
+        } catch (error) {
+          console.error("Error loading orders:", error);
+          document.querySelectorAll('.loading-row').forEach(row => row.remove());
+          document.getElementById('emptyState').classList.remove('hidden');
+        }
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          loadOrders();
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    </script>
+  </body>
 </html>

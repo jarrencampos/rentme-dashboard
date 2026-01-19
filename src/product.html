@@ -597,7 +597,7 @@
   <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getFirestore, doc, Timestamp, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getFirestore, doc, Timestamp, getDoc, updateDoc, deleteDoc, collection, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
@@ -954,7 +954,8 @@
           const productRef = doc(db, "products", productId);
           const detailsRef = doc(db, "details", productData.details_id);
 
-          if (selectedBlockDates && selectedBlockDates.length > 0) {
+          // Always update block_dates if changed (including clearing all dates)
+          if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) {
             detailUpdates.block_dates = selectedBlockDates;
           }
 
@@ -1000,10 +1001,10 @@
             const fileName = uniqueFileName('second', image2File);
             imageUploadPromises.push(
               uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName)
-                .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
+                .then(url => setDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
                   image_url: url,
                   timestamp: Timestamp.now()
-                }))
+                }, { merge: true }))
             );
           }
 
@@ -1011,10 +1012,10 @@
             const fileName = uniqueFileName('third', image3File);
             imageUploadPromises.push(
               uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName)
-                .then(url => updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
+                .then(url => setDoc(doc(db, "details", productData.details_id, "photos", "third"), {
                   image_url: url,
                   timestamp: Timestamp.now()
-                }))
+                }, { merge: true }))
             );
           }
 
@@ -1031,20 +1032,20 @@
           // Remove secondary image if marked and no new file uploaded
           if (window.imagesToRemove.secondary && !image2File) {
             imageRemovalPromises.push(
-              updateDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
+              setDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
                 image_url: '',
                 timestamp: Timestamp.now()
-              })
+              }, { merge: true })
             );
           }
 
           // Remove third image if marked and no new file uploaded
           if (window.imagesToRemove.third && !image3File) {
             imageRemovalPromises.push(
-              updateDoc(doc(db, "details", productData.details_id, "photos", "third"), {
+              setDoc(doc(db, "details", productData.details_id, "photos", "third"), {
                 image_url: '',
                 timestamp: Timestamp.now()
-              })
+              }, { merge: true })
             );
           }
 
