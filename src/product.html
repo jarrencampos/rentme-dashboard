@@ -448,6 +448,60 @@
               </div>
             </div>
 
+            <!-- Addons Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20">
+                  <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Add-ons</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Optional extras customers can add to their rental</p>
+                </div>
+              </div>
+
+              <div id="addons-container" class="space-y-4">
+                <!-- Addons will be dynamically added here -->
+              </div>
+
+              <button type="button" id="add-addon-btn"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add an add-on
+              </button>
+            </div>
+
+            <!-- Variations Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-pink-500/10 dark:bg-pink-500/20">
+                  <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Variations</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Options like colors or sizes customers can choose from</p>
+                </div>
+              </div>
+
+              <div id="variations-container" class="space-y-4">
+                <!-- Variations will be dynamically added here -->
+              </div>
+
+              <button type="button" id="add-variation-btn"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/10 rounded-xl hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add a variation
+              </button>
+            </div>
+
             <!-- Availability Section -->
             <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
               <div class="flex items-center gap-3 mb-6">
@@ -672,8 +726,18 @@
                     mainCategory: detailsData.mainCategory || '',
                     subCategory: detailsData.subCategory || '',
                     mainImageFile: productData.image_url || '',
-                    block_dates: detailsData.block_dates || []
+                    block_dates: detailsData.block_dates || [],
+                    addons: detailsData.addons || [],
+                    variations: detailsData.variations || []
                   };
+
+                  // Load addons and variations into UI
+                  if (detailsData.addons) {
+                    window.loadAddons(detailsData.addons);
+                  }
+                  if (detailsData.variations) {
+                    window.loadVariations(detailsData.variations);
+                  }
 
                   const today = new Date();
                   const oneYearFromToday = new Date();
@@ -764,6 +828,16 @@
           if (sortedInitial[i] !== sortedNew[i]) return true;
         }
         return false;
+      }
+
+      function haveAddonsChanged(initialAddons, newAddons) {
+        if (initialAddons.length !== newAddons.length) return true;
+        return JSON.stringify(initialAddons) !== JSON.stringify(newAddons);
+      }
+
+      function haveVariationsChanged(initialVariations, newVariations) {
+        if (initialVariations.length !== newVariations.length) return true;
+        return JSON.stringify(initialVariations) !== JSON.stringify(newVariations);
       }
 
       document.getElementById('listingForm').addEventListener('submit', async function(event) {
@@ -877,6 +951,9 @@
         }
 
         try {
+          const currentAddons = window.collectAddonsData();
+          const currentVariations = window.collectVariationsData();
+
           const hasChanges = (
             initialValues.title !== document.getElementById('title').value ||
             initialValues.subtitle !== document.getElementById('subtitle').value ||
@@ -888,6 +965,8 @@
             initialValues.subCategory !== document.getElementById('subCategory').value ||
             initialValues.quantity !== document.getElementById('quantity').value ||
             haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
+            haveAddonsChanged(initialValues.addons, currentAddons) ||
+            haveVariationsChanged(initialValues.variations, currentVariations) ||
             document.getElementById('imageInput').files.length > 0 ||
             document.getElementById('imageInput2').files.length > 0 ||
             document.getElementById('imageInput3').files.length > 0 ||
@@ -957,6 +1036,16 @@
           // Always update block_dates if changed (including clearing all dates)
           if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) {
             detailUpdates.block_dates = selectedBlockDates;
+          }
+
+          // Update addons if changed
+          if (haveAddonsChanged(initialValues.addons, currentAddons)) {
+            detailUpdates.addons = currentAddons;
+          }
+
+          // Update variations if changed
+          if (haveVariationsChanged(initialValues.variations, currentVariations)) {
+            detailUpdates.variations = currentVariations;
           }
 
           if (Object.keys(productUpdates).length > 0) {
@@ -1185,6 +1274,307 @@
           subCategorySelect.disabled = true;
         }
       });
+    });
+  </script>
+
+  <!-- Addons and Variations Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Track addons and variations
+      window.addonsData = [];
+      window.variationsData = [];
+      let addonCounter = 0;
+      let variationCounter = 0;
+
+      const addonsContainer = document.getElementById('addons-container');
+      const variationsContainer = document.getElementById('variations-container');
+      const addAddonBtn = document.getElementById('add-addon-btn');
+      const addVariationBtn = document.getElementById('add-variation-btn');
+
+      // Generate unique ID
+      function generateId(prefix) {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+
+      // Create addon card HTML
+      function createAddonCard(addon = null) {
+        const id = addon?.id || generateId('addon');
+        const index = addonCounter++;
+
+        const card = document.createElement('div');
+        card.className = 'addon-card bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700';
+        card.dataset.addonId = id;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Add-on ${index + 1}</span>
+            <button type="button" class="remove-addon-btn text-gray-400 hover:text-red-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Name</label>
+              <input type="text" class="addon-name modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+                placeholder="e.g., Propane Tank" value="${addon?.name || ''}" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Price</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                <input type="number" class="addon-price modern-input w-full pl-7 pr-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+                  placeholder="0.00" step="0.01" min="0" value="${addon?.price || ''}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
+            <input type="text" class="addon-description modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+              placeholder="Brief description of this add-on" value="${addon?.description || ''}" />
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-3">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Price Type:</label>
+              <div class="flex items-center gap-2">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="radio" name="priceType_${id}" value="flat" class="addon-price-type sr-only peer" ${(!addon?.priceType || addon?.priceType === 'flat') ? 'checked' : ''} />
+                  <span class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-500/10 peer-checked:text-orange-600 dark:peer-checked:text-orange-400 text-gray-600 dark:text-gray-400 transition-colors">Flat</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="radio" name="priceType_${id}" value="perday" class="addon-price-type sr-only peer" ${addon?.priceType === 'perday' ? 'checked' : ''} />
+                  <span class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-500/10 peer-checked:text-orange-600 dark:peer-checked:text-orange-400 text-gray-600 dark:text-gray-400 transition-colors">Per Day</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="addon-required sr-only peer" ${addon?.required ? 'checked' : ''} />
+              <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+              <span class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">Required</span>
+            </label>
+          </div>
+        `;
+
+        // Add remove event listener
+        card.querySelector('.remove-addon-btn').addEventListener('click', () => {
+          card.remove();
+          updateAddonNumbers();
+        });
+
+        return card;
+      }
+
+      // Update addon numbering after removal
+      function updateAddonNumbers() {
+        const cards = addonsContainer.querySelectorAll('.addon-card');
+        cards.forEach((card, index) => {
+          card.querySelector('span').textContent = `Add-on ${index + 1}`;
+        });
+      }
+
+      // Create variation card HTML
+      function createVariationCard(variation = null) {
+        const id = variation?.id || generateId('var');
+        const index = variationCounter++;
+
+        const card = document.createElement('div');
+        card.className = 'variation-card bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700';
+        card.dataset.variationId = id;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Variation ${index + 1}</span>
+            <button type="button" class="remove-variation-btn text-gray-400 hover:text-red-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Name</label>
+              <input type="text" class="variation-name modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+                placeholder="e.g., Ball Pit Colors" value="${variation?.name || ''}" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Selection Type</label>
+              <div class="relative">
+                <select class="variation-type modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none text-sm appearance-none cursor-pointer">
+                  <option value="single" ${(!variation?.type || variation?.type === 'single') ? 'selected' : ''}>Single choice</option>
+                  <option value="multiple" ${variation?.type === 'multiple' ? 'selected' : ''}>Multiple choices</option>
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Choices</label>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="variation-required sr-only peer" ${variation?.required ? 'checked' : ''} />
+                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-pink-500"></div>
+                <span class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">Required</span>
+              </label>
+            </div>
+
+            <div class="choices-container space-y-2">
+              <!-- Choices will be added here -->
+            </div>
+
+            <button type="button" class="add-choice-btn mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              Add choice
+            </button>
+          </div>
+        `;
+
+        const choicesContainer = card.querySelector('.choices-container');
+        const addChoiceBtn = card.querySelector('.add-choice-btn');
+
+        // Add existing choices if any
+        if (variation?.choices && variation.choices.length > 0) {
+          variation.choices.forEach(choice => {
+            choicesContainer.appendChild(createChoiceInput(choice));
+          });
+        }
+
+        // Add choice button event
+        addChoiceBtn.addEventListener('click', () => {
+          choicesContainer.appendChild(createChoiceInput());
+        });
+
+        // Remove variation event
+        card.querySelector('.remove-variation-btn').addEventListener('click', () => {
+          card.remove();
+          updateVariationNumbers();
+        });
+
+        return card;
+      }
+
+      // Create choice input
+      function createChoiceInput(choice = null) {
+        const id = choice?.id || generateId('choice');
+
+        const choiceDiv = document.createElement('div');
+        choiceDiv.className = 'choice-item flex items-center gap-2';
+        choiceDiv.dataset.choiceId = id;
+
+        choiceDiv.innerHTML = `
+          <input type="text" class="choice-name modern-input flex-1 px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+            placeholder="e.g., Rainbow Mix" value="${choice?.name || ''}" />
+          <button type="button" class="remove-choice-btn text-gray-400 hover:text-red-500 transition-colors p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        `;
+
+        choiceDiv.querySelector('.remove-choice-btn').addEventListener('click', () => {
+          choiceDiv.remove();
+        });
+
+        return choiceDiv;
+      }
+
+      // Update variation numbering after removal
+      function updateVariationNumbers() {
+        const cards = variationsContainer.querySelectorAll('.variation-card');
+        cards.forEach((card, index) => {
+          card.querySelector('span').textContent = `Variation ${index + 1}`;
+        });
+      }
+
+      // Add addon button click
+      addAddonBtn.addEventListener('click', () => {
+        addonsContainer.appendChild(createAddonCard());
+      });
+
+      // Add variation button click
+      addVariationBtn.addEventListener('click', () => {
+        variationsContainer.appendChild(createVariationCard());
+      });
+
+      // Collect addons data from DOM
+      window.collectAddonsData = function() {
+        const addons = [];
+        addonsContainer.querySelectorAll('.addon-card').forEach(card => {
+          const name = card.querySelector('.addon-name').value.trim();
+          if (name) {
+            addons.push({
+              id: card.dataset.addonId,
+              name: name,
+              description: card.querySelector('.addon-description').value.trim(),
+              price: parseFloat(card.querySelector('.addon-price').value) || 0,
+              priceType: card.querySelector('.addon-price-type:checked')?.value || 'flat',
+              required: card.querySelector('.addon-required').checked
+            });
+          }
+        });
+        return addons;
+      };
+
+      // Collect variations data from DOM
+      window.collectVariationsData = function() {
+        const variations = [];
+        variationsContainer.querySelectorAll('.variation-card').forEach(card => {
+          const name = card.querySelector('.variation-name').value.trim();
+          if (name) {
+            const choices = [];
+            card.querySelectorAll('.choice-item').forEach(choiceItem => {
+              const choiceName = choiceItem.querySelector('.choice-name').value.trim();
+              if (choiceName) {
+                choices.push({
+                  id: choiceItem.dataset.choiceId,
+                  name: choiceName
+                });
+              }
+            });
+
+            variations.push({
+              id: card.dataset.variationId,
+              name: name,
+              type: card.querySelector('.variation-type').value,
+              required: card.querySelector('.variation-required').checked,
+              choices: choices
+            });
+          }
+        });
+        return variations;
+      };
+
+      // Load addons into UI
+      window.loadAddons = function(addons) {
+        addonsContainer.innerHTML = '';
+        addonCounter = 0;
+        if (addons && addons.length > 0) {
+          addons.forEach(addon => {
+            addonsContainer.appendChild(createAddonCard(addon));
+          });
+        }
+      };
+
+      // Load variations into UI
+      window.loadVariations = function(variations) {
+        variationsContainer.innerHTML = '';
+        variationCounter = 0;
+        if (variations && variations.length > 0) {
+          variations.forEach(variation => {
+            variationsContainer.appendChild(createVariationCard(variation));
+          });
+        }
+      };
     });
   </script>
 
