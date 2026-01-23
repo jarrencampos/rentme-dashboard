@@ -33,6 +33,59 @@ function setReferralCookie() {
   }
 }
 
+// Send email notification for new vendor signup
+async function sendVendorSignupNotification(vendorData) {
+  console.log('Sending vendor signup notification email...');
+
+  try {
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        subject: `New Vendor Signup: ${vendorData.businessName || vendorData.name}`,
+        message: `
+A new vendor has signed up and is pending approval.
+
+=== VENDOR DETAILS ===
+
+Name: ${vendorData.name}
+Email: ${vendorData.email}
+Phone: ${vendorData.phone || 'Not provided'}
+Business Name: ${vendorData.businessName || 'Not provided'}
+
+=== BUSINESS INFO ===
+
+Inventory Size: ${vendorData.inventoryCount || 'Not specified'}
+Estimated Annual Revenue: ${vendorData.annualRevenue || 'Not specified'}
+Primary Rental Category: ${vendorData.rentalCategory || 'Not specified'}
+How They Found Us: ${vendorData.hearAboutUs || 'Not specified'}
+
+=== ADDITIONAL INFO ===
+
+Referral: ${vendorData.ref || 'None'}
+Signup Date: ${new Date().toLocaleString()}
+Vendor UID: ${vendorData.uid}
+
+---
+Please review this vendor in the admin dashboard.
+        `.trim()
+      }),
+    });
+
+    if (response.ok) {
+      console.log('Vendor notification email sent successfully!');
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to send vendor notification email:', response.status, errorData);
+    }
+  } catch (error) {
+    console.error('Error sending vendor notification (this is expected on localhost):', error);
+    // Don't block signup if email fails
+  }
+}
+
 function initSignUpPage() {
   // Only run on signup page
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -53,15 +106,38 @@ function initSignUpPage() {
     createAccountForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      // Get form elements
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const submitLoading = document.getElementById('submitLoading');
+
+      // Collect form data
       const email = document.getElementById('email')?.value;
       const password = document.getElementById('password')?.value;
       const name = document.getElementById('name')?.value;
       const businessName = document.getElementById('businessName')?.value;
       const phone = document.getElementById('phone')?.value;
+      const inventoryCount = document.getElementById('inventoryCount')?.value;
+      const annualRevenue = document.getElementById('annualRevenue')?.value;
+      const rentalCategory = document.getElementById('rentalCategory')?.value;
+      const hearAboutUs = document.getElementById('hearAboutUs')?.value;
+      const agreeTerms = document.getElementById('agreeTerms')?.checked;
 
       if (!email || !password || !name) {
         alert('Please fill in all required fields');
         return;
+      }
+
+      if (!agreeTerms) {
+        alert('Please agree to the Terms of Service and Privacy Policy');
+        return;
+      }
+
+      // Show loading state
+      if (submitBtn && submitText && submitLoading) {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitLoading.classList.remove('hidden');
       }
 
       try {
@@ -69,9 +145,8 @@ function initSignUpPage() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Save vendor information in Firestore
-        const userDocRef = doc(db, 'vendors', user.uid);
-        await setDoc(userDocRef, {
+        // Prepare vendor data
+        const vendorData = {
           uid: user.uid,
           name: name,
           phone: phone || '',
@@ -82,13 +157,36 @@ function initSignUpPage() {
           pending_deposits: 0,
           total_bookings: 0,
           total_sales: 0,
-        });
+          // Qualifying data
+          inventoryCount: inventoryCount || '',
+          annualRevenue: annualRevenue || '',
+          rentalCategory: rentalCategory || '',
+          hearAboutUs: hearAboutUs || '',
+          // Status for manual approval
+          status: 'pending_approval',
+          createdAt: new Date().toISOString(),
+        };
+
+        // Save vendor information in Firestore
+        const userDocRef = doc(db, 'vendors', user.uid);
+        await setDoc(userDocRef, vendorData);
+
+        // Send email notification (don't await - let it happen in background)
+        sendVendorSignupNotification(vendorData);
 
         createAccountForm.reset();
-        window.location.href = 'index.html';
+        // Redirect to pending approval page instead of dashboard
+        window.location.href = 'pending-approval.html';
       } catch (error) {
         console.error('Error signing up:', error);
         alert(error.message);
+
+        // Reset button state
+        if (submitBtn && submitText && submitLoading) {
+          submitBtn.disabled = false;
+          submitText.classList.remove('hidden');
+          submitLoading.classList.add('hidden');
+        }
       }
     });
   }

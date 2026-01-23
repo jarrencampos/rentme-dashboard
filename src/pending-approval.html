@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Pending Approval | RentMe</title>
+  </head>
+
+  <body
+    x-data="{ page: 'pending-approval', loaded: true, darkMode: true }"
+    x-init="
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex min-h-screen items-center justify-center p-6">
+      <div class="w-full max-w-lg">
+        <!-- Card -->
+        <div class="rounded-2xl border border-stroke bg-white p-8 shadow-default dark:border-strokedark dark:bg-boxdark sm:p-12 text-center">
+          <!-- Logo -->
+          <a href="index.html" class="inline-block mb-8">
+            <img src="./images/logo/rentme-blue.png" alt="RentMe Logo" class="h-10 mx-auto" />
+          </a>
+
+          <!-- Icon -->
+          <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-warning/10">
+            <svg class="h-10 w-10 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+
+          <!-- Title -->
+          <h1 class="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl">
+            Account Pending Approval
+          </h1>
+
+          <!-- Message -->
+          <p class="mb-6 text-body dark:text-bodydark">
+            Thank you for signing up! Your vendor account is currently under review. We'll notify you by email once your account has been approved.
+          </p>
+
+          <!-- What to expect -->
+          <div class="mb-8 rounded-xl bg-gray-50 dark:bg-boxdark-2 p-6 text-left">
+            <h3 class="mb-4 font-semibold text-black dark:text-white">What happens next?</h3>
+            <ul class="space-y-3 text-sm text-body dark:text-bodydark">
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">1</span>
+                <span>Our team will review your application</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">2</span>
+                <span>You'll receive an email once approved</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">3</span>
+                <span>Start adding your rental inventory</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Estimated time -->
+          <p class="mb-8 text-sm text-body dark:text-bodydark">
+            Approval typically takes <span class="font-medium text-black dark:text-white">1-2 business days</span>
+          </p>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="mailto:support@rentme.co"
+              class="inline-flex items-center justify-center gap-2 rounded-xl border border-stroke dark:border-strokedark py-3 px-6 font-medium text-black dark:text-white transition hover:bg-gray-50 dark:hover:bg-boxdark-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Contact Support
+            </a>
+            <button
+              id="signOutBtn"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary py-3 px-6 font-medium text-white transition hover:bg-primary/90"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer note -->
+        <p class="mt-6 text-center text-sm text-body dark:text-bodydark">
+          Wrong account? <a href="signin.html" class="text-primary hover:underline">Sign in with a different account</a>
+        </p>
+      </div>
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

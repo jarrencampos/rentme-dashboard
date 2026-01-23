@@ -1,15 +1,24 @@
 // js/pages/signin-page.js - Sign In Page Logic
-import { signIn, resetPassword, initAuthStateListener } from '../auth-service.js';
+import { signIn, resetPassword, initAuthStateListener, getVendorData } from '../auth-service.js';
 
 function initSignInPage() {
   // Only run on signin page
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   if (currentPage !== 'signin.html') return;
 
-  // Redirect if already signed in
+  // Redirect if already signed in - check approval status first
   initAuthStateListener({
-    redirectIfSignedIn: true,
-    redirectIfSignedOut: false
+    redirectIfSignedIn: false,
+    redirectIfSignedOut: false,
+    onSignedIn: async (user) => {
+      // User is already signed in, check their status and redirect
+      const vendorResult = await getVendorData(user.uid);
+      if (vendorResult.success && vendorResult.data.status === 'pending_approval') {
+        window.location.href = 'pending-approval.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
   });
 
   const loginButton = document.getElementById('loginButton');
@@ -36,7 +45,20 @@ function initSignInPage() {
 
       if (result.success) {
         if (messageEl) messageEl.textContent = 'Login successful!';
-        window.location.href = 'index.html';
+
+        // Check vendor approval status before redirecting
+        const vendorResult = await getVendorData(result.user.uid);
+        console.log('Vendor status check:', vendorResult);
+
+        if (vendorResult.success && vendorResult.data.status === 'pending_approval') {
+          console.log('Redirecting to pending approval page');
+          window.location.href = 'pending-approval.html';
+          return; // Prevent any further execution
+        } else {
+          console.log('Redirecting to dashboard');
+          window.location.href = 'index.html';
+          return;
+        }
       } else {
         if (messageEl) messageEl.textContent = 'Error: ' + result.error;
       }

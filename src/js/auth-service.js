@@ -15,6 +15,9 @@ import {
 // Pages that don't require authentication
 const PUBLIC_PAGES = ['signin.html', 'signup.html', 'login.html', 'terms.html', 'privacy.html'];
 
+// Pages accessible while pending approval
+const PENDING_ALLOWED_PAGES = ['pending-approval.html', 'terms.html', 'privacy.html'];
+
 // Get current page name
 function getCurrentPage() {
   return window.location.pathname.split('/').pop() || 'index.html';
@@ -25,10 +28,23 @@ function isPublicPage() {
   return PUBLIC_PAGES.includes(getCurrentPage());
 }
 
+// Check if current page is allowed for pending users
+function isPendingAllowedPage() {
+  return PENDING_ALLOWED_PAGES.includes(getCurrentPage());
+}
+
 // Redirect to sign in
 function redirectToSignIn() {
   if (!isPublicPage()) {
     window.location.href = 'signin.html';
+  }
+}
+
+// Redirect to pending approval page
+function redirectToPendingApproval() {
+  const currentPage = getCurrentPage();
+  if (!isPendingAllowedPage() && !PUBLIC_PAGES.includes(currentPage)) {
+    window.location.href = 'pending-approval.html';
   }
 }
 
@@ -40,13 +56,49 @@ function redirectToDashboard() {
   }
 }
 
+// Check vendor approval status
+async function checkVendorApprovalStatus(uid) {
+  try {
+    const docSnap = await getDoc(doc(db, "vendors", uid));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.status || 'approved'; // Default to approved for existing vendors without status
+    }
+    return 'approved'; // If no vendor doc, allow access (edge case)
+  } catch (error) {
+    console.error("Error checking vendor status:", error);
+    return 'approved'; // On error, don't block
+  }
+}
+
 // Initialize auth state listener
 export function initAuthStateListener(options = {}) {
-  const { onSignedIn, onSignedOut, redirectIfSignedOut = true, redirectIfSignedIn = false } = options;
+  const { onSignedIn, onSignedOut, redirectIfSignedOut = true, redirectIfSignedIn = false, skipApprovalCheck = false } = options;
 
   return onAuthStateChanged(auth, async (user) => {
     if (user) {
       console.log("User signed in:", user.uid);
+
+      // Check vendor approval status (unless skipped)
+      if (!skipApprovalCheck) {
+        const status = await checkVendorApprovalStatus(user.uid);
+        const currentPage = getCurrentPage();
+
+        if (status === 'pending_approval') {
+          // Vendor is pending - redirect to pending page if trying to access dashboard
+          if (!isPendingAllowedPage() && !PUBLIC_PAGES.includes(currentPage)) {
+            redirectToPendingApproval();
+            return;
+          }
+        } else if (status === 'approved' || !status) {
+          // Vendor is approved - redirect away from pending page
+          if (currentPage === 'pending-approval.html') {
+            window.location.href = 'index.html';
+            return;
+          }
+        }
+      }
+
       if (onSignedIn) await onSignedIn(user);
       if (redirectIfSignedIn) redirectToDashboard();
     } else {

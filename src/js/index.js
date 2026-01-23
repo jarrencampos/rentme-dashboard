@@ -19,6 +19,7 @@ import './dashboard.js';
 import './pages/header.js';
 import './pages/signin-page.js';
 import './pages/signup-page.js';
+import './pages/pending-approval-page.js';
 import { logOut } from './auth-service.js';
 
 Alpine.plugin(persist);
