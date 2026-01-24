@@ -1,128 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In</title>
-</head>
+    <title>Sign In | RentMe Vendor</title>
+  </head>
 
-<body
-    x-data="{ page: 'signin', loaded: true, darkMode: true, stickyMenu: false, sidebarToggle: false, scrollTop: false }"
+  <body
+    x-data="{
+      page: 'signin',
+      loaded: true,
+      darkMode: true,
+      showPassword: false
+    }"
     x-init="
-          darkMode = JSON.parse(localStorage.getItem('darkMode'));
-          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+      darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
     :class="{'dark text-bodydark bg-boxdark-2': darkMode === true}"
->
+  >
     <!-- ===== Preloader Start ===== -->
     <include src="./partials/preloader.html"></include>
     <!-- ===== Preloader End ===== -->
 
     <!-- ===== Page Wrapper Start ===== -->
-    <div class="flex h-screen overflow-hidden">
-        <!-- ===== Content Area Start ===== -->
-        <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            <!-- ===== Main Content Start ===== -->
-            <main>
-                <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-                    <!-- ====== Forms Section Start ====== -->
-                    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                        <div class="flex flex-wrap items-center">
-                            <div class="hidden w-full xl:block xl:w-1/2">
-                                <div class="px-26 py-17.5 text-center">
-                                    <a class="mb-5.5 inline-block">
-                                        <img class="hidden dark:block" src="./images/logo/rentme-blue.png" alt="Logo" />
-                                        <img class="dark:hidden" src="./images/logo/rentme-blue.png" alt="Logo" />
-                                    </a>
-                                    <p class="font-medium 2xl:px-20">Sign in to your vendor account to manage your inventory!</p>
-                                    <span class="mt-15 inline-block">
-                                        <img src="./images/illustration/onboarding2.png" alt="illustration" />
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
-                                <div class="w-full p-4 sm:p-12.5 xl:p-17.5">
-                                    <h2 class="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">Vendor Dashboard</h2>
+    <div class="flex min-h-screen">
+      <!-- ===== Left Side - Branding ===== -->
+      <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-boxdark dark:to-boxdark-2 items-center justify-center p-12">
+        <div class="max-w-md text-center">
+          <a href="index.html" class="inline-block mb-8">
+            <img src="./images/logo/rentme-blue.png" alt="RentMe Logo" class="h-12" />
+          </a>
+          <h1 class="text-3xl font-bold text-black dark:text-white mb-4">
+            Welcome Back
+          </h1>
+          <p class="text-lg text-body dark:text-bodydark mb-8">
+            Sign in to manage your rental inventory and grow your business.
+          </p>
+          <img src="./images/illustration/onboarding2.png" alt="Vendor illustration" class="w-full max-w-sm mx-auto" />
 
-                                    <form id="loginForm">
-                                        <div class="mb-4">
-                                            <label class="mb-2.5 block font-medium text-black dark:text-white">Email</label>
-                                            <div class="relative">
-                                                <input
-                                                    type="email"
-                                                    id="loginEmail"
-                                                    placeholder="Enter your email"
-                                                    class="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-6">
-                                            <label class="mb-2.5 block font-medium text-black dark:text-white">Password</label>
-                                            <div class="relative">
-                                                <input
-                                                    type="password"
-                                                    id="signInPassword"
-                                                    placeholder="Enter your password"
-                                                    class="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-strokedark dark:bg-form-input dark:focus:border-primary"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-5">
-                                            <input
-                                                type="button"
-                                                id="loginButton"
-                                                value="Sign In"
-                                                class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
-                                            />
-                                        </div>
-
-                                        <div class="mt-6 text-center">
-                                            <p class="font-medium">
-                                                Don’t have an account?
-                                                <a href="signup.html" class="text-primary">Sign Up</a>
-                                            </p>
-                                            <button id="forgotPasswordButton">Forgot Password?</button>
-                                        </div>
-                                    </form>
-                                    <div id="loadingIndicator" style="display: none;">Loading...</div>
-                                    <div id="message"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- ====== Forms Section End ====== -->
-                </div>
-            </main>
-            <!-- ===== Main Content End ===== -->
+          <!-- Trust indicators -->
+          <div class="mt-8 flex items-center justify-center gap-6 text-sm text-body dark:text-bodydark">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span>Secure login</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span>24/7 access</span>
+            </div>
+          </div>
         </div>
-        <!-- ===== Content Area End ===== -->
+      </div>
+
+      <!-- ===== Right Side - Form ===== -->
+      <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+        <div class="w-full max-w-md">
+          <!-- Mobile logo -->
+          <div class="lg:hidden text-center mb-8">
+            <a href="index.html" class="inline-block">
+              <img src="./images/logo/rentme-blue.png" alt="RentMe Logo" class="h-10" />
+            </a>
+          </div>
+
+          <!-- Header -->
+          <div class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-black dark:text-white mb-2">
+              Sign in to your account
+            </h2>
+            <p class="text-body dark:text-bodydark">
+              Enter your credentials to access your vendor dashboard
+            </p>
+          </div>
+
+          <form id="loginForm">
+            <!-- Email -->
+            <div class="mb-5">
+              <label class="mb-2 block text-sm font-medium text-black dark:text-white">
+                Email Address
+              </label>
+              <div class="relative">
+                <input
+                  type="email"
+                  id="loginEmail"
+                  placeholder="you@example.com"
+                  required
+                  class="w-full rounded-xl border border-stroke bg-transparent py-3.5 pl-5 pr-12 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-body dark:text-bodydark">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-6">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-black dark:text-white">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  id="forgotPasswordButton"
+                  class="text-sm text-primary hover:underline focus:outline-none"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <div class="relative">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="signInPassword"
+                  placeholder="Enter your password"
+                  required
+                  class="w-full rounded-xl border border-stroke bg-transparent py-3.5 pl-5 pr-12 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-body dark:text-bodydark hover:text-primary transition focus:outline-none"
+                >
+                  <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <svg x-show="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sign In Button -->
+            <button
+              type="button"
+              id="loginButton"
+              class="w-full rounded-xl bg-primary py-3.5 px-6 font-medium text-white transition hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span id="loginText">Sign In</span>
+              <span id="loginLoading" class="hidden">
+                <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+
+            <!-- Message area -->
+            <div id="message" class="mt-4 text-center text-sm"></div>
+
+            <!-- Divider -->
+            <div class="my-8 flex items-center gap-4">
+              <div class="flex-1 h-px bg-stroke dark:bg-form-strokedark"></div>
+              <span class="text-sm text-body dark:text-bodydark">New to RentMe?</span>
+              <div class="flex-1 h-px bg-stroke dark:bg-form-strokedark"></div>
+            </div>
+
+            <!-- Sign Up Link -->
+            <a
+              href="signup.html"
+              class="flex w-full items-center justify-center gap-2 rounded-xl border border-stroke dark:border-form-strokedark py-3.5 px-6 font-medium text-black dark:text-white transition hover:bg-gray-50 dark:hover:bg-boxdark focus:outline-none"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              Create a vendor account
+            </a>
+          </form>
+
+          <!-- Footer -->
+          <p class="mt-8 text-center text-sm text-body dark:text-bodydark">
+            By signing in, you agree to our
+            <a href="terms.html" class="text-primary hover:underline">Terms</a>
+            and
+            <a href="privacy.html" class="text-primary hover:underline">Privacy Policy</a>
+          </p>
+        </div>
+      </div>
     </div>
     <!-- ===== Page Wrapper End ===== -->
-    <!-- SweetAlert2 for password reset notifications -->
+
+    <!-- SweetAlert2 for notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-      <style>
-        /* Define the custom button style */
-        .custom-ok-button {
-          background-color: #292929;
-          /* Green background */
-          color: white;
-          /* Text color */
-          border: none;
-          /* Remove border */
-          padding: 10px 20px;
-          /* Add padding */
-          font-size: 16px;
-          /* Adjust font size */
-          border-radius: 5px;
-          /* Round the corners */
-        }
-        /* Hover effect for the button */
-        .custom-ok-button:hover {
-          background-color: #000000;
-          /* Darker green on hover */
-        }
-      </style>
-</body>
+  </body>
 </html>

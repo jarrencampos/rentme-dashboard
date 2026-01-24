@@ -26,6 +26,21 @@ function initPendingApprovalPage() {
       }
     });
   }
+
+  // Switch account button - sign out and redirect to sign in
+  const switchAccountBtn = document.getElementById('switchAccountBtn');
+  if (switchAccountBtn) {
+    switchAccountBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await signOut(auth);
+        window.location.href = 'signin.html';
+      } catch (error) {
+        console.error('Error signing out:', error);
+        alert('Error signing out. Please try again.');
+      }
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initPendingApprovalPage);
