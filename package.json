@@ -47,9 +47,11 @@
     "alpinejs": "^3.10.3",
     "apexcharts": "^3.36.3",
     "firebase": "^11.6.1",
+    "firebase-admin": "^12.0.0",
     "flatpickr": "^4.6.13",
     "jsvectormap": "^1.5.1",
     "nodemailer": "^7.0.12",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "stripe": "^14.0.0"
   }
 }

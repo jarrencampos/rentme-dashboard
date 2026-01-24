@@ -118,6 +118,36 @@
       .order-link:hover {
         text-decoration: underline;
       }
+
+      /* Stripe Connect styles */
+      .stripe-connect-card {
+        background: linear-gradient(135deg, #635bff 0%, #7c3aed 100%);
+        transition: all 0.3s ease;
+      }
+      .stripe-connect-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(99, 91, 255, 0.3);
+      }
+      .stripe-connected-card {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      }
+      .stripe-pending-card {
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      }
+      .stripe-btn {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
+      }
+      .stripe-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.02);
+      }
+      .balance-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
     </style>
   </head>
 
@@ -156,6 +186,102 @@
               <p class="mt-1 text-gray-500 dark:text-gray-400">
                 Track your earnings and transaction history
               </p>
+            </div>
+
+            <!-- Stripe Connect Section -->
+            <div id="stripeConnectSection" class="mb-8 animate-in delay-1">
+              <!-- Loading State -->
+              <div id="stripeLoading" class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark">
+                <div class="flex items-center gap-4">
+                  <div class="skeleton h-12 w-12 rounded-xl"></div>
+                  <div class="flex-1">
+                    <div class="skeleton h-5 w-48 mb-2"></div>
+                    <div class="skeleton h-4 w-64"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Not Connected State -->
+              <div id="stripeNotConnected" class="hidden stripe-connect-card rounded-2xl p-6 text-white">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+                      <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-bold">Connect with Stripe to Get Paid</h3>
+                      <p class="mt-1 text-white/80 text-sm">Set up your payout account to receive payments from rentals. It only takes a few minutes.</p>
+                    </div>
+                  </div>
+                  <button id="connectStripeBtn" onclick="connectStripe()" class="stripe-btn flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Connect Stripe Account
+                  </button>
+                </div>
+              </div>
+
+              <!-- Onboarding Incomplete State -->
+              <div id="stripeOnboardingIncomplete" class="hidden stripe-pending-card rounded-2xl p-6 text-white">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-bold">Complete Your Stripe Setup</h3>
+                      <p class="mt-1 text-white/80 text-sm">Your Stripe account is pending. Complete the setup to start receiving payouts.</p>
+                    </div>
+                  </div>
+                  <button onclick="connectStripe()" class="stripe-btn flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    Continue Setup
+                  </button>
+                </div>
+              </div>
+
+              <!-- Connected State -->
+              <div id="stripeConnected" class="hidden stripe-connected-card rounded-2xl p-6 text-white">
+                <div class="flex flex-col gap-4">
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-start gap-4">
+                      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="text-lg font-bold">Stripe Connected</h3>
+                        <p class="mt-1 text-white/80 text-sm">Your account is set up and ready to receive payouts.</p>
+                      </div>
+                    </div>
+                    <button onclick="openStripeDashboard()" class="stripe-btn flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-white whitespace-nowrap">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                      </svg>
+                      Open Stripe Dashboard
+                    </button>
+                  </div>
+                  <!-- Balance Cards -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                    <div class="balance-card rounded-xl p-4">
+                      <p class="text-sm text-white/70">Available Balance</p>
+                      <p id="stripeAvailableBalance" class="text-2xl font-bold mt-1">$0.00</p>
+                    </div>
+                    <div class="balance-card rounded-xl p-4">
+                      <p class="text-sm text-white/70">Pending Balance</p>
+                      <p id="stripePendingBalance" class="text-2xl font-bold mt-1">$0.00</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Stats Cards -->
@@ -318,6 +444,163 @@
     <script>
       let allTransactions = [];
       let currentFilter = 'all';
+      let currentUserId = null;
+      let currentUserEmail = null;
+      let currentBusinessName = null;
+
+      // Stripe Connect Functions
+      async function connectStripe() {
+        if (!currentUserId || !currentUserEmail) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        const btn = document.getElementById('connectStripeBtn');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = `
+            <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Connecting...
+          `;
+        }
+
+        try {
+          const response = await fetch('/api/stripe/create-connect-account', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              vendorId: currentUserId,
+              email: currentUserEmail,
+              businessName: currentBusinessName,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.success && data.url) {
+            // Redirect to Stripe onboarding
+            window.location.href = data.url;
+          } else {
+            console.error('Failed to create Stripe account:', data.error);
+            alert('Failed to connect Stripe account. Please try again.');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Connect Stripe Account
+              `;
+            }
+          }
+        } catch (error) {
+          console.error('Error connecting Stripe:', error);
+          alert('Failed to connect Stripe account. Please try again.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              Connect Stripe Account
+            `;
+          }
+        }
+      }
+
+      async function checkStripeStatus() {
+        if (!currentUserId) return;
+
+        try {
+          const response = await fetch('/api/stripe/account-status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              vendorId: currentUserId,
+            }),
+          });
+
+          const data = await response.json();
+
+          // Hide loading state
+          document.getElementById('stripeLoading').classList.add('hidden');
+
+          if (!data.hasStripeAccount) {
+            // Show connect button
+            document.getElementById('stripeNotConnected').classList.remove('hidden');
+          } else if (!data.onboardingComplete) {
+            // Show incomplete onboarding state
+            document.getElementById('stripeOnboardingIncomplete').classList.remove('hidden');
+          } else {
+            // Show connected state with balance
+            document.getElementById('stripeConnected').classList.remove('hidden');
+
+            if (data.balance) {
+              document.getElementById('stripeAvailableBalance').textContent =
+                `$${data.balance.available.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+              document.getElementById('stripePendingBalance').textContent =
+                `$${data.balance.pending.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            }
+          }
+        } catch (error) {
+          console.error('Error checking Stripe status:', error);
+          document.getElementById('stripeLoading').classList.add('hidden');
+          document.getElementById('stripeNotConnected').classList.remove('hidden');
+        }
+      }
+
+      async function openStripeDashboard() {
+        if (!currentUserId) return;
+
+        try {
+          const response = await fetch('/api/stripe/create-login-link', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              vendorId: currentUserId,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.success && data.url) {
+            window.open(data.url, '_blank');
+          } else {
+            console.error('Failed to open Stripe dashboard:', data.error);
+            alert('Failed to open Stripe dashboard. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error opening Stripe dashboard:', error);
+          alert('Failed to open Stripe dashboard. Please try again.');
+        }
+      }
+
+      // Check for Stripe onboarding return
+      function checkStripeReturn() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.get('stripe_onboarding') === 'complete') {
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Re-check status after a brief delay
+          setTimeout(() => checkStripeStatus(), 1000);
+        }
+
+        if (urlParams.get('stripe_refresh') === 'true') {
+          // User needs to restart onboarding
+          window.history.replaceState({}, document.title, window.location.pathname);
+          connectStripe();
+        }
+      }
 
       function filterTransactions(filter) {
         currentFilter = filter;
@@ -438,13 +721,17 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      async function getUserInfo(userId) {
+      async function getUserInfo(userId, userEmail) {
         try {
           const userDoc = doc(db, 'vendors', userId);
           const docSnap = await getDoc(userDoc);
 
           if (docSnap.exists()) {
             const userInfo = docSnap.data();
+
+            // Store user info for Stripe Connect
+            currentUserEmail = userEmail || userInfo.email;
+            currentBusinessName = userInfo.businessName;
 
             // Format lifetime earnings
             const lifetimeEarnings = (userInfo.total_sales || 0)
@@ -458,6 +745,9 @@
 
             document.getElementById('userLifetimeEarnings').textContent = `$${lifetimeEarnings}`;
             document.getElementById('userPendingDeposits').textContent = `$${pendingDeposits}`;
+
+            // Check Stripe status after user info is loaded
+            checkStripeStatus();
           }
         } catch (error) {
           console.error('Error getting user info:', error);
@@ -500,8 +790,10 @@
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          getUserInfo(user.uid);
+          currentUserId = user.uid;
+          getUserInfo(user.uid, user.email);
           loadTransactions(user.uid);
+          checkStripeReturn();
         } else {
           window.location.href = 'login.html';
         }
