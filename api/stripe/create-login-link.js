@@ -2,13 +2,26 @@ import Stripe from 'stripe';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
+// Format private key - handle different formats from Vercel
+function formatPrivateKey(key) {
+  if (!key) return key;
+  // Replace literal \n with actual newlines
+  let formatted = key.replace(/\\n/g, '\n');
+  // If the key doesn't have proper line breaks, add them
+  if (!formatted.includes('\n')) {
+    formatted = formatted.replace(/-----BEGIN PRIVATE KEY-----/, '-----BEGIN PRIVATE KEY-----\n');
+    formatted = formatted.replace(/-----END PRIVATE KEY-----/, '\n-----END PRIVATE KEY-----');
+  }
+  return formatted;
+}
+
 // Initialize Firebase Admin
 if (!getApps().length) {
   initializeApp({
     credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      privateKey: formatPrivateKey(process.env.FIREBASE_PRIVATE_KEY),
     }),
   });
 }
