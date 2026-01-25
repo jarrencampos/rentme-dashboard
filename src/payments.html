@@ -548,6 +548,14 @@
               document.getElementById('stripePendingBalance').textContent =
                 `$${data.balance.pending.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
             }
+
+            // Update Lifetime Earnings with Stripe total charges
+            if (typeof data.totalCharges === 'number') {
+              const formattedEarnings = data.totalCharges
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+              document.getElementById('userLifetimeEarnings').textContent = `$${formattedEarnings}`;
+            }
           }
         } catch (error) {
           console.error('Error checking Stripe status:', error);

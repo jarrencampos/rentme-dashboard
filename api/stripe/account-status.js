@@ -75,8 +75,10 @@ export default async function handler(req, res) {
     // Get Stripe account details
     const account = await stripe.accounts.retrieve(stripeAccountId);
 
-    // Get account balance
+    // Get account balance and total charges
     let balance = null;
+    let totalCharges = 0;
+
     if (account.charges_enabled) {
       try {
         const balanceData = await stripe.balance.retrieve({
@@ -89,6 +91,45 @@ export default async function handler(req, res) {
         };
       } catch (balanceError) {
         console.error('Error fetching balance:', balanceError);
+      }
+
+      // Fetch total charges (gross earnings)
+      try {
+        let hasMore = true;
+        let startingAfter = null;
+
+        while (hasMore) {
+          const params = {
+            limit: 100,
+            stripeAccount: stripeAccountId,
+          };
+          if (startingAfter) {
+            params.starting_after = startingAfter;
+          }
+
+          const charges = await stripe.charges.list(params);
+
+          // Sum up successful charges
+          for (const charge of charges.data) {
+            if (charge.status === 'succeeded' && !charge.refunded) {
+              totalCharges += charge.amount;
+            } else if (charge.status === 'succeeded' && charge.amount_refunded > 0) {
+              // Partial refund - add the non-refunded amount
+              totalCharges += (charge.amount - charge.amount_refunded);
+            }
+          }
+
+          hasMore = charges.has_more;
+          if (charges.data.length > 0) {
+            startingAfter = charges.data[charges.data.length - 1].id;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        totalCharges = totalCharges / 100; // Convert from cents to dollars
+      } catch (chargesError) {
+        console.error('Error fetching charges:', chargesError);
       }
     }
 
@@ -109,6 +150,7 @@ export default async function handler(req, res) {
       detailsSubmitted: account.details_submitted,
       requirements: account.requirements,
       balance: balance,
+      totalCharges: totalCharges,
       defaultCurrency: account.default_currency,
     });
 
