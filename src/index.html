@@ -248,19 +248,19 @@
                 </div>
               </div>
 
-              <!-- Total Bookings Card -->
+              <!-- Upcoming Bookings Card -->
               <div class="stat-card rounded-2xl p-6 bg-white dark:bg-boxdark border border-gray-100 dark:border-strokedark animate-in delay-4">
                 <div class="flex items-start justify-between mb-4">
-                  <div class="stat-icon bg-yellow-500/10">
-                    <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="stat-icon bg-blue-500/10">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                   </div>
-                  <a href="calendar.html" class="text-xs font-medium text-primary hover:underline">Calendar</a>
+                  <a href="orders.html" class="text-xs font-medium text-primary hover:underline">View all</a>
                 </div>
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Bookings</p>
-                  <h3 id="userTotalBookings" class="text-3xl font-bold text-gray-900 dark:text-white">0</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Upcoming Bookings</p>
+                  <h3 id="userUpcomingBookings" class="text-3xl font-bold text-gray-900 dark:text-white">0</h3>
                 </div>
               </div>
 
@@ -745,27 +745,63 @@
           return; // Keep the empty state
         }
 
-        container.innerHTML = orders.map((order, index) => `
-          <div class="activity-item">
-            <div class="activity-line">
-              <div class="activity-dot bg-primary"></div>
+        container.innerHTML = orders.map((order, index) => {
+          const firstItem = order.items && order.items[0] ? order.items[0] : {};
+          const selectedVariations = firstItem.selectedVariations || {};
+          const productTitle = selectedVariations.title || firstItem.title || 'Rental Item';
+          const startDate = selectedVariations.startDate || firstItem.startDate || 'N/A';
+
+          // Status color
+          let dotColor = 'bg-gray-400';
+          if (order.displayStatus === 'upcoming') dotColor = 'bg-blue-500';
+          else if (order.displayStatus === 'active') dotColor = 'bg-yellow-500';
+          else if (order.displayStatus === 'completed') dotColor = 'bg-green-500';
+
+          return `
+            <div class="activity-item">
+              <div class="activity-line">
+                <div class="activity-dot ${dotColor}"></div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  ${order.customerName || 'Customer'}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  ${productTitle} - ${formatCurrency(order.amountTotal || 0)}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  ${startDate}
+                </p>
+              </div>
+              <a href="order.html?id=${order.id}" class="text-xs text-primary hover:underline whitespace-nowrap">
+                View
+              </a>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                Order #${order.id}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                ${order.rentalProduct || 'Unknown Product'} - ${formatCurrency(order.totalPrice)}
-              </p>
-              <p class="text-xs text-gray-400 mt-1">
-                ${order.rentalDateStart || 'N/A'}
-              </p>
-            </div>
-            <a href="order.html?id=${order.id}" class="text-xs text-primary hover:underline whitespace-nowrap">
-              View
-            </a>
-          </div>
-        `).join('');
+          `;
+        }).join('');
+      }
+
+      // Calculate display status based on payment status and dates
+      function getDisplayStatus(paymentStatus, startDate, endDate) {
+        const status = (paymentStatus || '').toLowerCase();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (status !== 'paid' && status !== 'confirmed') {
+          return 'pending';
+        }
+
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(0, 0, 0, 0);
+
+        if (end && end < today) return 'completed';
+        if (start && start > today) return 'upcoming';
+        if (start && start <= today && (!end || end >= today)) return 'active';
+
+        return 'upcoming';
       }
 
       onAuthStateChanged(auth, async (user) => {
@@ -774,16 +810,17 @@
             // Get vendor data
             const vendorRef = doc(db, "vendors", user.uid);
             const vendorSnap = await getDoc(vendorRef);
+            let totalBookings = 0;
 
             if (vendorSnap.exists()) {
               const data = vendorSnap.data();
+              totalBookings = data.total_bookings || 0;
 
-              // Update stats
+              // Update stats with Firestore data initially
               document.getElementById('userTotalSales').textContent = formatCurrency(data.total_sales);
-              document.getElementById('userTotalBookings').textContent = data.total_bookings || 0;
 
               // Calculate average sale
-              const avgSale = data.total_bookings > 0 ? data.total_sales / data.total_bookings : 0;
+              const avgSale = totalBookings > 0 ? data.total_sales / totalBookings : 0;
               document.getElementById('userTotalViews').textContent = formatCurrency(avgSale);
 
               // Update greeting with name if available
@@ -797,27 +834,84 @@
               }
             }
 
+            // Fetch Stripe data for accurate total sales
+            try {
+              const stripeResponse = await fetch('/api/stripe/account-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vendorId: user.uid })
+              });
+              const stripeData = await stripeResponse.json();
+
+              if (stripeData.hasStripeAccount && stripeData.onboardingComplete) {
+                // Update Total Sales with Stripe total charges (lifetime earnings)
+                if (typeof stripeData.totalCharges === 'number') {
+                  document.getElementById('userTotalSales').textContent = formatCurrency(stripeData.totalCharges);
+
+                  // Recalculate average sale with Stripe data
+                  const newAvgSale = totalBookings > 0 ? stripeData.totalCharges / totalBookings : 0;
+                  document.getElementById('userTotalViews').textContent = formatCurrency(newAvgSale);
+                }
+              }
+            } catch (stripeError) {
+              console.error('Error fetching Stripe data:', stripeError);
+              // Keep Firestore data as fallback
+            }
+
             // Get product count
             const productsRef = collection(db, "products");
             const productsQuery = query(productsRef, where("vendor_id", "==", user.uid));
             const productsSnap = await getDocs(productsQuery);
             document.getElementById('userTotalProducts').textContent = productsSnap.size;
 
-            // Get recent orders
-            const ordersRef = collection(db, "orders");
-            const ordersQuery = query(
-              ordersRef,
-              where("vendorId", "==", user.uid),
-              limit(5)
-            );
-            const ordersSnap = await getDocs(ordersQuery);
+            // Get orders for upcoming count and recent activity
+            // First get order IDs from vendor's orders subcollection
+            const vendorOrdersRef = collection(db, "vendors", user.uid, "orders");
+            const vendorOrdersSnap = await getDocs(vendorOrdersRef);
+            const orderIds = vendorOrdersSnap.docs.map(doc => doc.id);
 
-            const orders = ordersSnap.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
+            // Fetch actual order data from orders collection
+            let upcomingActiveCount = 0;
+            const orders = [];
 
-            renderActivity(orders);
+            for (const orderId of orderIds) {
+              const orderDocRef = doc(db, "orders", orderId);
+              const orderSnap = await getDoc(orderDocRef);
+
+              if (orderSnap.exists()) {
+                const orderData = orderSnap.data();
+                const firstItem = orderData.items && orderData.items[0] ? orderData.items[0] : {};
+                const selectedVariations = firstItem.selectedVariations || {};
+
+                const startDate = selectedVariations.startDate || firstItem.startDate || null;
+                const endDate = firstItem.endDate || selectedVariations.endDate || null;
+                const displayStatus = getDisplayStatus(orderData.paymentStatus || orderData.status, startDate, endDate);
+
+                // Count upcoming and active bookings
+                if (displayStatus === 'upcoming' || displayStatus === 'active') {
+                  upcomingActiveCount++;
+                }
+
+                orders.push({
+                  id: orderId,
+                  ...orderData,
+                  displayStatus
+                });
+              }
+            }
+
+            // Update upcoming bookings count
+            document.getElementById('userUpcomingBookings').textContent = upcomingActiveCount;
+
+            // Sort orders by createdAt for recent activity
+            orders.sort((a, b) => {
+              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+              return dateB - dateA;
+            });
+
+            // Render recent activity (top 5)
+            renderActivity(orders.slice(0, 5));
 
             // Check if user needs onboarding tour
             checkAndStartTour(user.uid, vendorSnap.data());

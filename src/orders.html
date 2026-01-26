@@ -63,13 +63,21 @@
         align-items: center;
         gap: 0.375rem;
       }
-      .status-paid {
+      .status-upcoming {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3B82F6;
+      }
+      .status-active {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+      }
+      .status-completed {
         background-color: rgba(16, 185, 129, 0.1);
         color: #10B981;
       }
       .status-pending {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
+        background-color: rgba(107, 114, 128, 0.1);
+        color: #6B7280;
       }
       .status-cancelled {
         background-color: rgba(239, 68, 68, 0.1);
@@ -146,12 +154,12 @@
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
               <!-- Total Orders -->
               <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-1">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Orders</p>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
                     <h3 id="totalOrders" class="mt-1 text-2xl font-bold text-black dark:text-white">-</h3>
                   </div>
                   <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
@@ -162,12 +170,27 @@
                 </div>
               </div>
 
-              <!-- Pending Orders -->
+              <!-- Upcoming Orders -->
               <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-2">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
-                    <h3 id="pendingOrders" class="mt-1 text-2xl font-bold text-yellow-500">-</h3>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming</p>
+                    <h3 id="upcomingOrders" class="mt-1 text-2xl font-bold text-blue-500">-</h3>
+                  </div>
+                  <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Orders -->
+              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active</p>
+                    <h3 id="activeOrders" class="mt-1 text-2xl font-bold text-yellow-500">-</h3>
                   </div>
                   <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500/10">
                     <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +201,7 @@
               </div>
 
               <!-- Completed Orders -->
-              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-3">
+              <div class="stat-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
@@ -215,15 +238,18 @@
                 </div>
 
                 <!-- Filter Tabs -->
-                <div class="flex gap-2 mt-4">
+                <div class="flex flex-wrap gap-2 mt-4">
                   <button onclick="filterOrders('all')" id="filter-all" class="filter-btn active px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white transition-all">
                     All
                   </button>
-                  <button onclick="filterOrders('pending')" id="filter-pending" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
-                    Pending
+                  <button onclick="filterOrders('upcoming')" id="filter-upcoming" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
+                    Upcoming
                   </button>
-                  <button onclick="filterOrders('paid')" id="filter-paid" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
-                    Paid
+                  <button onclick="filterOrders('active')" id="filter-active" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
+                    Active
+                  </button>
+                  <button onclick="filterOrders('completed')" id="filter-completed" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-meta-4 dark:text-gray-300 dark:hover:bg-gray-600 transition-all">
+                    Completed
                   </button>
                 </div>
               </div>
@@ -303,6 +329,54 @@
       let allOrders = [];
       let currentFilter = 'all';
 
+      // Calculate display status based on payment status and dates
+      function getDisplayStatus(order) {
+        const paymentStatus = (order.paymentStatus || '').toLowerCase();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // If not paid, show pending
+        if (paymentStatus !== 'paid' && paymentStatus !== 'confirmed') {
+          return 'pending';
+        }
+
+        // Parse dates
+        const startDate = order.startDate ? new Date(order.startDate) : null;
+        const endDate = order.endDate ? new Date(order.endDate) : null;
+
+        if (startDate) startDate.setHours(0, 0, 0, 0);
+        if (endDate) endDate.setHours(0, 0, 0, 0);
+
+        // If end date has passed, it's completed
+        if (endDate && endDate < today) {
+          return 'completed';
+        }
+
+        // If start date hasn't arrived yet, it's upcoming
+        if (startDate && startDate > today) {
+          return 'upcoming';
+        }
+
+        // If we're between start and end date, it's active
+        if (startDate && startDate <= today && (!endDate || endDate >= today)) {
+          return 'active';
+        }
+
+        // Default to upcoming if paid
+        return 'upcoming';
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case 'completed': return 'status-completed';
+          case 'active': return 'status-active';
+          case 'upcoming': return 'status-upcoming';
+          case 'cancelled':
+          case 'canceled': return 'status-cancelled';
+          default: return 'status-pending';
+        }
+      }
+
       function filterOrders(filter) {
         currentFilter = filter;
 
@@ -313,26 +387,31 @@
         });
 
         const activeBtn = document.getElementById(`filter-${filter}`);
-        activeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-meta-4', 'dark:text-gray-300');
-        activeBtn.classList.add('bg-primary', 'text-white');
+        if (activeBtn) {
+          activeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-meta-4', 'dark:text-gray-300');
+          activeBtn.classList.add('bg-primary', 'text-white');
+        }
 
         renderOrders();
       }
 
       function renderOrders() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
         const tableBody = document.getElementById('ordersTableBody');
         const emptyState = document.getElementById('emptyState');
 
         // Filter orders
         let filteredOrders = allOrders.filter(order => {
-          const matchesFilter = currentFilter === 'all' ||
-            (order.status && order.status.toLowerCase() === currentFilter);
+          const displayStatus = order.displayStatus || 'pending';
+          const matchesFilter = currentFilter === 'all' || displayStatus === currentFilter;
 
           const matchesSearch = !searchTerm ||
-            (order.orderNumber && order.orderNumber.toString().includes(searchTerm)) ||
+            (order.orderId && order.orderId.toLowerCase().includes(searchTerm)) ||
+            (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
             (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
-            (order.rentalProduct && order.rentalProduct.toLowerCase().includes(searchTerm));
+            (order.customerEmail && order.customerEmail.toLowerCase().includes(searchTerm)) ||
+            (order.rentalProduct && order.rentalProduct.toLowerCase().includes(searchTerm)) ||
+            (order.deliveryAddress && order.deliveryAddress.toLowerCase().includes(searchTerm));
 
           return matchesFilter && matchesSearch;
         });
@@ -357,17 +436,12 @@
       function createOrderRow(order) {
         const row = document.createElement('tr');
         row.className = 'order-row border-b border-gray-50 dark:border-strokedark';
-        row.onclick = () => window.location.href = `/order.html?id=${order.orderNumber}`;
+        row.onclick = () => window.location.href = `/order.html?id=${order.orderId}`;
 
-        // Status badge class
-        let statusClass = 'status-pending';
-        let statusIcon = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>';
-
-        if (order.status === 'Paid' || order.status === 'Completed') {
-          statusClass = 'status-paid';
-        } else if (order.status === 'Cancelled') {
-          statusClass = 'status-cancelled';
-        }
+        const displayStatus = order.displayStatus || 'pending';
+        const statusClass = getStatusClass(displayStatus);
+        const statusIcon = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>';
+        const statusLabel = displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1);
 
         row.innerHTML = `
           <td class="px-6 py-4">
@@ -388,7 +462,7 @@
           <td class="px-6 py-4">
             <span class="status-badge ${statusClass}">
               ${statusIcon}
-              ${order.status || 'Pending'}
+              ${statusLabel}
             </span>
           </td>
         `;
@@ -420,39 +494,78 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      async function getOrderIds() {
-        const ordersCollection = collection(db, "vendors", auth.currentUser.uid, "orders");
-        const ordersSnapshot = await getDocs(ordersCollection);
-        return ordersSnapshot.docs.map(doc => doc.id);
-      }
-
-      async function getOrderDetails(orderId) {
-        const orderDocRef = doc(db, "vendors", auth.currentUser.uid, "orders", orderId);
-        const orderDocSnapshot = await getDoc(orderDocRef);
-        return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
-      }
-
       async function loadOrders() {
         try {
-          const orderIds = await getOrderIds();
-          const orderDetailsPromises = orderIds.map(orderId => getOrderDetails(orderId));
-          const orderDetails = await Promise.all(orderDetailsPromises);
+          // Step 1: Get order IDs from vendors/{vendorId}/orders
+          const vendorOrdersCollection = collection(db, "vendors", auth.currentUser.uid, "orders");
+          const vendorOrdersSnapshot = await getDocs(vendorOrdersCollection);
+          const orderIds = vendorOrdersSnapshot.docs.map(doc => doc.id);
 
-          // Filter out null values and sort by date
-          allOrders = orderDetails.filter(order => order !== null);
+          // Step 2: Fetch actual order data from orders/{orderId} collection
+          const orderPromises = orderIds.map(async (orderId) => {
+            const orderDocRef = doc(db, "orders", orderId);
+            const orderSnapshot = await getDoc(orderDocRef);
+            if (orderSnapshot.exists()) {
+              return { id: orderId, ...orderSnapshot.data() };
+            }
+            return null;
+          });
+
+          const ordersData = await Promise.all(orderPromises);
+
+          // Map documents to order objects with proper field mapping
+          allOrders = ordersData.filter(data => data !== null).map(data => {
+            const firstItem = data.items && data.items[0] ? data.items[0] : {};
+            const selectedVariations = firstItem.selectedVariations || {};
+
+            // Get startDate from selectedVariations or directly from item
+            const startDate = selectedVariations.startDate || firstItem.startDate || null;
+            // Get endDate from item
+            const endDate = firstItem.endDate || selectedVariations.endDate || null;
+            // Get title from selectedVariations or directly from item
+            const title = selectedVariations.title || firstItem.title || 'N/A';
+
+            const orderObj = {
+              orderId: data.id,
+              orderNumber: data.id.slice(-8).toUpperCase(), // Last 8 chars of ID for display
+              customerName: data.customerName || 'N/A',
+              customerEmail: data.customerEmail || '',
+              rentalProduct: title,
+              rentalDate: startDate || 'N/A',
+              startDate: startDate,
+              endDate: endDate,
+              orderAmount: data.amountTotal ? data.amountTotal.toFixed(2) : '0.00',
+              paymentStatus: data.paymentStatus || data.status || 'pending',
+              createdAt: data.createdAt,
+              deliveryAddress: data.deliveryAddress || '',
+              phoneNumber: data.phoneNumber || ''
+            };
+
+            // Calculate display status based on dates
+            orderObj.displayStatus = getDisplayStatus(orderObj);
+
+            return orderObj;
+          });
+
+          // Sort by created date (most recent first)
           allOrders.sort((a, b) => {
-            const dateA = new Date(a.earliestRentalDate || a.rentalDate);
-            const dateB = new Date(b.earliestRentalDate || b.rentalDate);
-            return dateB - dateA; // Most recent first
+            if (a.createdAt && b.createdAt) {
+              const dateA = a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+              const dateB = b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+              return dateB - dateA;
+            }
+            return 0;
           });
 
           // Update stats
           const totalOrders = allOrders.length;
-          const pendingOrders = allOrders.filter(o => o.status === 'Pending' || !o.status).length;
-          const completedOrders = allOrders.filter(o => o.status === 'Paid' || o.status === 'Completed').length;
+          const upcomingOrders = allOrders.filter(o => o.displayStatus === 'upcoming').length;
+          const activeOrders = allOrders.filter(o => o.displayStatus === 'active').length;
+          const completedOrders = allOrders.filter(o => o.displayStatus === 'completed').length;
 
           document.getElementById('totalOrders').textContent = totalOrders;
-          document.getElementById('pendingOrders').textContent = pendingOrders;
+          document.getElementById('upcomingOrders').textContent = upcomingOrders;
+          document.getElementById('activeOrders').textContent = activeOrders;
           document.getElementById('completedOrders').textContent = completedOrders;
 
           // Remove loading skeletons

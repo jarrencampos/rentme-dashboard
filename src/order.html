@@ -4,175 +4,189 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order</title>
+    <title>Order Details</title>
+    <!-- html2pdf for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+      /* Modern animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-in {
+        animation: fadeInUp 0.5s ease-out forwards;
+        opacity: 0;
+      }
+
+      .delay-1 { animation-delay: 0.1s; }
+      .delay-2 { animation-delay: 0.2s; }
+      .delay-3 { animation-delay: 0.3s; }
+      .delay-4 { animation-delay: 0.4s; }
+      .delay-5 { animation-delay: 0.5s; }
+
+      /* Card styling */
+      .info-card {
+        transition: all 0.3s ease;
+      }
+      .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      }
+      .dark .info-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Status badge styling */
+      .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+      .status-upcoming {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3B82F6;
+      }
+      .status-active {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+      }
+      .status-completed {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10B981;
+      }
+      .status-pending {
+        background-color: rgba(107, 114, 128, 0.1);
+        color: #6B7280;
+      }
+      .status-cancelled {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+      }
+
+      /* Button styling */
+      .btn-primary {
+        background: linear-gradient(135deg, #3C50E0 0%, #6366F1 100%);
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(60, 80, 224, 0.4);
+      }
+
+      .btn-secondary {
+        transition: all 0.2s ease;
+      }
+      .btn-secondary:hover {
+        background-color: rgba(60, 80, 224, 0.1);
+      }
+
+      /* Item row */
+      .item-row {
+        transition: all 0.2s ease;
+      }
+      .item-row:hover {
+        background-color: rgba(60, 80, 224, 0.02);
+      }
+      .dark .item-row:hover {
+        background-color: rgba(60, 80, 224, 0.05);
+      }
+
+      /* Loading skeleton */
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
+        background-size: 200% 100%;
+      }
+
+      /* Print styles */
+      @media print {
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+        body { background: white !important; }
+        .dark { background: white !important; color: black !important; }
+      }
+      .print-only { display: none; }
+
+      /* PDF Generation styles - force light mode */
+      .generating-pdf,
+      .generating-pdf * {
+        background-color: white !important;
+        color: #1a1a1a !important;
+      }
+      .generating-pdf .info-card {
+        background-color: white !important;
+        border-color: #e5e7eb !important;
+      }
+      .generating-pdf .bg-gray-50,
+      .generating-pdf .dark\:bg-meta-4 {
+        background-color: #f9fafb !important;
+      }
+      .generating-pdf .text-black,
+      .generating-pdf .dark\:text-white {
+        color: #1a1a1a !important;
+      }
+      .generating-pdf .text-gray-500,
+      .generating-pdf .text-gray-600,
+      .generating-pdf .text-gray-700,
+      .generating-pdf .dark\:text-gray-300,
+      .generating-pdf .dark\:text-gray-400 {
+        color: #6b7280 !important;
+      }
+      .generating-pdf .text-primary {
+        color: #3C50E0 !important;
+      }
+      .generating-pdf .text-green-500 {
+        color: #10B981 !important;
+      }
+      .generating-pdf .text-red-500 {
+        color: #EF4444 !important;
+      }
+      .generating-pdf .text-yellow-500 {
+        color: #F59E0B !important;
+      }
+      .generating-pdf .border-gray-100,
+      .generating-pdf .dark\:border-strokedark {
+        border-color: #e5e7eb !important;
+      }
+      .generating-pdf .divide-gray-100 > * + *,
+      .generating-pdf .dark\:divide-strokedark > * + * {
+        border-color: #e5e7eb !important;
+      }
+      .generating-pdf .status-badge {
+        color: inherit !important;
+      }
+      .generating-pdf .bg-primary\/10,
+      .generating-pdf .bg-green-500\/10,
+      .generating-pdf .bg-blue-500\/10,
+      .generating-pdf .bg-purple-500\/10,
+      .generating-pdf .bg-yellow-500\/10 {
+        opacity: 1 !important;
+      }
+    </style>
   </head>
-  <script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
-      authDomain: "ryntit-b503c.firebaseapp.com",
-      databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
-      projectId: "ryntit-b503c",
-      storageBucket: "ryntit-b503c.appspot.com",
-      messagingSenderId: "908115066071",
-      appId: "1:908115066071:web:1de252c17cce4346be0492",
-      measurementId: "G-PDBZNLKYKC"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Function to get URL parameter
-    function getUrlParameter(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    // Function to fetch the order details by order ID
-    async function getOrderDetails(orderId) {
-      const orderDocRef = doc(db, "orders", orderId);
-      const orderDocSnapshot = await getDoc(orderDocRef);
-      return orderDocSnapshot.exists() ? orderDocSnapshot.data() : null;
-    }
-
-    async function fetchOrderDetails(orderId) {
-    if (!orderId) {
-        console.error("Order ID is missing.");
-        return null;
-    }
-
-    try {
-        const orderDocRef = doc(db, "orders", orderId);
-        const orderSnapshot = await getDoc(orderDocRef);
-
-        if (orderSnapshot.exists()) {
-            return orderSnapshot.data(); // Return order details
-        } else {
-            console.warn("Order not found:", orderId);
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching order details:", error);
-        return null;
-    }
-}
-
-    onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        console.log("No user is signed in.");
-        window.location.href = 'signin.html'; // Redirect to login
-        return;
-    }
-
-    console.log("User is signed in:", user.uid);
-
-    const orderId = getUrlParameter('id'); // Get the order ID from URL
-    if (!orderId) {
-        console.log("No order ID in URL.");
-        return;
-    }
-
-    const order = await fetchOrderDetails(orderId); // Fetch order details
-
-    if (order && order.vendorId === user.uid) {
-        console.log("User is authorized to view this order.");
-
-        // Update the Order # header
-        const orderHeader = document.querySelector("h1");
-        if (orderHeader) {
-            orderHeader.textContent = `Order #${orderId}`;
-        }
-
-        // Update the Rental Address
-        const rentalAddressElement = document.querySelector("#rental-address");
-        if (rentalAddressElement && order.rentalAddress) {
-            rentalAddressElement.textContent = order.rentalAddress;
-        }
-
-        const rentalStartDateElement = document.querySelector("#start-date");
-        if (rentalStartDateElement && order.rentalDateStart) {
-          rentalStartDateElement.textContent = `Start: ${order.rentalDateStart}`;
-        }
-
-        const rentalEndDateElement = document.querySelector("#end-date");
-        if (rentalEndDateElement && order.rentalDateEnd) {
-          rentalEndDateElement.textContent = `End: ${order.rentalDateEnd}`;
-        }
-
-        const customerNameElement = document.querySelector("#renter-name");
-        if (customerNameElement && order.customerInfoName) {
-          customerNameElement.textContent = `Name: ${order.customerInfoName}`;
-        }
-
-        const customerEmailElement = document.querySelector("#renter-email");
-        if (customerEmailElement && order.customerInfoEmail) {
-          customerEmailElement.textContent = `Email: ${order.customerInfoEmail}`;
-        }
-
-        const customerPhoneElement = document.querySelector("#renter-number");
-        if (customerPhoneElement && order.customerInfoNumber) {
-          customerPhoneElement.textContent = `Phone: ${order.customerInfoNumber}`;
-        }
-
-        const rentalProduct = document.querySelector("#rental-product");
-        if (rentalProduct && order.rentalProduct) {
-          rentalProduct.textContent = `${order.rentalProduct} x ${order.days}`;
-        }
-
-        const rentalPrice = document.querySelector("#rental-price");
-        if (rentalPrice && order.rentalPrice) {
-          rentalPrice.textContent = `$${order.rentalPrice}/day`;
-        }
-
-        // Totals
-
-        const priceClient = document.querySelector("#price-client");
-if (priceClient && order.totalPrice) {
-    priceClient.textContent = `$${order.totalPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-}
-
-        
-        const totalFee = order.totalPrice - order.rentalPrice
-
-        const priceFee = document.querySelector("#price-fee");
-        if (priceFee) {
-          priceFee.textContent = `- $${totalFee.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        }
-
-        const pricePayout = document.querySelector("#price-payout");
-        if (pricePayout && order.rentalPrice) {
-          pricePayout.textContent = `$${(order.totalPrice - totalFee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        }
-
-const rentalAddressLink = document.querySelector("#rental-address-link");
-
-if (rentalAddressElement && rentalAddressLink && order.rentalAddress) {
-    rentalAddressElement.textContent = order.rentalAddress;
-    
-    // Encode address for Google Maps search
-    const encodedAddress = encodeURIComponent(order.rentalAddress);
-    rentalAddressLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-}
-
-
-        // You can also update other elements like rental dates, customer info, etc.
-    } else {
-        console.log("User is not authorized to view this order.");
-        window.location.href = 'unauthorized.html'; // Redirect unauthorized users
-    }
-});
-
-  </script>
 
   <body
-    x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-data="{ page: 'order', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
     x-init="
       darkMode = JSON.parse(localStorage.getItem('darkMode'));
       $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
@@ -182,7 +196,7 @@ if (rentalAddressElement && rentalAddressLink && order.rentalAddress) {
     <include src="./partials/preloader.html"></include>
     <!-- ===== Preloader End ===== -->
 
-    <!-- ===== Pa ge Wrapper Start ===== -->
+    <!-- ===== Page Wrapper Start ===== -->
     <div class="flex h-screen overflow-hidden">
       <!-- ===== Sidebar Start ===== -->
       <include src="./partials/sidebar.html"></include>
@@ -196,77 +210,533 @@ if (rentalAddressElement && rentalAddressLink && order.rentalAddress) {
 
         <!-- ===== Main Content Start ===== -->
         <main>
-          <div id="order-details-container">
-            <!-- Order details will be inserted here -->
-            <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg space-y-6">
+          <div class="mx-auto max-w-screen-xl p-4 md:p-6 2xl:p-10">
 
-                <!-- Order Overview Header -->
-                <div class="text-center space-y-2">
-                  <h1 class="text-3xl font-semibold text-gray-800">...</h1>
-                </div>
-          
-                <!-- Rental Details Section -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <!-- Rental Address -->
-                  <a id="rental-address-link" href="#" target="_blank" class="block">
-                  <div class="bg-gray-100 p-4 rounded-lg">
-                      <div class="bg-gray-100 p-4 rounded-lg hover:bg-gray-200 transition cursor-pointer">
-                        <h3 class="font-semibold text-lg text-gray-700">Rental Address</h3>
-                        <p id="rental-address" class="text-gray-600">...</p>
-                      </div>                    
-                  </div>
-                </a>
+            <!-- Back Button & Actions -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-in no-print">
+              <a href="orders.html" class="btn-secondary inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Orders
+              </a>
+              <button onclick="downloadPDF()" class="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Download PDF
+              </button>
+            </div>
 
-          
-                  <!-- Dates -->
-                  <div class="bg-gray-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-lg text-gray-700">Rental Dates</h3>
-                    <p id="start-date" class="text-gray-600">Start: ...</p>
-                    <p id="end-date" class="text-gray-600">End: ...</p>
+            <!-- PDF Content Container -->
+            <div id="pdf-content">
+              <!-- Order Header Card -->
+              <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark mb-6 animate-in delay-1">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <div class="flex items-center gap-3 mb-2">
+                      <h1 id="order-number" class="text-2xl font-bold text-black dark:text-white">Order #...</h1>
+                      <span id="order-status" class="status-badge status-pending">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
+                        Loading...
+                      </span>
+                    </div>
+                    <p id="order-date" class="text-sm text-gray-500 dark:text-gray-400">Order placed on ...</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="text-right">
+                      <p class="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
+                      <p id="header-total" class="text-2xl font-bold text-primary">$0.00</p>
+                    </div>
                   </div>
                 </div>
-
-                                <!-- Customer Info Section -->
-                                <div class="bg-gray-100 p-4 rounded-lg">
-                                    <h3 class="font-semibold text-lg text-gray-700">Customer Information</h3>
-                                    <p id="renter-name" class="text-gray-600">Name: ...</p>
-                                    <p id="renter-email" class="text-gray-600">Email: ...</p>
-                                    <p id="renter-number" class="text-gray-600">Phone: ...</p>
-                                  </div>
-          
-                <!-- Products Section -->
-                <div class="bg-gray-100 p-4 rounded-lg">
-                  <h3 class="font-semibold text-lg text-gray-700">Rental Products</h3>
-                  <ul class="space-y-2">
-                    <li class="flex justify-between">
-                      <span id="rental-product" class="text-gray-600">...</span>
-                      <span id="rental-price" class="text-gray-800 font-semibold">$.../day</span>
-                    </li>
-                  </ul>
-                </div>
-          
-                <!-- Cost Breakdown -->
-                <div class="bg-gray-100 p-4 rounded-lg">
-                  <h3 class="font-semibold text-lg text-gray-700">Cost Breakdown</h3>
-                  <div class="flex justify-between text-gray-600">
-                    <span>Client Paid</span>
-                    <span id="price-client" class="text-gray-800 font-semibold">$...</span>
-                  </div>
-                  <div class="flex justify-between text-gray-600">
-                    <span>Transaction Fee</span>
-                    <span id="price-fee" class="text-gray-800 font-semibold">$...</span>
-                  </div>
-                  <hr class="border-t border-gray-400 my-2">
-                  <div class="flex justify-between text-gray-600">
-                    <span>Total Payout</span>
-                    <span id="price-payout" class="text-gray-800 font-semibold">$...</span>
-                  </div>
-                </div>
-          
               </div>
+
+              <!-- Main Content Grid -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Left Column - Customer & Delivery -->
+                <div class="lg:col-span-2 space-y-6">
+
+                  <!-- Customer Information -->
+                  <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-2">
+                    <div class="flex items-center gap-3 mb-4">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                      </div>
+                      <h2 class="text-lg font-semibold text-black dark:text-white">Customer Information</h2>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Name</p>
+                        <p id="customer-name" class="text-sm font-medium text-black dark:text-white">...</p>
+                      </div>
+                      <div>
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+                        <p id="customer-phone" class="text-sm font-medium text-black dark:text-white">...</p>
+                      </div>
+                      <div class="sm:col-span-2">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email</p>
+                        <p id="customer-email" class="text-sm font-medium text-black dark:text-white">...</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Delivery Address -->
+                  <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-3">
+                    <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                          <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-black dark:text-white">Delivery Address</h2>
+                      </div>
+                      <a id="maps-link" href="#" target="_blank" class="no-print text-sm text-primary hover:underline flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                        Open in Maps
+                      </a>
+                    </div>
+                    <p id="delivery-address" class="text-sm text-gray-700 dark:text-gray-300">...</p>
+                  </div>
+
+                  <!-- Rental Items -->
+                  <div class="info-card rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-4">
+                    <div class="p-6 border-b border-gray-100 dark:border-strokedark">
+                      <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
+                          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                          </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-black dark:text-white">Rental Items</h2>
+                      </div>
+                    </div>
+                    <div id="items-container" class="divide-y divide-gray-100 dark:divide-strokedark">
+                      <!-- Items will be inserted here -->
+                      <div class="p-6">
+                        <div class="skeleton h-16 w-full mb-4"></div>
+                        <div class="skeleton h-16 w-full"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Right Column - Dates & Payment -->
+                <div class="space-y-6">
+
+                  <!-- Rental Period -->
+                  <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-2">
+                    <div class="flex items-center gap-3 mb-4">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                      </div>
+                      <h2 class="text-lg font-semibold text-black dark:text-white">Rental Period</h2>
+                    </div>
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-meta-4">
+                        <div>
+                          <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Start Date</p>
+                          <p id="start-date" class="text-sm font-semibold text-black dark:text-white mt-1">...</p>
+                        </div>
+                        <div class="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-meta-4">
+                        <div>
+                          <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">End Date</p>
+                          <p id="end-date" class="text-sm font-semibold text-black dark:text-white mt-1">...</p>
+                        </div>
+                        <div class="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                          <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="text-center pt-2">
+                        <span id="rental-duration" class="text-sm font-medium text-primary">... day(s)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Payment Summary -->
+                  <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-3">
+                    <div class="flex items-center gap-3 mb-4">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10">
+                        <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <h2 class="text-lg font-semibold text-black dark:text-white">Payment Summary</h2>
+                    </div>
+                    <div class="space-y-3">
+                      <div id="payment-items" class="space-y-2">
+                        <!-- Payment line items will be inserted here -->
+                      </div>
+                      <div class="border-t border-gray-200 dark:border-strokedark pt-3 mt-3">
+                        <div class="flex justify-between items-center">
+                          <span class="text-sm text-gray-500 dark:text-gray-400">Client Paid</span>
+                          <span id="total-paid" class="text-sm font-semibold text-black dark:text-white">$0.00</span>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Platform Fee</span>
+                        <span id="platform-fee" class="text-sm font-medium text-red-500">-$0.00</span>
+                      </div>
+                      <div class="border-t-2 border-gray-200 dark:border-strokedark pt-3 mt-3">
+                        <div class="flex justify-between items-center">
+                          <span class="text-base font-semibold text-black dark:text-white">Your Payout</span>
+                          <span id="your-payout" class="text-xl font-bold text-green-500">$0.00</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Payment Status -->
+                  <div class="info-card rounded-2xl bg-white p-6 shadow-sm border border-gray-100 dark:bg-boxdark dark:border-strokedark animate-in delay-4">
+                    <div class="flex items-center gap-3 mb-4">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <h2 class="text-lg font-semibold text-black dark:text-white">Payment Status</h2>
+                    </div>
+                    <div id="payment-status-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/10 text-green-500 font-medium">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
+                      <span id="payment-status-text">...</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
           </div>
         </main>
+        <!-- ===== Main Content End ===== -->
       </div>
+      <!-- ===== Content Area End ===== -->
     </div>
+    <!-- ===== Page Wrapper End ===== -->
+
+    <script>
+      let orderData = null;
+      let orderId = null;
+
+      function downloadPDF() {
+        if (!orderData || !orderId) {
+          alert('Order data not loaded yet');
+          return;
+        }
+
+        const element = document.getElementById('pdf-content');
+
+        // Add temporary class for PDF styling (force light mode)
+        element.classList.add('generating-pdf');
+
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: `Order-${orderId.slice(-8).toUpperCase()}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+          element.classList.remove('generating-pdf');
+        }).catch(() => {
+          element.classList.remove('generating-pdf');
+        });
+      }
+
+      function formatCurrency(amount) {
+        return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+      }
+
+      // Calculate display status based on payment status and dates
+      function getDisplayStatus(paymentStatus, startDate, endDate) {
+        const status = (paymentStatus || '').toLowerCase();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // If not paid, show pending
+        if (status !== 'paid' && status !== 'confirmed') {
+          return 'pending';
+        }
+
+        // Parse dates
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(0, 0, 0, 0);
+
+        // If end date has passed, it's completed
+        if (end && end < today) {
+          return 'completed';
+        }
+
+        // If start date hasn't arrived yet, it's upcoming
+        if (start && start > today) {
+          return 'upcoming';
+        }
+
+        // If we're between start and end date, it's active
+        if (start && start <= today && (!end || end >= today)) {
+          return 'active';
+        }
+
+        // Default to upcoming if paid
+        return 'upcoming';
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case 'completed': return 'status-completed';
+          case 'active': return 'status-active';
+          case 'upcoming': return 'status-upcoming';
+          case 'cancelled':
+          case 'canceled': return 'status-cancelled';
+          default: return 'status-pending';
+        }
+      }
+
+      function capitalizeFirst(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function renderOrder(order, id) {
+        orderData = order;
+        orderId = id;
+
+        // Get first item details
+        const firstItem = order.items && order.items[0] ? order.items[0] : {};
+        const selectedVariations = firstItem.selectedVariations || {};
+        const startDate = selectedVariations.startDate || firstItem.startDate || null;
+        const endDate = firstItem.endDate || selectedVariations.endDate || null;
+
+        // Order header
+        document.getElementById('order-number').textContent = `Order #${id.slice(-8).toUpperCase()}`;
+
+        // Calculate display status based on dates
+        const displayStatus = getDisplayStatus(order.paymentStatus || order.status, startDate, endDate);
+        const statusEl = document.getElementById('order-status');
+        statusEl.className = `status-badge ${getStatusClass(displayStatus)}`;
+        statusEl.innerHTML = `<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>${capitalizeFirst(displayStatus)}`;
+
+        // Order date
+        if (order.createdAt) {
+          const createdDate = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+          document.getElementById('order-date').textContent = `Order placed on ${createdDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+        }
+
+        // Header total
+        document.getElementById('header-total').textContent = formatCurrency(order.amountTotal || 0);
+
+        // Customer info
+        document.getElementById('customer-name').textContent = order.customerName || 'N/A';
+        document.getElementById('customer-email').textContent = order.customerEmail || 'N/A';
+        document.getElementById('customer-phone').textContent = order.phoneNumber || 'N/A';
+
+        // Delivery address
+        document.getElementById('delivery-address').textContent = order.deliveryAddress || 'N/A';
+        if (order.deliveryAddress) {
+          document.getElementById('maps-link').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.deliveryAddress)}`;
+        }
+
+        // Rental dates
+        document.getElementById('start-date').textContent = formatDate(startDate);
+        document.getElementById('end-date').textContent = formatDate(endDate);
+
+        const days = firstItem.numberOfDays || 1;
+        document.getElementById('rental-duration').textContent = `${days} day${days > 1 ? 's' : ''}`;
+
+        // Render items
+        const itemsContainer = document.getElementById('items-container');
+        itemsContainer.innerHTML = '';
+
+        let subtotal = 0;
+        let addonsTotal = 0;
+
+        if (order.items && order.items.length > 0) {
+          order.items.forEach((item, index) => {
+            const itemVariations = item.selectedVariations || {};
+            const itemTitle = itemVariations.title || item.title || 'Rental Item';
+            const itemPrice = item.price || 0;
+            const itemDays = item.numberOfDays || 1;
+            const itemTotal = itemPrice * itemDays;
+            subtotal += itemTotal;
+
+            let addonsHtml = '';
+            if (item.selectedAddons && item.selectedAddons.length > 0) {
+              addonsHtml = '<div class="mt-2 space-y-1">';
+              item.selectedAddons.forEach(addon => {
+                addonsTotal += addon.price || 0;
+                addonsHtml += `
+                  <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 pl-4">
+                    <span>+ ${addon.Name || addon.name || 'Addon'}</span>
+                    <span>${formatCurrency(addon.price || 0)}</span>
+                  </div>
+                `;
+              });
+              addonsHtml += '</div>';
+            }
+
+            itemsContainer.innerHTML += `
+              <div class="item-row p-6">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <h3 class="font-medium text-black dark:text-white">${itemTitle}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      ${formatCurrency(itemPrice)}/day × ${itemDays} day${itemDays > 1 ? 's' : ''}
+                    </p>
+                    ${addonsHtml}
+                  </div>
+                  <div class="text-right">
+                    <p class="font-semibold text-black dark:text-white">${formatCurrency(itemTotal)}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        // Payment summary
+        const paymentItems = document.getElementById('payment-items');
+        paymentItems.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Subtotal</span>
+            <span class="text-sm text-black dark:text-white">${formatCurrency(subtotal)}</span>
+          </div>
+        `;
+
+        if (addonsTotal > 0) {
+          paymentItems.innerHTML += `
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-500 dark:text-gray-400">Add-ons</span>
+              <span class="text-sm text-black dark:text-white">${formatCurrency(addonsTotal)}</span>
+            </div>
+          `;
+        }
+
+        const totalPaid = order.amountTotal || 0;
+        const vendorPayout = subtotal + addonsTotal; // Vendor gets subtotal + addons
+        const serviceFee = totalPaid - vendorPayout; // Service fee is the remainder
+
+        document.getElementById('total-paid').textContent = formatCurrency(totalPaid);
+        document.getElementById('platform-fee').textContent = `-${formatCurrency(serviceFee)}`;
+        document.getElementById('your-payout').textContent = formatCurrency(vendorPayout);
+
+        // Payment status
+        const paymentStatusText = order.paymentStatus || 'pending';
+        document.getElementById('payment-status-text').textContent = capitalizeFirst(paymentStatusText);
+
+        const paymentStatusBadge = document.getElementById('payment-status-badge');
+        if (paymentStatusText.toLowerCase() === 'paid') {
+          paymentStatusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/10 text-green-500 font-medium';
+        } else if (paymentStatusText.toLowerCase() === 'pending') {
+          paymentStatusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/10 text-yellow-500 font-medium';
+        }
+      }
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+        authDomain: "ryntit-b503c.firebaseapp.com",
+        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+        projectId: "ryntit-b503c",
+        storageBucket: "ryntit-b503c.appspot.com",
+        messagingSenderId: "908115066071",
+        appId: "1:908115066071:web:1de252c17cce4346be0492",
+        measurementId: "G-PDBZNLKYKC"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
+      async function fetchOrderDetails(orderId, vendorId) {
+        if (!orderId) {
+          console.error("Order ID is missing.");
+          return null;
+        }
+
+        try {
+          const orderDocRef = doc(db, "orders", orderId);
+          const orderSnapshot = await getDoc(orderDocRef);
+
+          if (orderSnapshot.exists()) {
+            const data = orderSnapshot.data();
+            if (data.vendorId === vendorId) {
+              return data;
+            } else {
+              console.warn("Order does not belong to this vendor");
+              return null;
+            }
+          } else {
+            console.warn("Order not found:", orderId);
+            return null;
+          }
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          return null;
+        }
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = 'signin.html';
+          return;
+        }
+
+        const orderId = getUrlParameter('id');
+        if (!orderId) {
+          window.location.href = 'orders.html';
+          return;
+        }
+
+        const order = await fetchOrderDetails(orderId, user.uid);
+
+        if (order) {
+          renderOrder(order, orderId);
+        } else {
+          window.location.href = 'orders.html';
+        }
+      });
+    </script>
   </body>
 </html>
