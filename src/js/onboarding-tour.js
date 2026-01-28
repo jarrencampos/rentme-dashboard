@@ -360,7 +360,7 @@ class OnboardingTour {
       welcome.innerHTML = `
         <div class="tour-welcome-icon">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-1a1.5 1.5 0 013 0m-3 1a1.5 1.5 0 013 0m0 0v1m0-1a1.5 1.5 0 013 0m-3 0a1.5 1.5 0 013 0m0 0v1m0-1a1.5 1.5 0 013 0m-3 0a1.5 1.5 0 013 0v3a5 5 0 01-10 0v-2m4-6l-1-1m0 0l-1-1m1 1h-1m1-1V5"/>
           </svg>
         </div>
         <h2 class="tour-welcome-title">Welcome to RentMe!</h2>
