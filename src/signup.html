@@ -149,25 +149,27 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                 <div>
                   <label class="mb-2 block text-sm font-medium text-black dark:text-white">
-                    Business Name
+                    Business Name <span class="text-danger">*</span>
                   </label>
                   <input
                     type="text"
                     id="businessName"
                     x-model="formData.businessName"
                     placeholder="Your Business"
+                    required
                     class="w-full rounded-xl border border-stroke bg-transparent py-3.5 px-5 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
                 <div>
                   <label class="mb-2 block text-sm font-medium text-black dark:text-white">
-                    Phone Number
+                    Phone Number <span class="text-danger">*</span>
                   </label>
                   <input
                     type="tel"
                     id="phone"
                     x-model="formData.phone"
                     placeholder="(555) 123-4567"
+                    required
                     class="w-full rounded-xl border border-stroke bg-transparent py-3.5 px-5 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
                 </div>
@@ -176,7 +178,7 @@
               <!-- Next button -->
               <button
                 type="button"
-                @click="if(formData.name && formData.email) currentStep = 2; else alert('Please fill in your name and email')"
+                @click="if(formData.name && formData.email && formData.businessName && formData.phone) currentStep = 2; else alert('Please fill in all required fields')"
                 class="w-full rounded-xl bg-primary py-3.5 px-6 font-medium text-white transition hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/30"
               >
                 Continue
@@ -208,11 +210,12 @@
               <!-- Annual Revenue -->
               <div class="mb-5">
                 <label class="mb-2 block text-sm font-medium text-black dark:text-white">
-                  Estimated annual rental revenue
+                  Estimated annual rental revenue <span class="text-danger">*</span>
                 </label>
                 <select
                   id="annualRevenue"
                   x-model="formData.annualRevenue"
+                  required
                   class="w-full rounded-xl border border-stroke bg-transparent py-3.5 px-5 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary appearance-none cursor-pointer"
                 >
                   <option value="" disabled selected>Select revenue range</option>
@@ -253,11 +256,12 @@
               <!-- How did you hear about us -->
               <div class="mb-6">
                 <label class="mb-2 block text-sm font-medium text-black dark:text-white">
-                  How did you hear about us?
+                  How did you hear about us? <span class="text-danger">*</span>
                 </label>
                 <select
                   id="hearAboutUs"
                   x-model="formData.hearAboutUs"
+                  required
                   class="w-full rounded-xl border border-stroke bg-transparent py-3.5 px-5 outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_rgba(128,202,238,0.15)] dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary appearance-none cursor-pointer"
                 >
                   <option value="" disabled selected>Select an option</option>
@@ -281,7 +285,7 @@
                 </button>
                 <button
                   type="button"
-                  @click="if(formData.inventoryCount && formData.rentalCategory) currentStep = 3; else alert('Please fill in the required fields')"
+                  @click="if(formData.inventoryCount && formData.rentalCategory && formData.annualRevenue && formData.hearAboutUs) currentStep = 3; else alert('Please fill in all required fields')"
                   class="flex-[2] rounded-xl bg-primary py-3.5 px-6 font-medium text-white transition hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/30"
                 >
                   Continue

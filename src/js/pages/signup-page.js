@@ -123,7 +123,7 @@ function initSignUpPage() {
       const hearAboutUs = document.getElementById('hearAboutUs')?.value;
       const agreeTerms = document.getElementById('agreeTerms')?.checked;
 
-      if (!email || !password || !name) {
+      if (!email || !password || !name || !businessName || !phone || !inventoryCount || !annualRevenue || !rentalCategory || !hearAboutUs) {
         alert('Please fill in all required fields');
         return;
       }
