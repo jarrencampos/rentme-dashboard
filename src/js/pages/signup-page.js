@@ -2,9 +2,13 @@
 import {
   auth,
   db,
+  storage,
   createUserWithEmailAndPassword,
   doc,
-  setDoc
+  setDoc,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL
 } from '../firebase-config.js';
 import { initAuthStateListener } from '../auth-service.js';
 
@@ -100,6 +104,25 @@ function initSignUpPage() {
     redirectIfSignedOut: false
   });
 
+  // Logo preview handler
+  const logoInput = document.getElementById('vendorLogo');
+  if (logoInput) {
+    logoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const logoImage = document.getElementById('logoImage');
+          const logoPlaceholder = document.getElementById('logoPlaceholder');
+          logoImage.src = event.target.result;
+          logoImage.classList.remove('hidden');
+          logoPlaceholder.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
   const createAccountForm = document.getElementById('createAccountForm');
 
   if (createAccountForm) {
@@ -122,9 +145,10 @@ function initSignUpPage() {
       const rentalCategory = document.getElementById('rentalCategory')?.value;
       const hearAboutUs = document.getElementById('hearAboutUs')?.value;
       const agreeTerms = document.getElementById('agreeTerms')?.checked;
+      const logoFile = document.getElementById('vendorLogo')?.files[0];
 
-      if (!email || !password || !name || !businessName || !phone || !inventoryCount || !annualRevenue || !rentalCategory || !hearAboutUs) {
-        alert('Please fill in all required fields');
+      if (!email || !password || !name || !businessName || !phone || !inventoryCount || !annualRevenue || !rentalCategory || !hearAboutUs || !logoFile) {
+        alert('Please fill in all required fields, including your vendor logo');
         return;
       }
 
@@ -145,6 +169,22 @@ function initSignUpPage() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // Upload vendor logo
+        const ext = logoFile.name.split('.').pop();
+        const logoPath = `vendors/${user.uid}/profile/logo_${Date.now()}.${ext}`;
+        const logoRef = ref(storage, logoPath);
+        const uploadTask = uploadBytesResumable(logoRef, logoFile);
+
+        const logoUrl = await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed', null, (error) => {
+            console.error('Logo upload error:', error);
+            reject(error);
+          }, async () => {
+            const url = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(url);
+          });
+        });
+
         // Prepare vendor data
         const vendorData = {
           uid: user.uid,
@@ -152,7 +192,7 @@ function initSignUpPage() {
           phone: phone || '',
           email: email,
           businessName: businessName || '',
-          image: getRandomProfileImage(),
+          image: logoUrl,
           ref: getReferralCookie(),
           pending_deposits: 0,
           total_bookings: 0,

@@ -18,6 +18,38 @@ function displayUserInfo(userInfo) {
   if (nameDisplay) nameDisplay.innerText = truncateText(userInfo.name);
   if (businessNameDisplay) businessNameDisplay.innerText = truncateText(userInfo.businessName);
   if (profileImage && userInfo.image) profileImage.src = userInfo.image;
+
+  // Set Visit Shop and Share Shop URLs
+  const vendorUrl = userInfo.url;
+  if (!vendorUrl) return;
+  const shopUrl = `https://rentme.co/${vendorUrl}`;
+  const shopName = userInfo.businessName || userInfo.name || 'my shop';
+  const shareText = `Check out ${shopName} on RentMe!`;
+
+  const visitShopLink = document.getElementById('visitShopLink');
+  if (visitShopLink) visitShopLink.href = shopUrl;
+
+  const shareFacebook = document.getElementById('shareFacebook');
+  if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shopUrl)}`;
+
+  const shareTwitter = document.getElementById('shareTwitter');
+  if (shareTwitter) shareTwitter.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shopUrl)}&text=${encodeURIComponent(shareText)}`;
+
+  const shareInstagram = document.getElementById('shareInstagram');
+  if (shareInstagram) shareInstagram.href = `https://www.instagram.com/`;
+
+  const shareCopyLink = document.getElementById('shareCopyLink');
+  if (shareCopyLink) {
+    shareCopyLink.addEventListener('click', () => {
+      navigator.clipboard.writeText(shopUrl).then(() => {
+        const copyText = document.getElementById('copyLinkText');
+        if (copyText) {
+          copyText.textContent = 'Copied!';
+          setTimeout(() => { copyText.textContent = 'Copy Link'; }, 2000);
+        }
+      });
+    });
+  }
 }
 
 async function getUserInfo(userId) {
