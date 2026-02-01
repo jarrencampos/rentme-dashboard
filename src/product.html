@@ -1140,6 +1140,66 @@
 
           await Promise.all([...imageUploadPromises, ...imageRemovalPromises]);
 
+          // Send email notification for listing edit (don't await - let it happen in background)
+          try {
+            const updatedTitle = document.getElementById('title').value.trim();
+            const updatedPricing = document.getElementById('pricing').value.trim();
+            const updatedLocation = document.getElementById('location').value.trim();
+            const updatedMainCategory = document.getElementById('mainCategory').value;
+            const updatedSubCategory = document.getElementById('subCategory').value;
+
+            const changedFields = [];
+            if (initialValues.title !== document.getElementById('title').value) changedFields.push('Title');
+            if (initialValues.subtitle !== document.getElementById('subtitle').value) changedFields.push('Subtitle');
+            if (initialValues.description !== document.getElementById('description').value) changedFields.push('Description');
+            if (initialValues.location !== document.getElementById('location').value) changedFields.push('Location');
+            if (initialValues.serviceMiles !== document.getElementById('serviceMiles').value) changedFields.push('Service Radius');
+            if (initialValues.pricing !== document.getElementById('pricing').value) changedFields.push('Pricing');
+            if (initialValues.mainCategory !== document.getElementById('mainCategory').value) changedFields.push('Main Category');
+            if (initialValues.subCategory !== document.getElementById('subCategory').value) changedFields.push('Sub Category');
+            if (initialValues.quantity !== document.getElementById('quantity').value) changedFields.push('Quantity');
+            if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) changedFields.push('Blocked Dates');
+            if (document.getElementById('imageInput').files.length > 0) changedFields.push('Main Image');
+            if (document.getElementById('imageInput2').files.length > 0) changedFields.push('Image 2');
+            if (document.getElementById('imageInput3').files.length > 0) changedFields.push('Image 3');
+            if (window.imagesToRemove.main || window.imagesToRemove.secondary || window.imagesToRemove.third) changedFields.push('Image Removal');
+            if (haveAddonsChanged(initialValues.addons, currentAddons)) changedFields.push('Add-ons');
+            if (haveVariationsChanged(initialValues.variations, currentVariations)) changedFields.push('Variations');
+
+            fetch('/api/send-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                subject: `Listing Updated: ${updatedTitle}`,
+                message: `
+A vendor has updated their listing.
+
+=== LISTING DETAILS ===
+
+Title: ${updatedTitle}
+Location: ${updatedLocation || 'Not specified'}
+Price: $${updatedPricing} / day
+Category: ${updatedMainCategory} > ${updatedSubCategory}
+
+=== CHANGES MADE ===
+
+Fields Updated: ${changedFields.join(', ') || 'None'}
+
+=== INFO ===
+
+Vendor UID: ${currentUserId}
+Product ID: ${productId}
+Updated: ${new Date().toLocaleString()}
+
+---
+Please review the changes if needed.
+                `.trim()
+              }),
+            });
+          } catch (emailError) {
+            console.error('Error sending listing update notification email:', emailError);
+          }
+
           Swal.fire({
             title: 'Success!',
             text: 'Your listing has been updated.',
