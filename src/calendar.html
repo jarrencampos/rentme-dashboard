@@ -303,6 +303,122 @@
         display: none !important;
       }
 
+      /* Export button & dropdown */
+      .export-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+        background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .export-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+      }
+      .export-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 200px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        border: 1px solid #E5E7EB;
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-4px);
+        transition: all 0.2s ease;
+      }
+      .dark .export-dropdown {
+        background: #1F2937;
+        border-color: #374151;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      }
+      .export-dropdown.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      .export-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #374151;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .dark .export-dropdown-item {
+        color: #E5E7EB;
+      }
+      .export-dropdown-item:first-child {
+        border-radius: 12px 12px 0 0;
+      }
+      .export-dropdown-item:last-child {
+        border-radius: 0 0 12px 12px;
+      }
+      .export-dropdown-item:hover {
+        background: #F3F4F6;
+      }
+      .dark .export-dropdown-item:hover {
+        background: #374151;
+      }
+      .export-dropdown-item svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      /* Per-event add-to-calendar button */
+      .add-to-cal-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #3C50E0;
+        background: #EEF2FF;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        margin-top: 6px;
+      }
+      .dark .add-to-cal-btn {
+        color: #93C5FD;
+        background: rgba(60, 80, 224, 0.15);
+      }
+      .add-to-cal-btn:hover {
+        background: #E0E7FF;
+      }
+      .dark .add-to-cal-btn:hover {
+        background: rgba(60, 80, 224, 0.25);
+      }
+      .add-to-cal-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+      .add-to-cal-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
       /* Vacation mode styles */
       .vacation-toggle {
         position: relative;
@@ -653,11 +769,37 @@
                 </p>
               </div>
 
-              <button id="next-month" class="nav-btn">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
+              <div class="flex items-center gap-3">
+                <!-- Export Calendar Button -->
+                <div style="position: relative;">
+                  <button class="export-btn" onclick="toggleExportDropdown(event)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export
+                  </button>
+                  <div id="export-dropdown" class="export-dropdown">
+                    <button class="export-dropdown-item" onclick="exportAllICS()">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      Download .ics File
+                    </button>
+                    <button class="export-dropdown-item" onclick="exportAllToGoogle()">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      Add to Google Calendar
+                    </button>
+                  </div>
+                </div>
+
+                <button id="next-month" class="nav-btn">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <!-- Calendar Table -->
@@ -1098,6 +1240,7 @@
         const vacation = getVacationForDate(date);
 
         if (vacation) {
+          const vacLabel = vacation.label || 'Time Off';
           const vacationLi = document.createElement('li');
           vacationLi.style.background = 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)';
           vacationLi.style.border = '1px solid #F59E0B';
@@ -1106,7 +1249,17 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
               </svg>
-              <strong>${vacation.label || 'Time Off'}</strong> - All listings unavailable
+              <strong>${vacLabel}</strong> - All listings unavailable
+            </div>
+            <div class="add-to-cal-actions" style="margin-top: 8px;">
+              <button class="add-to-cal-btn" onclick="event.stopPropagation(); addToAppleCalendar('RentMe: ${vacLabel.replace(/'/g, "\\'")}', '${vacation.startDate}', 'RentMe vacation - all listings unavailable')" style="color: #92400E; background: rgba(146, 64, 14, 0.1);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                .ics
+              </button>
+              <button class="add-to-cal-btn" onclick="event.stopPropagation(); addToGoogleCalendar('RentMe: ${vacLabel.replace(/'/g, "\\'")}', '${vacation.startDate}')" style="color: #92400E; background: rgba(146, 64, 14, 0.1);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                Google
+              </button>
             </div>
           `;
           eventList.appendChild(vacationLi);
@@ -1115,6 +1268,20 @@
         if (events.length > 0) {
           events.forEach(event => {
             const li = document.createElement('li');
+
+            // Build the add-to-calendar action buttons
+            const calBtns = `
+              <div class="add-to-cal-actions">
+                <button class="add-to-cal-btn" onclick="event.stopPropagation(); addToAppleCalendar('${event.replace(/'/g, "\\'")}', '${date}', '')">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  .ics
+                </button>
+                <button class="add-to-cal-btn" onclick="event.stopPropagation(); addToGoogleCalendar('${event.replace(/'/g, "\\'")}', '${date}')">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  Google
+                </button>
+              </div>
+            `;
 
             if (event.startsWith("Order #")) {
               const match = event.match(/Order\s+#(\d+)/);
@@ -1127,9 +1294,10 @@
                     </svg>
                     ${event}
                   </a>
+                  ${calBtns}
                 `;
               } else {
-                li.textContent = event;
+                li.innerHTML = event + calBtns;
               }
             } else {
               li.innerHTML = `
@@ -1139,6 +1307,7 @@
                   </svg>
                   ${event}
                 </div>
+                ${calBtns}
               `;
             }
 
@@ -1166,8 +1335,178 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           closePopup();
+          closeExportDropdown();
         }
       });
+    </script>
+
+    <!-- Calendar Export / Sync Logic -->
+    <script>
+      // Toggle export dropdown
+      function toggleExportDropdown(e) {
+        e.stopPropagation();
+        const dropdown = document.getElementById('export-dropdown');
+        dropdown.classList.toggle('active');
+      }
+
+      function closeExportDropdown() {
+        const dropdown = document.getElementById('export-dropdown');
+        if (dropdown) dropdown.classList.remove('active');
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.export-btn') && !e.target.closest('.export-dropdown')) {
+          closeExportDropdown();
+        }
+      });
+
+      // Format date as ICS date string (YYYYMMDD)
+      function toICSDate(dateStr) {
+        return dateStr.replace(/-/g, '');
+      }
+
+      // Add one day to a YYYY-MM-DD string (for ICS exclusive end dates)
+      function addOneDay(dateStr) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d + 1);
+        const yy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yy}-${mm}-${dd}`;
+      }
+
+      // Escape special characters for ICS text fields
+      function escapeICS(text) {
+        return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+      }
+
+      // Generate a single VEVENT block
+      function buildVEVENT(summary, startDate, endDate, uid, description) {
+        const lines = [
+          'BEGIN:VEVENT',
+          'DTSTART;VALUE=DATE:' + toICSDate(startDate),
+          'DTEND;VALUE=DATE:' + toICSDate(endDate),
+          'SUMMARY:' + escapeICS(summary),
+          'UID:' + uid,
+        ];
+        if (description) {
+          lines.push('DESCRIPTION:' + escapeICS(description));
+        }
+        lines.push('END:VEVENT');
+        return lines.join('\r\n');
+      }
+
+      // Generate full ICS file content from all events and vacations
+      function generateFullICS() {
+        const vevents = [];
+
+        // Add regular events and orders
+        (window.events || []).forEach((evt, i) => {
+          const endDate = addOneDay(evt.date);
+          const uid = 'rentme-event-' + i + '-' + toICSDate(evt.date) + '@rentme.com';
+          const isOrder = evt.event.startsWith('Order');
+          const description = isOrder ? 'RentMe ' + evt.event : '';
+          vevents.push(buildVEVENT(evt.event, evt.date, endDate, uid, description));
+        });
+
+        // Add vacations
+        (window.vacations || []).forEach((vac, i) => {
+          const endDate = addOneDay(vac.endDate);
+          const uid = 'rentme-vacation-' + (vac.id || i) + '@rentme.com';
+          const label = vac.label || 'Time Off';
+          vevents.push(buildVEVENT('RentMe: ' + label, vac.startDate, endDate, uid, 'RentMe vacation - all listings unavailable'));
+        });
+
+        const ics = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//RentMe//Dashboard//EN',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          'X-WR-CALNAME:RentMe Calendar',
+          ...vevents,
+          'END:VCALENDAR'
+        ].join('\r\n');
+
+        return ics;
+      }
+
+      // Generate ICS for a single event
+      function generateSingleICS(summary, date, description) {
+        const endDate = addOneDay(date);
+        const uid = 'rentme-' + toICSDate(date) + '-' + Date.now() + '@rentme.com';
+        const vevent = buildVEVENT(summary, date, endDate, uid, description || '');
+
+        return [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//RentMe//Dashboard//EN',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          vevent,
+          'END:VCALENDAR'
+        ].join('\r\n');
+      }
+
+      // Trigger .ics file download
+      function downloadICS(content, filename) {
+        const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Export all events as .ics download
+      function exportAllICS() {
+        closeExportDropdown();
+        const totalItems = (window.events || []).length + (window.vacations || []).length;
+        if (totalItems === 0) {
+          alert('No events or vacations to export.');
+          return;
+        }
+        const ics = generateFullICS();
+        downloadICS(ics, 'RentMe-Calendar.ics');
+      }
+
+      // Export all to Google Calendar (downloads .ics since Google supports import)
+      function exportAllToGoogle() {
+        closeExportDropdown();
+        const totalItems = (window.events || []).length + (window.vacations || []).length;
+        if (totalItems === 0) {
+          alert('No events or vacations to export.');
+          return;
+        }
+        // Google Calendar doesn't support bulk URL adds, so download .ics
+        // and show instructions
+        const ics = generateFullICS();
+        downloadICS(ics, 'RentMe-Calendar.ics');
+        setTimeout(() => {
+          alert('Your .ics file has been downloaded.\n\nTo import into Google Calendar:\n1. Open Google Calendar (calendar.google.com)\n2. Click the gear icon > Settings\n3. Click "Import & Export" on the left\n4. Click "Select file" and choose the downloaded .ics file\n5. Click "Import"');
+        }, 500);
+      }
+
+      // Open Google Calendar URL for a single event
+      function addToGoogleCalendar(title, date) {
+        const start = toICSDate(date);
+        const end = toICSDate(addOneDay(date));
+        const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+          + '&text=' + encodeURIComponent(title)
+          + '&dates=' + start + '/' + end;
+        window.open(url, '_blank');
+      }
+
+      // Download .ics for a single event (Apple Calendar / Outlook)
+      function addToAppleCalendar(title, date, description) {
+        const ics = generateSingleICS(title, date, description || '');
+        const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '-').substring(0, 30);
+        downloadICS(ics, safeTitle + '.ics');
+      }
     </script>
   </body>
 </html>
