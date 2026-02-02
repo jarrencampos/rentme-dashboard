@@ -568,6 +568,8 @@
     // Track images to be removed
     window.imagesToRemove = { main: false, secondary: false, third: false };
     window.currentImageUrls = { main: null, secondary: null, third: null };
+    // Track actual Firestore doc IDs for photos subcollection
+    window.photoDocIds = { secondary: null, third: null };
 
     function getEmptyStateHTML(isMain = false) {
       return `
@@ -651,7 +653,7 @@
   <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getFirestore, doc, Timestamp, getDoc, updateDoc, deleteDoc, collection, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getFirestore, doc, Timestamp, getDoc, updateDoc, deleteDoc, collection, getDocs, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
@@ -716,19 +718,25 @@
 
                   updateImagePreview('imageInput', 'imagePreview1', productData.image_url, true, 'main');
 
-                  // Load secondary and third images from photos subcollection
+                  // Load images from photos subcollection (random doc IDs, display in order added)
                   const photosRef = collection(db, "details", detailsId, "photos");
                   getDocs(photosRef).then((photosSnap) => {
+                    const photos = [];
                     photosSnap.forEach((photoDoc) => {
                       const photoData = photoDoc.data();
                       if (photoData.image_url) {
-                        if (photoDoc.id === 'secondary') {
-                          updateImagePreview('imageInput2', 'imagePreview2', photoData.image_url, false, 'secondary');
-                        } else if (photoDoc.id === 'third') {
-                          updateImagePreview('imageInput3', 'imagePreview3', photoData.image_url, false, 'third');
-                        }
+                        photos.push({ id: photoDoc.id, url: photoData.image_url });
                       }
                     });
+                    // Assign to slots in order
+                    if (photos[0]) {
+                      window.photoDocIds.secondary = photos[0].id;
+                      updateImagePreview('imageInput2', 'imagePreview2', photos[0].url, false, 'secondary');
+                    }
+                    if (photos[1]) {
+                      window.photoDocIds.third = photos[1].id;
+                      updateImagePreview('imageInput3', 'imagePreview3', photos[1].url, false, 'third');
+                    }
                   });
 
                   initialValues = {
@@ -784,20 +792,6 @@
                     }
                   });
 
-                  const secondaryRef = doc(db, "details", detailsId, "photos", "secondary");
-                  const thirdRef = doc(db, "details", detailsId, "photos", "third");
-
-                  getDoc(secondaryRef).then((docSnap) => {
-                    if (docSnap.exists() && docSnap.data().image_url) {
-                      updateImagePreview('imageInput2', 'imagePreview2', docSnap.data().image_url, false, 'secondary');
-                    }
-                  });
-
-                  getDoc(thirdRef).then((docSnap) => {
-                    if (docSnap.exists() && docSnap.data().image_url) {
-                      updateImagePreview('imageInput3', 'imagePreview3', docSnap.data().image_url, false, 'third');
-                    }
-                  });
                 }
               });
             }
@@ -1104,23 +1098,39 @@
 
           if (image2File) {
             const fileName = uniqueFileName('second', image2File);
+            const existingDocId = window.photoDocIds.secondary;
             imageUploadPromises.push(
               uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName)
-                .then(url => setDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
-                  image_url: url,
-                  timestamp: Timestamp.now()
-                }, { merge: true }))
+                .then(url => {
+                  if (existingDocId) {
+                    return setDoc(doc(db, "details", productData.details_id, "photos", existingDocId), {
+                      image_url: url
+                    }, { merge: true });
+                  } else {
+                    return addDoc(collection(db, "details", productData.details_id, "photos"), {
+                      image_url: url
+                    });
+                  }
+                })
             );
           }
 
           if (image3File) {
             const fileName = uniqueFileName('third', image3File);
+            const existingDocId = window.photoDocIds.third;
             imageUploadPromises.push(
               uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName)
-                .then(url => setDoc(doc(db, "details", productData.details_id, "photos", "third"), {
-                  image_url: url,
-                  timestamp: Timestamp.now()
-                }, { merge: true }))
+                .then(url => {
+                  if (existingDocId) {
+                    return setDoc(doc(db, "details", productData.details_id, "photos", existingDocId), {
+                      image_url: url
+                    }, { merge: true });
+                  } else {
+                    return addDoc(collection(db, "details", productData.details_id, "photos"), {
+                      image_url: url
+                    });
+                  }
+                })
             );
           }
 
@@ -1135,22 +1145,16 @@
           }
 
           // Remove secondary image if marked and no new file uploaded
-          if (window.imagesToRemove.secondary && !image2File) {
+          if (window.imagesToRemove.secondary && !image2File && window.photoDocIds.secondary) {
             imageRemovalPromises.push(
-              setDoc(doc(db, "details", productData.details_id, "photos", "secondary"), {
-                image_url: '',
-                timestamp: Timestamp.now()
-              }, { merge: true })
+              deleteDoc(doc(db, "details", productData.details_id, "photos", window.photoDocIds.secondary))
             );
           }
 
           // Remove third image if marked and no new file uploaded
-          if (window.imagesToRemove.third && !image3File) {
+          if (window.imagesToRemove.third && !image3File && window.photoDocIds.third) {
             imageRemovalPromises.push(
-              setDoc(doc(db, "details", productData.details_id, "photos", "third"), {
-                image_url: '',
-                timestamp: Timestamp.now()
-              }, { merge: true })
+              deleteDoc(doc(db, "details", productData.details_id, "photos", window.photoDocIds.third))
             );
           }
 
