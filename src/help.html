@@ -359,9 +359,38 @@
         answer.classList.toggle('open');
         icon.classList.toggle('open');
       }
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
+        authDomain: "ryntit-b503c.firebaseapp.com",
+        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
+        projectId: "ryntit-b503c",
+        storageBucket: "ryntit-b503c.appspot.com",
+        messagingSenderId: "908115066071",
+        appId: "1:908115066071:web:1de252c17cce4346be0492",
+        measurementId: "G-PDBZNLKYKC"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      let currentUser = null;
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+        } else {
+          currentUser = user;
+        }
+      });
 
       // Form submission
-      document.getElementById('contactForm').addEventListener('submit', function(event) {
+      document.getElementById('contactForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const subject = document.getElementById('subject').value;
@@ -388,42 +417,50 @@
           }
         });
 
-        // Simulate sending (replace with actual API call)
-        setTimeout(() => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Message Sent!',
-            text: 'We\'ll get back to you within 24 hours.',
-            confirmButtonColor: '#3C50E0'
+        const vendorUid = currentUser ? currentUser.uid : 'Unknown';
+        const vendorEmail = currentUser ? currentUser.email : 'Unknown';
+
+        const emailBody = `
+          <h2>New Help Request from Vendor Dashboard</h2>
+          <hr/>
+          <p><strong>Topic:</strong> ${subject}</p>
+          <p><strong>Vendor UID:</strong> ${vendorUid}</p>
+          <p><strong>Vendor Email:</strong> ${vendorEmail}</p>
+          <hr/>
+          <h3>Message:</h3>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+          <hr/>
+          <p style="color: #888; font-size: 12px;">Sent from the RentMe Vendor Dashboard Help Page on ${new Date().toLocaleString()}</p>
+        `;
+
+        try {
+          const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              subject: `Help Request: ${subject} - from ${vendorEmail}`,
+              message: emailBody
+            })
           });
 
-          // Reset form
-          document.getElementById('contactForm').reset();
-        }, 1500);
-      });
-    </script>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyB-8sarU_q2gdfBSLQAUhNlnbmj3T2o8nA",
-        authDomain: "ryntit-b503c.firebaseapp.com",
-        databaseURL: "https://ryntit-b503c-default-rtdb.firebaseio.com",
-        projectId: "ryntit-b503c",
-        storageBucket: "ryntit-b503c.appspot.com",
-        messagingSenderId: "908115066071",
-        appId: "1:908115066071:web:1de252c17cce4346be0492",
-        measurementId: "G-PDBZNLKYKC"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-
-      onAuthStateChanged(auth, (user) => {
-        if (!user) {
-          window.location.href = 'login.html';
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Message Sent!',
+              text: "We'll get back to you within 24 hours.",
+              confirmButtonColor: '#3C50E0'
+            });
+            document.getElementById('contactForm').reset();
+          } else {
+            throw new Error('Failed to send');
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed to Send',
+            text: 'Something went wrong. Please try again or email us directly at support@rentme.co.',
+            confirmButtonColor: '#3C50E0'
+          });
         }
       });
     </script>
