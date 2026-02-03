@@ -81,6 +81,35 @@
       background: #3C50E0 !important;
       border-color: #3C50E0 !important;
     }
+    .flatpickr-day.vacation-day {
+      background: rgba(245, 158, 11, 0.2) !important;
+      border-color: #F59E0B !important;
+    }
+    .flatpickr-day.vacation-day:hover {
+      background: rgba(245, 158, 11, 0.35) !important;
+    }
+    .flatpickr-day.vacation-day.selected {
+      background: #3C50E0 !important;
+      border-color: #3C50E0 !important;
+    }
+    .vacation-legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #6B7280;
+      margin-top: 8px;
+    }
+    .dark .vacation-legend {
+      color: #9CA3AF;
+    }
+    .vacation-legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: rgba(245, 158, 11, 0.3);
+      border: 1px solid #F59E0B;
+    }
 
     /* Image remove button */
     .image-remove-btn {
@@ -703,7 +732,10 @@
   <script>
     let selectedDates = [];
 
-    document.addEventListener('DOMContentLoaded', function () {
+    window.initFlatpickr = function (vacationDates) {
+      vacationDates = vacationDates || [];
+      const vacationSet = new Set(vacationDates);
+
       const today = new Date();
       const oneYearFromToday = new Date();
       oneYearFromToday.setFullYear(today.getFullYear() + 1);
@@ -717,6 +749,15 @@
         minDate: "today",
         maxDate: oneYearFromToday,
         inline: true,
+        onDayCreate: function (dObj, dStr, fp, dayElem) {
+          const dateStr = dayElem.dateObj.getFullYear() + '-' +
+            String(dayElem.dateObj.getMonth() + 1).padStart(2, '0') + '-' +
+            String(dayElem.dateObj.getDate()).padStart(2, '0');
+          if (vacationSet.has(dateStr)) {
+            dayElem.classList.add('vacation-day');
+            dayElem.title = 'Vendor vacation';
+          }
+        },
         onChange: function (selectedDatesArr) {
           selectedDates = selectedDatesArr.map(date => {
             const d = new Date(date);
@@ -728,13 +769,26 @@
             : '';
         }
       });
+
+      // Add vacation legend if there are vacation dates
+      if (vacationDates.length > 0) {
+        const legendDiv = document.createElement('div');
+        legendDiv.className = 'vacation-legend';
+        legendDiv.innerHTML = '<span class="vacation-legend-dot"></span> Vendor vacation dates';
+        document.getElementById("selected-dates").parentNode.appendChild(legendDiv);
+      }
+    };
+
+    // Default init with no vacation dates (will be re-initialized from module script if user is logged in)
+    document.addEventListener('DOMContentLoaded', function () {
+      window.initFlatpickr([]);
     });
   </script>
 
   <!-- Firebase Submission -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, getDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
@@ -757,10 +811,51 @@
     document.addEventListener("DOMContentLoaded", () => {
       let currentUserId = null;
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUserId = user.uid;
           console.log("Logged in user ID: ", currentUserId);
+
+          // Fetch vendor vacations and display on calendar
+          try {
+            const vendorSnap = await getDoc(doc(db, "vendors", user.uid));
+            if (vendorSnap.exists()) {
+              const vendorData = vendorSnap.data();
+              let vacations = [];
+              if (vendorData.vacations && Array.isArray(vendorData.vacations)) {
+                vacations = vendorData.vacations;
+              } else if (vendorData.vacation && vendorData.vacation.active) {
+                vacations = [{
+                  startDate: vendorData.vacation.startDate,
+                  endDate: vendorData.vacation.endDate
+                }];
+              }
+
+              // Expand vacation ranges into individual YYYY-MM-DD strings
+              const vacationDates = [];
+              vacations.forEach(v => {
+                const start = new Date(v.startDate + 'T00:00:00');
+                const end = new Date(v.endDate + 'T00:00:00');
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                  vacationDates.push(d.getFullYear() + '-' +
+                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(d.getDate()).padStart(2, '0'));
+                }
+              });
+
+              if (vacationDates.length > 0) {
+                // Destroy existing flatpickr and reinitialize with vacation dates
+                const existingFp = document.querySelector('#datepicker')._flatpickr;
+                if (existingFp) existingFp.destroy();
+                // Remove old legend if any
+                const oldLegend = document.querySelector('.vacation-legend');
+                if (oldLegend) oldLegend.remove();
+                window.initFlatpickr(vacationDates);
+              }
+            }
+          } catch (err) {
+            console.error("Error fetching vendor vacations:", err);
+          }
         } else {
           console.log("No user logged in");
         }

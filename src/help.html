@@ -420,18 +420,12 @@
         const vendorUid = currentUser ? currentUser.uid : 'Unknown';
         const vendorEmail = currentUser ? currentUser.email : 'Unknown';
 
-        const emailBody = `
-          <h2>New Help Request from Vendor Dashboard</h2>
-          <hr/>
-          <p><strong>Topic:</strong> ${subject}</p>
-          <p><strong>Vendor UID:</strong> ${vendorUid}</p>
-          <p><strong>Vendor Email:</strong> ${vendorEmail}</p>
-          <hr/>
-          <h3>Message:</h3>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-          <hr/>
-          <p style="color: #888; font-size: 12px;">Sent from the RentMe Vendor Dashboard Help Page on ${new Date().toLocaleString()}</p>
-        `;
+        const emailBody = `New Help Request from Vendor Dashboard\n\n` +
+          `Topic: ${subject}\n` +
+          `Vendor UID: ${vendorUid}\n` +
+          `Vendor Email: ${vendorEmail}\n\n` +
+          `Message:\n${message}\n\n` +
+          `---\nSent from the RentMe Vendor Dashboard Help Page on ${new Date().toLocaleString()}`;
 
         try {
           const response = await fetch('/api/send-email', {
