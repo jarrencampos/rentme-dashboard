@@ -81,7 +81,6 @@
           const gridContainer = document.getElementById("listings-grid");
           const emptyState = document.getElementById("empty-state");
           const loadingState = document.getElementById("loading-state");
-          const statsContainer = document.getElementById("stats-container");
 
           const products = await getVendorProducts(vendorId);
 
@@ -90,17 +89,7 @@
 
           if (products.length === 0) {
             emptyState.classList.remove("hidden");
-            statsContainer.classList.add("hidden");
           } else {
-            // Update stats
-            const totalListings = products.length;
-            const totalBookings = products.reduce((sum, p) => sum + (p.bookings || 0), 0);
-            const totalEarned = products.reduce((sum, p) => sum + (p.earned || 0), 0);
-
-            document.getElementById("stat-listings").textContent = totalListings;
-            document.getElementById("stat-bookings").textContent = totalBookings;
-            document.getElementById("stat-earned").textContent = `$${totalEarned.toLocaleString()}`;
-
             // Render product cards
             gridContainer.innerHTML = products.map(product => createProductCard(product)).join('');
             gridContainer.classList.remove("hidden");
@@ -246,48 +235,6 @@
             </div>
           </div>
 
-          <!-- Stats Cards -->
-          <div id="stats-container" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20">
-                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Listings</p>
-                  <p id="stat-listings" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-500/10 dark:bg-green-500/20">
-                  <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Bookings</p>
-                  <p id="stat-bookings" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white dark:bg-boxdark rounded-2xl p-5 border border-gray-100 dark:border-strokedark">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-yellow-500/10 dark:bg-yellow-500/20">
-                  <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Earned</p>
-                  <p id="stat-earned" class="text-2xl font-bold text-gray-900 dark:text-white">$0</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- Loading State -->
           <div id="loading-state" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
