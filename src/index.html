@@ -836,9 +836,10 @@
 
             // Fetch Stripe data for accurate total sales
             try {
+              const token = await user.getIdToken();
               const stripeResponse = await fetch('/api/stripe/account-status', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ vendorId: user.uid })
               });
               const stripeData = await stripeResponse.json();

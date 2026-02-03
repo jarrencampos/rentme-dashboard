@@ -1002,9 +1002,10 @@
 
           // Send email notification for new listing approval (don't await - let it happen in background)
           try {
+            const emailToken = await auth.currentUser.getIdToken();
             fetch('/api/send-email', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${emailToken}` },
               body: JSON.stringify({
                 subject: `New Listing Pending Approval: ${title}`,
                 message: `

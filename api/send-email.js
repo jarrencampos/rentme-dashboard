@@ -1,9 +1,36 @@
+import { verifyAuth } from './lib/verify-auth.js';
+
 export default async function handler(req, res) {
+    // Set CORS headers
+    const allowedOrigin = process.env.ALLOWED_ORIGIN || 'https://dashboard.rentme.co';
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
     if (req.method !== 'POST') {
       return res.status(405).send({ message: 'Only POST requests allowed' });
     }
 
-    const { subject, message, to } = req.body;
+    const { subject, message, to, skipAuth } = req.body;
+
+    // For signup emails (skipAuth === true), just validate required fields exist
+    // For all other emails, require Firebase Auth
+    if (skipAuth) {
+      if (!subject || !message) {
+        return res.status(400).json({ message: 'Missing required fields: subject, message' });
+      }
+    } else {
+      try {
+        await verifyAuth(req);
+      } catch (authError) {
+        return res.status(authError.status || 401).json({ message: authError.message });
+      }
+    }
 
     // Send email using nodemailer
     const nodemailer = require('nodemailer');
@@ -39,4 +66,3 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: 'Failed to send email' });
     }
   }
-  

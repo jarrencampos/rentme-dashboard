@@ -468,10 +468,12 @@
         }
 
         try {
+          const token = await auth.currentUser.getIdToken();
           const response = await fetch('/api/stripe/create-connect-account', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
               vendorId: currentUserId,
@@ -517,10 +519,12 @@
         if (!currentUserId) return;
 
         try {
+          const token = await auth.currentUser.getIdToken();
           const response = await fetch('/api/stripe/account-status', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
               vendorId: currentUserId,
@@ -568,10 +572,12 @@
         if (!currentUserId) return;
 
         try {
+          const token = await auth.currentUser.getIdToken();
           const response = await fetch('/api/stripe/create-login-link', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
               vendorId: currentUserId,

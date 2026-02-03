@@ -428,9 +428,10 @@
           `---\nSent from the RentMe Vendor Dashboard Help Page on ${new Date().toLocaleString()}`;
 
         try {
+          const token = await auth.currentUser.getIdToken();
           const response = await fetch('/api/send-email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({
               subject: `Help Request: ${subject} - from ${vendorEmail}`,
               message: emailBody

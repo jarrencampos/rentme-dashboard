@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { verifyAuth } from '../lib/verify-auth.js';
 
 // Format private key - handle different formats from Vercel
 function formatPrivateKey(key) {
@@ -31,8 +32,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
   // Set CORS headers
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || 'https://dashboard.rentme.co';
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -49,6 +51,13 @@ export default async function handler(req, res) {
 
     if (!vendorId || !email) {
       return res.status(400).json({ error: 'Missing required fields: vendorId, email' });
+    }
+
+    // Verify Firebase Auth token and ensure uid matches vendorId
+    try {
+      await verifyAuth(req, vendorId);
+    } catch (authError) {
+      return res.status(authError.status || 401).json({ error: authError.message });
     }
 
     // Check if vendor already has a Stripe Connect account

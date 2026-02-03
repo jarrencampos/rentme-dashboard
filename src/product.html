@@ -1186,9 +1186,10 @@
             if (haveAddonsChanged(initialValues.addons, currentAddons)) changedFields.push('Add-ons');
             if (haveVariationsChanged(initialValues.variations, currentVariations)) changedFields.push('Variations');
 
+            const emailToken = await auth.currentUser.getIdToken();
             fetch('/api/send-email', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${emailToken}` },
               body: JSON.stringify({
                 subject: `Listing Updated: ${updatedTitle}`,
                 message: `

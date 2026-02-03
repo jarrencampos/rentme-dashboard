@@ -48,6 +48,7 @@ async function sendVendorSignupNotification(vendorData) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        skipAuth: true,
         subject: `New Vendor Signup: ${vendorData.businessName || vendorData.name}`,
         message: `
 A new vendor has signed up and is pending approval.
