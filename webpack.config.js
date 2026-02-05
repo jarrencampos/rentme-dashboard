@@ -2,6 +2,7 @@ const path = require('path');
 const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 // Determine build mode
 const isProduction = process.env.NODE_ENV === 'production';
@@ -137,6 +138,11 @@ module.exports = {
     ...generateHTMLPlugins(),
     new MiniCssExtractPlugin({
       filename: isProduction ? 'css/style.[contenthash:8].css' : 'css/style.css',
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: 'src/images/og-image.png', to: 'images/og-image.png' },
+      ],
     }),
   ],
 
