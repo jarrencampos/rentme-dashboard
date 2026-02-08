@@ -27,11 +27,11 @@ service cloud.firestore {
     // New products (pending approval) — only the vendor who owns them
     match /newProducts/{productId} {
       allow read: if request.auth != null
-                  && resource.data.vendorId == request.auth.uid;
+                  && resource.data.vendor_id == request.auth.uid;
       allow create: if request.auth != null
-                    && request.resource.data.vendorId == request.auth.uid;
+                    && request.resource.data.vendor_id == request.auth.uid;
       allow update, delete: if request.auth != null
-                            && resource.data.vendorId == request.auth.uid;
+                            && resource.data.vendor_id == request.auth.uid;
     }
 
     // Orders: vendor can read their own orders, anyone can create

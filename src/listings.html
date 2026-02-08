@@ -130,18 +130,6 @@
                 class="listing-image w-full h-full object-cover"
                 onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
               />
-              <!-- Status Badge -->
-              <div class="absolute top-3 left-3">
-                <span class="status-badge inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-black/70 text-gray-800 dark:text-white">
-                  ${bookings > 0 ? `<span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>Active` : `<span class="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></span>No bookings`}
-                </span>
-              </div>
-              <!-- Quick Stats Overlay -->
-              <div class="absolute bottom-3 right-3 flex gap-2">
-                <span class="status-badge inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-black/60 text-white">
-                  ${bookings} booked
-                </span>
-              </div>
             </div>
 
             <!-- Content -->
