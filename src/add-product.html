@@ -324,6 +324,25 @@
                     class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 resize-none"></textarea>
                   <p class="mt-1.5 text-xs text-gray-400">Detailed description of your item (max 1500 characters)</p>
                 </div>
+
+                <!-- Specifications -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
+                    Specifications
+                    <span class="relative group cursor-pointer">
+                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                      </svg>
+                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 px-3 py-2 text-xs font-normal text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                        Add product specifications like dimensions, weight, capacity, etc. Format: Size: 10x10x10, Weight: 100lbs
+                        <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                      </span>
+                    </span>
+                  </label>
+                  <textarea id="specifications" rows="3" placeholder="Size: 10x10x10, Weight: 100lbs, Capacity: 8 kids"
+                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 resize-none"></textarea>
+                  <p class="mt-1.5 text-xs text-gray-400">Comma-separated specs (e.g., Size: 10x10x10, Weight: 100lbs)</p>
+                </div>
               </div>
             </div>
 
@@ -882,6 +901,19 @@
         const quantity = document.getElementById('quantity').value.trim();
         const mainCategory = document.getElementById('mainCategory').value;
         const subCategory = document.getElementById('subCategory').value;
+        const specificationsRaw = document.getElementById('specifications').value.trim();
+
+        // Parse specifications into array of {key, value} objects
+        const specifications = specificationsRaw ? specificationsRaw.split(',').map(spec => {
+          const parts = spec.split(':');
+          if (parts.length >= 2) {
+            return {
+              key: parts[0].trim(),
+              value: parts.slice(1).join(':').trim()
+            };
+          }
+          return null;
+        }).filter(Boolean) : [];
 
         if (!title || !subtitle || !description || !location || !pricing || !mainImageFile || !mainCategory || !subCategory) {
           Swal.fire({
@@ -948,6 +980,7 @@
             vendor_id: currentUserId,
             category: mainCategory,
             subcategory: subCategory,
+            specifications,
             addons,
             variations,
             block_dates: selectedDates,
@@ -1025,6 +1058,10 @@ Price: $${pricingNumber} / day
 
 Main Category: ${mainCategory}
 Sub Category: ${subCategory}
+
+=== SPECIFICATIONS ===
+
+${specifications.length > 0 ? specifications.map(s => `- ${s.key}: ${s.value}`).join('\n') : 'None'}
 
 === ADD-ONS ===
 
