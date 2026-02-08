@@ -945,11 +945,12 @@
             pricing: pricingNumber,
             serviceMiles: serviceMiles ? parseInt(serviceMiles) : 0,
             num_items: quantity ? parseInt(quantity) : 1,
-            vendorId: currentUserId,
+            vendor_id: currentUserId,
             category: mainCategory,
             subcategory: subCategory,
             addons,
             variations,
+            block_dates: selectedDates,
             timestamp: Timestamp.now(),
           });
 
