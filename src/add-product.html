@@ -570,6 +570,15 @@
                 </div>
               </div>
 
+              <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Quick block:</span>
+                <button type="button" onclick="quickBlock(7)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">1 Week</button>
+                <button type="button" onclick="quickBlock(14)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">2 Weeks</button>
+                <button type="button" onclick="quickBlock(30)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">1 Month</button>
+                <button type="button" onclick="quickBlock(60)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">2 Months</button>
+                <button type="button" onclick="clearBlockedDates()" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700 transition-colors">Clear All</button>
+              </div>
+
               <div class="flex flex-col items-center">
                 <input type="text" id="datepicker" class="hidden" />
                 <div id="selected-dates" class="mt-2 text-center text-sm font-medium text-primary"></div>
@@ -811,6 +820,35 @@
     document.addEventListener('DOMContentLoaded', function () {
       window.initFlatpickr([]);
     });
+
+    function quickBlock(days) {
+      const fp = document.querySelector('#datepicker')._flatpickr;
+      if (!fp) return;
+
+      const existing = fp.selectedDates.map(d => d.getTime());
+      const newDates = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < days; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        if (!existing.includes(date.getTime())) {
+          newDates.push(date);
+        }
+      }
+
+      const merged = [...fp.selectedDates, ...newDates];
+      fp.setDate(merged, true);
+    }
+
+    function clearBlockedDates() {
+      const fp = document.querySelector('#datepicker')._flatpickr;
+      if (!fp) return;
+      fp.clear();
+      selectedDates = [];
+      document.getElementById('selected-dates').textContent = '';
+    }
   </script>
 
   <!-- Firebase Submission -->

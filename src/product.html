@@ -543,6 +543,15 @@
                 </div>
               </div>
 
+              <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Quick block:</span>
+                <button type="button" onclick="quickBlock(7)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">1 Week</button>
+                <button type="button" onclick="quickBlock(14)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">2 Weeks</button>
+                <button type="button" onclick="quickBlock(30)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">1 Month</button>
+                <button type="button" onclick="quickBlock(60)" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors">2 Months</button>
+                <button type="button" onclick="clearBlockedDates()" class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700 transition-colors">Clear All</button>
+              </div>
+
               <div class="flex flex-col items-center">
                 <input type="text" id="datepicker" class="hidden" />
                 <div id="blockedDates" class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400"></div>
@@ -1228,30 +1237,43 @@
             const updatedMainCategory = document.getElementById('mainCategory').value;
             const updatedSubCategory = document.getElementById('subCategory').value;
 
-            const changedFields = [];
-            if (initialValues.title !== document.getElementById('title').value) changedFields.push('Title');
-            if (initialValues.subtitle !== document.getElementById('subtitle').value) changedFields.push('Subtitle');
-            if (initialValues.description !== document.getElementById('description').value) changedFields.push('Description');
-            if (initialValues.location !== document.getElementById('location').value) changedFields.push('Location');
-            if (initialValues.serviceMiles !== document.getElementById('serviceMiles').value) changedFields.push('Service Radius');
-            if (initialValues.pricing !== document.getElementById('pricing').value) changedFields.push('Pricing');
-            if (initialValues.mainCategory !== document.getElementById('mainCategory').value) changedFields.push('Main Category');
-            if (initialValues.subCategory !== document.getElementById('subCategory').value) changedFields.push('Sub Category');
-            if (initialValues.quantity !== document.getElementById('quantity').value) changedFields.push('Quantity');
-            if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) changedFields.push('Blocked Dates');
-            if (document.getElementById('imageInput').files.length > 0) changedFields.push('Main Image');
-            if (document.getElementById('imageInput2').files.length > 0) changedFields.push('Image 2');
-            if (document.getElementById('imageInput3').files.length > 0) changedFields.push('Image 3');
-            if (window.imagesToRemove.main || window.imagesToRemove.secondary || window.imagesToRemove.third) changedFields.push('Image Removal');
-            if (haveAddonsChanged(initialValues.addons, currentAddons)) changedFields.push('Add-ons');
-            if (haveVariationsChanged(initialValues.variations, currentVariations)) changedFields.push('Variations');
-            if (haveSpecificationsChanged(initialValues.specifications, currentSpecifications)) changedFields.push('Specifications');
+            const changeDetails = [];
+            const newTitle = document.getElementById('title').value;
+            const newSubtitle = document.getElementById('subtitle').value;
+            const newDescription = document.getElementById('description').value;
+            const newLocation = document.getElementById('location').value;
+            const newServiceMiles = document.getElementById('serviceMiles').value;
+            const newPricing = document.getElementById('pricing').value;
+            const newMainCategory = document.getElementById('mainCategory').value;
+            const newSubCategory = document.getElementById('subCategory').value;
+            const newQuantity = document.getElementById('quantity').value;
+
+            if (initialValues.title !== newTitle) changeDetails.push(`- Title: "${initialValues.title}" → "${newTitle}"`);
+            if (initialValues.subtitle !== newSubtitle) changeDetails.push(`- Subtitle: "${initialValues.subtitle}" → "${newSubtitle}"`);
+            if (initialValues.description !== newDescription) changeDetails.push(`- Description: Updated (${newDescription.length} chars)`);
+            if (initialValues.location !== newLocation) changeDetails.push(`- Location: "${initialValues.location}" → "${newLocation}"`);
+            if (initialValues.serviceMiles !== newServiceMiles) changeDetails.push(`- Service Radius: ${initialValues.serviceMiles || '0'} mi → ${newServiceMiles || '0'} mi`);
+            if (initialValues.pricing !== newPricing) changeDetails.push(`- Pricing: $${initialValues.pricing} → $${newPricing} / day`);
+            if (initialValues.mainCategory !== newMainCategory) changeDetails.push(`- Main Category: "${initialValues.mainCategory}" → "${newMainCategory}"`);
+            if (initialValues.subCategory !== newSubCategory) changeDetails.push(`- Sub Category: "${initialValues.subCategory}" → "${newSubCategory}"`);
+            if (initialValues.quantity !== newQuantity) changeDetails.push(`- Quantity: ${initialValues.quantity || '1'} → ${newQuantity || '1'}`);
+            if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) changeDetails.push(`- Blocked Dates: ${initialValues.block_dates.length} dates → ${selectedBlockDates.length} dates`);
+            if (document.getElementById('imageInput').files.length > 0) changeDetails.push('- Main Image: Replaced');
+            if (document.getElementById('imageInput2').files.length > 0) changeDetails.push('- Image 2: Replaced');
+            if (document.getElementById('imageInput3').files.length > 0) changeDetails.push('- Image 3: Replaced');
+            if (window.imagesToRemove.main) changeDetails.push('- Main Image: Removed');
+            if (window.imagesToRemove.secondary) changeDetails.push('- Image 2: Removed');
+            if (window.imagesToRemove.third) changeDetails.push('- Image 3: Removed');
+            if (haveAddonsChanged(initialValues.addons, currentAddons)) changeDetails.push(`- Add-ons: ${initialValues.addons.length} → ${currentAddons.length} add-on(s)`);
+            if (haveVariationsChanged(initialValues.variations, currentVariations)) changeDetails.push(`- Variations: ${initialValues.variations.length} → ${currentVariations.length} variation(s)`);
+            if (haveSpecificationsChanged(initialValues.specifications, currentSpecifications)) changeDetails.push(`- Specifications: ${initialValues.specifications.length} → ${currentSpecifications.length} spec(s)`);
 
             const emailToken = await auth.currentUser.getIdToken();
             fetch('/api/send-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${emailToken}` },
               body: JSON.stringify({
+                to: 'jarren@rentme.co',
                 subject: `Listing Updated: ${updatedTitle}`,
                 message: `
 A vendor has updated their listing.
@@ -1265,7 +1287,7 @@ Category: ${updatedMainCategory} > ${updatedSubCategory}
 
 === CHANGES MADE ===
 
-Fields Updated: ${changedFields.join(', ') || 'None'}
+${changeDetails.length > 0 ? changeDetails.join('\n') : 'No field changes detected'}
 
 === INFO ===
 
@@ -1798,6 +1820,37 @@ Please review the changes if needed.
         }
       };
     });
+  </script>
+
+  <!-- Quick Block Helpers -->
+  <script>
+    function quickBlock(days) {
+      const fp = document.querySelector('#datepicker')._flatpickr;
+      if (!fp) return;
+
+      const existing = fp.selectedDates.map(d => d.getTime());
+      const newDates = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < days; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        if (!existing.includes(date.getTime())) {
+          newDates.push(date);
+        }
+      }
+
+      const merged = [...fp.selectedDates, ...newDates];
+      fp.setDate(merged, true);
+    }
+
+    function clearBlockedDates() {
+      const fp = document.querySelector('#datepicker')._flatpickr;
+      if (!fp) return;
+      fp.clear();
+      document.getElementById('selected-dates').textContent = '';
+    }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
