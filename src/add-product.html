@@ -325,24 +325,6 @@
                   <p class="mt-1.5 text-xs text-gray-400">Detailed description of your item (max 1500 characters)</p>
                 </div>
 
-                <!-- Specifications -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
-                    Specifications
-                    <span class="relative group cursor-pointer">
-                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                      </svg>
-                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 px-3 py-2 text-xs font-normal text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                        Add product specifications like dimensions, weight, capacity, etc. Format: Size: 10x10x10, Weight: 100lbs
-                        <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
-                      </span>
-                    </span>
-                  </label>
-                  <textarea id="specifications" rows="3" placeholder="Size: 10x10x10, Weight: 100lbs, Capacity: 8 kids"
-                    class="modern-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none dark:bg-gray-800/50 resize-none"></textarea>
-                  <p class="mt-1.5 text-xs text-gray-400">Comma-separated specs (e.g., Size: 10x10x10, Weight: 100lbs)</p>
-                </div>
               </div>
             </div>
 
@@ -491,6 +473,33 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Specifications Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20">
+                  <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Specifications</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Add product specs like dimensions, weight, capacity (max 4)</p>
+                </div>
+              </div>
+
+              <div id="specifications-container" class="space-y-3">
+                <!-- Specifications will be dynamically added here -->
+              </div>
+
+              <button type="button" id="add-specification-btn"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add a specification
+              </button>
             </div>
 
             <!-- Addons Section -->
@@ -901,19 +910,9 @@
         const quantity = document.getElementById('quantity').value.trim();
         const mainCategory = document.getElementById('mainCategory').value;
         const subCategory = document.getElementById('subCategory').value;
-        const specificationsRaw = document.getElementById('specifications').value.trim();
 
-        // Parse specifications into array of {key, value} objects
-        const specifications = specificationsRaw ? specificationsRaw.split(',').map(spec => {
-          const parts = spec.split(':');
-          if (parts.length >= 2) {
-            return {
-              key: parts[0].trim(),
-              value: parts.slice(1).join(':').trim()
-            };
-          }
-          return null;
-        }).filter(Boolean) : [];
+        // Collect specifications from the key-value inputs
+        const specifications = window.collectSpecificationsData ? window.collectSpecificationsData() : [];
 
         if (!title || !subtitle || !description || !location || !pricing || !mainImageFile || !mainCategory || !subCategory) {
           Swal.fire({
@@ -1125,6 +1124,85 @@ Please review this listing in the admin dashboard.
       });
     });
   </script>
+  <!-- Specifications Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const MAX_SPECIFICATIONS = 4;
+      let specificationCounter = 0;
+
+      const specificationsContainer = document.getElementById('specifications-container');
+      const addSpecificationBtn = document.getElementById('add-specification-btn');
+
+      function updateAddSpecificationBtnVisibility() {
+        const currentCount = specificationsContainer.querySelectorAll('.specification-item').length;
+        if (currentCount >= MAX_SPECIFICATIONS) {
+          addSpecificationBtn.classList.add('hidden');
+        } else {
+          addSpecificationBtn.classList.remove('hidden');
+        }
+      }
+
+      function createSpecificationInput(spec = null) {
+        const index = specificationCounter++;
+
+        const specDiv = document.createElement('div');
+        specDiv.className = 'specification-item flex items-center gap-3';
+
+        specDiv.innerHTML = `
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" class="spec-key modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+              placeholder="e.g., Dimensions" value="${spec?.key || ''}" maxlength="30" />
+            <input type="text" class="spec-value modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+              placeholder="e.g., 10x10x10 ft" value="${spec?.value || ''}" maxlength="50" />
+          </div>
+          <button type="button" class="remove-spec-btn text-gray-400 hover:text-red-500 transition-colors p-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        `;
+
+        specDiv.querySelector('.remove-spec-btn').addEventListener('click', () => {
+          specDiv.remove();
+          updateAddSpecificationBtnVisibility();
+        });
+
+        return specDiv;
+      }
+
+      addSpecificationBtn.addEventListener('click', () => {
+        const currentCount = specificationsContainer.querySelectorAll('.specification-item').length;
+        if (currentCount < MAX_SPECIFICATIONS) {
+          specificationsContainer.appendChild(createSpecificationInput());
+          updateAddSpecificationBtnVisibility();
+        }
+      });
+
+      window.collectSpecificationsData = function() {
+        const specifications = [];
+        specificationsContainer.querySelectorAll('.specification-item').forEach(item => {
+          const key = item.querySelector('.spec-key').value.trim();
+          const value = item.querySelector('.spec-value').value.trim();
+          if (key && value) {
+            specifications.push({ key, value });
+          }
+        });
+        return specifications;
+      };
+
+      window.loadSpecifications = function(specs) {
+        specificationsContainer.innerHTML = '';
+        specificationCounter = 0;
+        if (specs && Array.isArray(specs)) {
+          specs.forEach(spec => {
+            specificationsContainer.appendChild(createSpecificationInput(spec));
+          });
+        }
+        updateAddSpecificationBtnVisibility();
+      };
+    });
+  </script>
+
   <!-- Addons and Variations Logic -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {

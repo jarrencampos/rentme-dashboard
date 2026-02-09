@@ -448,6 +448,33 @@
               </div>
             </div>
 
+            <!-- Specifications Section -->
+            <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20">
+                  <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Specifications</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Add product specs like dimensions, weight, capacity (max 4)</p>
+                </div>
+              </div>
+
+              <div id="specifications-container" class="space-y-3">
+                <!-- Specifications will be dynamically added here -->
+              </div>
+
+              <button type="button" id="add-specification-btn"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add a specification
+              </button>
+            </div>
+
             <!-- Addons Section -->
             <div class="form-section bg-white dark:bg-boxdark rounded-2xl border border-gray-100 dark:border-strokedark p-6">
               <div class="flex items-center gap-3 mb-6">
@@ -752,10 +779,14 @@
                     mainImageFile: productData.image_url || '',
                     block_dates: detailsData.block_dates || [],
                     addons: detailsData.addons || [],
-                    variations: detailsData.variations || []
+                    variations: detailsData.variations || [],
+                    specifications: detailsData.specifications || []
                   };
 
-                  // Load addons and variations into UI
+                  // Load specifications, addons and variations into UI
+                  if (detailsData.specifications) {
+                    window.loadSpecifications(detailsData.specifications);
+                  }
                   if (detailsData.addons) {
                     window.loadAddons(detailsData.addons);
                   }
@@ -848,6 +879,11 @@
       function haveVariationsChanged(initialVariations, newVariations) {
         if (initialVariations.length !== newVariations.length) return true;
         return JSON.stringify(initialVariations) !== JSON.stringify(newVariations);
+      }
+
+      function haveSpecificationsChanged(initialSpecifications, newSpecifications) {
+        if (initialSpecifications.length !== newSpecifications.length) return true;
+        return JSON.stringify(initialSpecifications) !== JSON.stringify(newSpecifications);
       }
 
       document.getElementById('listingForm').addEventListener('submit', async function(event) {
@@ -963,6 +999,7 @@
         try {
           const currentAddons = window.collectAddonsData();
           const currentVariations = window.collectVariationsData();
+          const currentSpecifications = window.collectSpecificationsData ? window.collectSpecificationsData() : [];
 
           const hasChanges = (
             initialValues.title !== document.getElementById('title').value ||
@@ -977,6 +1014,7 @@
             haveDatesChanged(initialValues.block_dates, selectedBlockDates) ||
             haveAddonsChanged(initialValues.addons, currentAddons) ||
             haveVariationsChanged(initialValues.variations, currentVariations) ||
+            haveSpecificationsChanged(initialValues.specifications, currentSpecifications) ||
             document.getElementById('imageInput').files.length > 0 ||
             document.getElementById('imageInput2').files.length > 0 ||
             document.getElementById('imageInput3').files.length > 0 ||
@@ -1056,6 +1094,11 @@
           // Update variations if changed
           if (haveVariationsChanged(initialValues.variations, currentVariations)) {
             detailUpdates.variations = currentVariations;
+          }
+
+          // Update specifications if changed
+          if (haveSpecificationsChanged(initialValues.specifications, currentSpecifications)) {
+            detailUpdates.specifications = currentSpecifications;
           }
 
           if (Object.keys(productUpdates).length > 0) {
@@ -1185,6 +1228,7 @@
             if (window.imagesToRemove.main || window.imagesToRemove.secondary || window.imagesToRemove.third) changedFields.push('Image Removal');
             if (haveAddonsChanged(initialValues.addons, currentAddons)) changedFields.push('Add-ons');
             if (haveVariationsChanged(initialValues.variations, currentVariations)) changedFields.push('Variations');
+            if (haveSpecificationsChanged(initialValues.specifications, currentSpecifications)) changedFields.push('Specifications');
 
             const emailToken = await auth.currentUser.getIdToken();
             fetch('/api/send-email', {
@@ -1355,6 +1399,85 @@ Please review the changes if needed.
           subCategorySelect.disabled = true;
         }
       });
+    });
+  </script>
+
+  <!-- Specifications Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const MAX_SPECIFICATIONS = 4;
+      let specificationCounter = 0;
+
+      const specificationsContainer = document.getElementById('specifications-container');
+      const addSpecificationBtn = document.getElementById('add-specification-btn');
+
+      function updateAddSpecificationBtnVisibility() {
+        const currentCount = specificationsContainer.querySelectorAll('.specification-item').length;
+        if (currentCount >= MAX_SPECIFICATIONS) {
+          addSpecificationBtn.classList.add('hidden');
+        } else {
+          addSpecificationBtn.classList.remove('hidden');
+        }
+      }
+
+      function createSpecificationInput(spec = null) {
+        const index = specificationCounter++;
+
+        const specDiv = document.createElement('div');
+        specDiv.className = 'specification-item flex items-center gap-3';
+
+        specDiv.innerHTML = `
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" class="spec-key modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+              placeholder="e.g., Dimensions" value="${spec?.key || ''}" maxlength="30" />
+            <input type="text" class="spec-value modern-input w-full px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-sm"
+              placeholder="e.g., 10x10x10 ft" value="${spec?.value || ''}" maxlength="50" />
+          </div>
+          <button type="button" class="remove-spec-btn text-gray-400 hover:text-red-500 transition-colors p-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        `;
+
+        specDiv.querySelector('.remove-spec-btn').addEventListener('click', () => {
+          specDiv.remove();
+          updateAddSpecificationBtnVisibility();
+        });
+
+        return specDiv;
+      }
+
+      addSpecificationBtn.addEventListener('click', () => {
+        const currentCount = specificationsContainer.querySelectorAll('.specification-item').length;
+        if (currentCount < MAX_SPECIFICATIONS) {
+          specificationsContainer.appendChild(createSpecificationInput());
+          updateAddSpecificationBtnVisibility();
+        }
+      });
+
+      window.collectSpecificationsData = function() {
+        const specifications = [];
+        specificationsContainer.querySelectorAll('.specification-item').forEach(item => {
+          const key = item.querySelector('.spec-key').value.trim();
+          const value = item.querySelector('.spec-value').value.trim();
+          if (key && value) {
+            specifications.push({ key, value });
+          }
+        });
+        return specifications;
+      };
+
+      window.loadSpecifications = function(specs) {
+        specificationsContainer.innerHTML = '';
+        specificationCounter = 0;
+        if (specs && Array.isArray(specs)) {
+          specs.forEach(spec => {
+            specificationsContainer.appendChild(createSpecificationInput(spec));
+          });
+        }
+        updateAddSpecificationBtnVisibility();
+      };
     });
   </script>
 
