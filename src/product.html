@@ -706,8 +706,10 @@
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUserId = user.uid;
+        } else {
+          window.location.href = 'sign-in.html';
+          return;
         }
-      });
 
       const urlParams = new URLSearchParams(window.location.search);
       const productId = urlParams.get('id');
@@ -721,6 +723,21 @@
         getDoc(productRef).then((docSnap) => {
           if (docSnap.exists()) {
             productData = docSnap.data();
+
+            // Security check: only the owner can edit this listing
+            if (productData.vendor_id !== currentUserId) {
+              Swal.fire({
+                title: 'Access Denied',
+                text: 'You do not have permission to edit this listing.',
+                icon: 'error',
+                confirmButtonText: 'Go Back',
+                customClass: { confirmButton: 'custom-ok-button' }
+              }).then(() => {
+                window.location.href = 'listings.html';
+              });
+              return;
+            }
+
             const detailsId = productData.details_id;
 
             if (detailsId) {
@@ -1291,6 +1308,7 @@ Please review the changes if needed.
           spinner.classList.add('hidden');
         }
       });
+      }); // end onAuthStateChanged
     });
   </script>
 
