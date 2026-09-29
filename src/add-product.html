@@ -214,60 +214,113 @@
                 </div>
                 <div>
                   <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Photos</h2>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Add up to 3 photos of your listing</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Add up to 6 photos of your listing</p>
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="space-y-4">
                 <!-- Main Image -->
-                <div class="sm:col-span-2">
-                  <input type="file" id="imageInput" class="hidden" accept="image/*" />
-                  <div id="imagePreview1" class="image-upload-card main-image-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput').click()">
-                    <div class="text-center p-6">
-                      <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Main Photo <span class="text-red-500">*</span></p>
-                      <p class="text-xs text-gray-400 mt-1">Click to upload</p>
-                    </div>
-                    <div class="upload-overlay">
-                      <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
-                      <span class="text-white text-sm font-medium">Upload photo</span>
-                    </div>
+                <input type="file" id="imageInput" class="hidden" accept="image/*" />
+                <div id="imagePreview1" class="image-upload-card main-image-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput').click()">
+                  <div class="text-center p-6">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Main Photo <span class="text-red-500">*</span></p>
+                    <p class="text-xs text-gray-400 mt-1">Click to upload</p>
+                  </div>
+                  <div class="upload-overlay">
+                    <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span class="text-white text-sm font-medium">Upload photo</span>
                   </div>
                 </div>
 
                 <!-- Secondary Images -->
-                <div class="flex flex-col gap-4">
-                  <input type="file" id="imageInput2" class="hidden" accept="image/*" />
-                  <div id="imagePreview2" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput2').click()">
-                    <div class="text-center p-4">
-                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-xs text-gray-400">Photo 2</p>
-                    </div>
-                    <div class="upload-overlay">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  <div>
+                    <input type="file" id="imageInput2" class="hidden" accept="image/*" />
+                    <div id="imagePreview2" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput2').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 2</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
-                  <input type="file" id="imageInput3" class="hidden" accept="image/*" />
-                  <div id="imagePreview3" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput3').click()">
-                    <div class="text-center p-4">
-                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-xs text-gray-400">Photo 3</p>
+                  <div>
+                    <input type="file" id="imageInput3" class="hidden" accept="image/*" />
+                    <div id="imagePreview3" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput3').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 3</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
-                    <div class="upload-overlay">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput4" class="hidden" accept="image/*" />
+                    <div id="imagePreview4" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput4').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 4</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput5" class="hidden" accept="image/*" />
+                    <div id="imagePreview5" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput5').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 5</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput6" class="hidden" accept="image/*" />
+                    <div id="imagePreview6" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput6').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 6</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -681,8 +734,9 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       setupImagePreview('imageInput', 'imagePreview1', true);
-      setupImagePreview('imageInput2', 'imagePreview2', false);
-      setupImagePreview('imageInput3', 'imagePreview3', false);
+      for (let i = 2; i <= 6; i++) {
+        setupImagePreview('imageInput' + i, 'imagePreview' + i, false);
+      }
     });
   </script>
 
@@ -945,8 +999,7 @@
         const serviceMiles = document.getElementById('miles').value.trim();
         const pricing = document.getElementById('pricing').value.trim();
         const mainImageFile = document.getElementById('imageInput').files[0];
-        const image2File = document.getElementById('imageInput2').files[0];
-        const image3File = document.getElementById('imageInput3').files[0];
+        const secondaryImageFiles = [2, 3, 4, 5, 6].map(i => document.getElementById('imageInput' + i).files[0]);
         const quantity = document.getElementById('quantity').value.trim();
         const mainCategory = document.getElementById('mainCategory').value;
         const subCategory = document.getElementById('subCategory').value;
@@ -1058,13 +1111,12 @@
             const fileName = uniqueFileName('main', mainImageFile);
             imageUrls.push(await uploadImage(mainImageFile, fileName, 1));
           }
-          if (image2File) {
-            const fileName = uniqueFileName('second', image2File);
-            imageUrls.push(await uploadImage(image2File, fileName, 2));
-          }
-          if (image3File) {
-            const fileName = uniqueFileName('third', image3File);
-            imageUrls.push(await uploadImage(image3File, fileName, 3));
+          const secondaryLabels = ['second', 'third', 'fourth', 'fifth', 'sixth'];
+          for (let i = 0; i < secondaryImageFiles.length; i++) {
+            const file = secondaryImageFiles[i];
+            if (!file) continue;
+            const fileName = uniqueFileName(secondaryLabels[i], file);
+            imageUrls.push(await uploadImage(file, fileName, i + 2));
           }
 
           await setDoc(doc(db, "newProducts", docRef.id), {

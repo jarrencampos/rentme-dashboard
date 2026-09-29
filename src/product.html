@@ -197,60 +197,113 @@
                 </div>
                 <div>
                   <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Photos</h2>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Add up to 3 photos of your listing</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Add up to 6 photos of your listing</p>
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="space-y-4">
                 <!-- Main Image -->
-                <div class="sm:col-span-2">
-                  <input type="file" id="imageInput" class="hidden" accept="image/*" />
-                  <div id="imagePreview1" class="image-upload-card main-image-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput').click()">
-                    <div class="text-center p-6">
-                      <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Main Photo</p>
-                      <p class="text-xs text-gray-400 mt-1">Click to upload</p>
-                    </div>
-                    <div class="upload-overlay">
-                      <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
-                      <span class="text-white text-sm font-medium">Change photo</span>
-                    </div>
+                <input type="file" id="imageInput" class="hidden" accept="image/*" />
+                <div id="imagePreview1" class="image-upload-card main-image-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput').click()">
+                  <div class="text-center p-6">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Main Photo</p>
+                    <p class="text-xs text-gray-400 mt-1">Click to upload</p>
+                  </div>
+                  <div class="upload-overlay">
+                    <svg class="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span class="text-white text-sm font-medium">Change photo</span>
                   </div>
                 </div>
 
                 <!-- Secondary Images -->
-                <div class="flex flex-col gap-4">
-                  <input type="file" id="imageInput2" class="hidden" accept="image/*" />
-                  <div id="imagePreview2" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput2').click()">
-                    <div class="text-center p-4">
-                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-xs text-gray-400">Photo 2</p>
-                    </div>
-                    <div class="upload-overlay">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  <div>
+                    <input type="file" id="imageInput2" class="hidden" accept="image/*" />
+                    <div id="imagePreview2" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput2').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 2</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
-                  <input type="file" id="imageInput3" class="hidden" accept="image/*" />
-                  <div id="imagePreview3" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput3').click()">
-                    <div class="text-center p-4">
-                      <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                      <p class="text-xs text-gray-400">Photo 3</p>
+                  <div>
+                    <input type="file" id="imageInput3" class="hidden" accept="image/*" />
+                    <div id="imagePreview3" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput3').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 3</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
-                    <div class="upload-overlay">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                      </svg>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput4" class="hidden" accept="image/*" />
+                    <div id="imagePreview4" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput4').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 4</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput5" class="hidden" accept="image/*" />
+                    <div id="imagePreview5" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput5').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 5</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <input type="file" id="imageInput6" class="hidden" accept="image/*" />
+                    <div id="imagePreview6" class="image-upload-card border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center" onclick="document.getElementById('imageInput6').click()">
+                      <div class="text-center p-4">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Photo 6</p>
+                      </div>
+                      <div class="upload-overlay">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -602,11 +655,19 @@
 
   <!-- Image Preview Handler -->
   <script>
+    // Secondary photo slots: secondary1..secondary5 map to imageInput2..imageInput6
+    window.SECONDARY_IMAGE_KEYS = ['secondary1', 'secondary2', 'secondary3', 'secondary4', 'secondary5'];
+
     // Track images to be removed
-    window.imagesToRemove = { main: false, secondary: false, third: false };
-    window.currentImageUrls = { main: null, secondary: null, third: null };
+    window.imagesToRemove = { main: false };
+    window.currentImageUrls = { main: null };
     // Track actual Firestore doc IDs for photos subcollection
-    window.photoDocIds = { secondary: null, third: null };
+    window.photoDocIds = {};
+    window.SECONDARY_IMAGE_KEYS.forEach(key => {
+      window.imagesToRemove[key] = false;
+      window.currentImageUrls[key] = null;
+      window.photoDocIds[key] = null;
+    });
 
     function getEmptyStateHTML(isMain = false) {
       return `
@@ -644,8 +705,12 @@
     }
 
     function removeImage(imageKey, isMain) {
-      const previewMap = { main: 'imagePreview1', secondary: 'imagePreview2', third: 'imagePreview3' };
-      const inputMap = { main: 'imageInput', secondary: 'imageInput2', third: 'imageInput3' };
+      const previewMap = { main: 'imagePreview1' };
+      const inputMap = { main: 'imageInput' };
+      window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+        previewMap[key] = 'imagePreview' + (i + 2);
+        inputMap[key] = 'imageInput' + (i + 2);
+      });
 
       const previewBox = document.getElementById(previewMap[imageKey]);
       const input = document.getElementById(inputMap[imageKey]);
@@ -682,8 +747,9 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       setupImagePreview('imageInput', 'imagePreview1', true, 'main');
-      setupImagePreview('imageInput2', 'imagePreview2', false, 'secondary');
-      setupImagePreview('imageInput3', 'imagePreview3', false, 'third');
+      window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+        setupImagePreview('imageInput' + (i + 2), 'imagePreview' + (i + 2), false, key);
+      });
     });
   </script>
 
@@ -783,14 +849,13 @@
                       }
                     });
                     // Assign to slots in order
-                    if (photos[0]) {
-                      window.photoDocIds.secondary = photos[0].id;
-                      updateImagePreview('imageInput2', 'imagePreview2', photos[0].url, false, 'secondary');
-                    }
-                    if (photos[1]) {
-                      window.photoDocIds.third = photos[1].id;
-                      updateImagePreview('imageInput3', 'imagePreview3', photos[1].url, false, 'third');
-                    }
+                    window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+                      const photo = photos[i];
+                      if (photo) {
+                        window.photoDocIds[key] = photo.id;
+                        updateImagePreview('imageInput' + (i + 2), 'imagePreview' + (i + 2), photo.url, false, key);
+                      }
+                    });
                   });
 
                   initialValues = {
@@ -1043,11 +1108,9 @@
             haveVariationsChanged(initialValues.variations, currentVariations) ||
             haveSpecificationsChanged(initialValues.specifications, currentSpecifications) ||
             document.getElementById('imageInput').files.length > 0 ||
-            document.getElementById('imageInput2').files.length > 0 ||
-            document.getElementById('imageInput3').files.length > 0 ||
+            window.SECONDARY_IMAGE_KEYS.some((key, i) => document.getElementById('imageInput' + (i + 2)).files.length > 0) ||
             window.imagesToRemove.main ||
-            window.imagesToRemove.secondary ||
-            window.imagesToRemove.third
+            window.SECONDARY_IMAGE_KEYS.some(key => window.imagesToRemove[key])
           );
 
           if (!hasChanges) {
@@ -1137,8 +1200,7 @@
 
           const imageUploadPromises = [];
           const mainImageFile = document.getElementById('imageInput').files[0];
-          const image2File = document.getElementById('imageInput2').files[0];
-          const image3File = document.getElementById('imageInput3').files[0];
+          const secondaryFiles = window.SECONDARY_IMAGE_KEYS.map((key, i) => document.getElementById('imageInput' + (i + 2)).files[0]);
 
           const getFileExtension = (file) => file.name.split('.').pop();
           const uniqueFileName = (label, file) => `${label}_${Date.now()}.${getFileExtension(file)}`;
@@ -1166,11 +1228,14 @@
             );
           }
 
-          if (image2File) {
-            const fileName = uniqueFileName('second', image2File);
-            const existingDocId = window.photoDocIds.secondary;
+          const secondaryLabels = ['second', 'third', 'fourth', 'fifth', 'sixth'];
+          window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+            const file = secondaryFiles[i];
+            if (!file) return;
+            const fileName = uniqueFileName(secondaryLabels[i], file);
+            const existingDocId = window.photoDocIds[key];
             imageUploadPromises.push(
-              uploadImage(image2File, `vendors/${currentUserId}/products/${productId}`, fileName)
+              uploadImage(file, `vendors/${currentUserId}/products/${productId}`, fileName)
                 .then(url => {
                   if (existingDocId) {
                     return setDoc(doc(db, "details", productData.details_id, "photos", existingDocId), {
@@ -1183,26 +1248,7 @@
                   }
                 })
             );
-          }
-
-          if (image3File) {
-            const fileName = uniqueFileName('third', image3File);
-            const existingDocId = window.photoDocIds.third;
-            imageUploadPromises.push(
-              uploadImage(image3File, `vendors/${currentUserId}/products/${productId}`, fileName)
-                .then(url => {
-                  if (existingDocId) {
-                    return setDoc(doc(db, "details", productData.details_id, "photos", existingDocId), {
-                      image_url: url
-                    }, { merge: true });
-                  } else {
-                    return addDoc(collection(db, "details", productData.details_id, "photos"), {
-                      image_url: url
-                    });
-                  }
-                })
-            );
-          }
+          });
 
           // Handle image removals
           const imageRemovalPromises = [];
@@ -1214,19 +1260,14 @@
             );
           }
 
-          // Remove secondary image if marked and no new file uploaded
-          if (window.imagesToRemove.secondary && !image2File && window.photoDocIds.secondary) {
-            imageRemovalPromises.push(
-              deleteDoc(doc(db, "details", productData.details_id, "photos", window.photoDocIds.secondary))
-            );
-          }
-
-          // Remove third image if marked and no new file uploaded
-          if (window.imagesToRemove.third && !image3File && window.photoDocIds.third) {
-            imageRemovalPromises.push(
-              deleteDoc(doc(db, "details", productData.details_id, "photos", window.photoDocIds.third))
-            );
-          }
+          // Remove secondary images if marked and no new file uploaded
+          window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+            if (window.imagesToRemove[key] && !secondaryFiles[i] && window.photoDocIds[key]) {
+              imageRemovalPromises.push(
+                deleteDoc(doc(db, "details", productData.details_id, "photos", window.photoDocIds[key]))
+              );
+            }
+          });
 
           await Promise.all([...imageUploadPromises, ...imageRemovalPromises]);
 
@@ -1260,11 +1301,13 @@
             if (initialValues.quantity !== newQuantity) changeDetails.push(`- Quantity: ${initialValues.quantity || '1'} → ${newQuantity || '1'}`);
             if (haveDatesChanged(initialValues.block_dates, selectedBlockDates)) changeDetails.push(`- Blocked Dates: ${initialValues.block_dates.length} dates → ${selectedBlockDates.length} dates`);
             if (document.getElementById('imageInput').files.length > 0) changeDetails.push('- Main Image: Replaced');
-            if (document.getElementById('imageInput2').files.length > 0) changeDetails.push('- Image 2: Replaced');
-            if (document.getElementById('imageInput3').files.length > 0) changeDetails.push('- Image 3: Replaced');
+            window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+              if (document.getElementById('imageInput' + (i + 2)).files.length > 0) changeDetails.push(`- Image ${i + 2}: Replaced`);
+            });
             if (window.imagesToRemove.main) changeDetails.push('- Main Image: Removed');
-            if (window.imagesToRemove.secondary) changeDetails.push('- Image 2: Removed');
-            if (window.imagesToRemove.third) changeDetails.push('- Image 3: Removed');
+            window.SECONDARY_IMAGE_KEYS.forEach((key, i) => {
+              if (window.imagesToRemove[key]) changeDetails.push(`- Image ${i + 2}: Removed`);
+            });
             if (haveAddonsChanged(initialValues.addons, currentAddons)) changeDetails.push(`- Add-ons: ${initialValues.addons.length} → ${currentAddons.length} add-on(s)`);
             if (haveVariationsChanged(initialValues.variations, currentVariations)) changeDetails.push(`- Variations: ${initialValues.variations.length} → ${currentVariations.length} variation(s)`);
             if (haveSpecificationsChanged(initialValues.specifications, currentSpecifications)) changeDetails.push(`- Specifications: ${initialValues.specifications.length} → ${currentSpecifications.length} spec(s)`);
