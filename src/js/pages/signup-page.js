@@ -165,10 +165,40 @@ function initSignUpPage() {
         submitLoading.classList.remove('hidden');
       }
 
+      let user = null;
+
       try {
         // Create user with email and password
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        user = userCredential.user;
+
+        // Prepare vendor data (without the logo yet)
+        const vendorData = {
+          uid: user.uid,
+          name: name,
+          phone: phone || '',
+          email: email,
+          businessName: businessName || '',
+          image: null,
+          ref: getReferralCookie(),
+          pending_deposits: 0,
+          total_bookings: 0,
+          total_sales: 0,
+          // Qualifying data
+          inventoryCount: inventoryCount || '',
+          annualRevenue: annualRevenue || '',
+          rentalCategory: rentalCategory || '',
+          hearAboutUs: hearAboutUs || '',
+          // Status for manual approval
+          status: 'pending_approval',
+          createdAt: new Date().toISOString(),
+        };
+
+        // Save vendor information in Firestore right away, before the
+        // (potentially slow/flaky) logo upload, so an interrupted signup
+        // never leaves an Auth account with no vendor profile behind it.
+        const userDocRef = doc(db, 'vendors', user.uid);
+        await setDoc(userDocRef, vendorData);
 
         // Upload vendor logo
         const ext = logoFile.name.split('.').pop();
@@ -186,31 +216,8 @@ function initSignUpPage() {
           });
         });
 
-        // Prepare vendor data
-        const vendorData = {
-          uid: user.uid,
-          name: name,
-          phone: phone || '',
-          email: email,
-          businessName: businessName || '',
-          image: logoUrl,
-          ref: getReferralCookie(),
-          pending_deposits: 0,
-          total_bookings: 0,
-          total_sales: 0,
-          // Qualifying data
-          inventoryCount: inventoryCount || '',
-          annualRevenue: annualRevenue || '',
-          rentalCategory: rentalCategory || '',
-          hearAboutUs: hearAboutUs || '',
-          // Status for manual approval
-          status: 'pending_approval',
-          createdAt: new Date().toISOString(),
-        };
-
-        // Save vendor information in Firestore
-        const userDocRef = doc(db, 'vendors', user.uid);
-        await setDoc(userDocRef, vendorData);
+        vendorData.image = logoUrl;
+        await setDoc(userDocRef, { image: logoUrl }, { merge: true });
 
         // Send email notification (don't await - let it happen in background)
         sendVendorSignupNotification(vendorData);
@@ -220,6 +227,17 @@ function initSignUpPage() {
         window.location.href = 'pending-approval.html';
       } catch (error) {
         console.error('Error signing up:', error);
+
+        if (user) {
+          // Auth account + vendor doc already exist at this point (only the
+          // logo upload failed) - don't strand the user on a broken form
+          // where retrying would fail with "email already in use".
+          alert('Your account was created, but the logo upload failed. You can add a logo later from Settings.');
+          createAccountForm.reset();
+          window.location.href = 'pending-approval.html';
+          return;
+        }
+
         alert(error.message);
 
         // Reset button state

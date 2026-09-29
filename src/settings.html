@@ -418,7 +418,7 @@
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-      import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
       import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -589,9 +589,10 @@
               return;
             }
 
-            // Update Firestore
+            // Update Firestore (setDoc + merge so this also heals a vendor
+            // whose profile doc never got created, e.g. an interrupted signup)
             const vendorRef = doc(db, 'vendors', currentUserId);
-            await updateDoc(vendorRef, updates);
+            await setDoc(vendorRef, updates, { merge: true });
 
             // Update initial values and UI with new values
             Object.assign(initialValues, updates);
